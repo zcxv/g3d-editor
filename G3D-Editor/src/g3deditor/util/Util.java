@@ -2,6 +2,11 @@ package g3deditor.util;
 
 import java.util.Comparator;
 
+/**
+ * <a href="http://l2j-server.com/">L2jServer</a>
+ * 
+ * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
+ */
 public final class Util
 {
 	public static final <T> void mergeSort(final T[] src, final T[] dest, final int length, final Comparator<T> comparator)
