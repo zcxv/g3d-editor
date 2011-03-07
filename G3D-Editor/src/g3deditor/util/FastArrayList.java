@@ -81,6 +81,8 @@ public final class FastArrayList<E> implements List<E>
 		}
 		else
 			_values = values;
+		
+		_size = values.length;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -608,44 +610,40 @@ public final class FastArrayList<E> implements List<E>
 			_values = values;
 		}
 	}
-
+	
 	/**
 	 * @see java.util.List#size()
 	 */
 	@Override
-	public int size()
+	public final int size()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return _size;
 	}
-
+	
 	/**
 	 * @see java.util.List#isEmpty()
 	 */
 	@Override
-	public boolean isEmpty()
+	public final boolean isEmpty()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return _size == 0;
 	}
-
+	
 	/**
 	 * @see java.util.List#containsAll(java.util.Collection)
 	 */
 	@Override
-	public boolean containsAll(Collection<?> c)
+	public final boolean containsAll(final Collection<?> c)
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	/**
 	 * @see java.util.List#subList(int, int)
 	 */
 	@Override
-	public List<E> subList(int fromIndex, int toIndex)
+	public final List<E> subList(final int fromIndex, final int toIndex)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

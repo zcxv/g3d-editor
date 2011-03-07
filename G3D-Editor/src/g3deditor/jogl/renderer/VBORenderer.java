@@ -15,6 +15,7 @@
 package g3deditor.jogl.renderer;
 
 import g3deditor.entity.CellColor;
+import g3deditor.entity.SelectionState;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;
@@ -34,8 +35,6 @@ import javax.media.opengl.GL2;
 public final class VBORenderer extends GLRenderer
 {
 	private static final int TEX_COORDS = 24;
-	private static final int FLOAT_SIZE = Float.SIZE / Byte.SIZE;
-	private static final int SHORT_SIZE = Short.SIZE / Byte.SIZE;
 	
 	private static final short[] GEOMETRY_INDICES_DATA =
 	{
@@ -162,13 +161,13 @@ public final class VBORenderer extends GLRenderer
 		_vboTexture = temp[2];
 		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
-		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, _indexBuffer.limit() * SHORT_SIZE, _indexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, _indexBuffer.limit() * BufferUtils.SHORT_SIZE, _indexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.limit() * FLOAT_SIZE, _vertexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.limit() * BufferUtils.FLOAT_SIZE, _vertexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _textureBuffer.limit() * FLOAT_SIZE, _textureBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _textureBuffer.limit() * BufferUtils.FLOAT_SIZE, _textureBuffer, GL2.GL_STATIC_DRAW);
 	}
 	
 	/**
@@ -205,7 +204,7 @@ public final class VBORenderer extends GLRenderer
 		}
 		else
 		{
-			gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH) * SHORT_SIZE);
+			gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH) * BufferUtils.SHORT_SIZE);
 		}
 		
 		gl.glPopMatrix();
