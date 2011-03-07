@@ -279,6 +279,17 @@ public final class FastArrayList<E> implements List<E>
 	}
 	
 	@SuppressWarnings("unchecked")
+	public final void setCapacity(final int capacity)
+	{
+		if (_values.length != capacity)
+		{
+			final E[] values = (E[]) new Object[capacity];
+			System.arraycopy(_values, 0, values, 0, _size);
+			_values = values;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
 	public final void ensureCapacity(final int capacity)
 	{
 		if (_values.length < capacity)
