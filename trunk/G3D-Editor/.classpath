@@ -23,5 +23,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/incolution.jar" sourcepath="lib/incolution-src.jar"/>
+	<classpathentry kind="lib" path="lib/javolution.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

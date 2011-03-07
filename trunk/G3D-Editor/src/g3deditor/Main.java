@@ -27,7 +27,7 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 
-import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.FPSAnimator;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -93,8 +93,8 @@ public final class Main
         });
 
        
-       final Animator animator = new Animator(canvas);
-       animator.setRunAsFastAsPossible(false);
+       final FPSAnimator animator = new FPSAnimator(canvas, 60);
+       //animator.setRunAsFastAsPossible(false);
        animator.start();
 	}
 }

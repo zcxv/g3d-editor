@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.renderer.DLRenderer;
@@ -21,6 +22,7 @@ import g3deditor.jogl.renderer.IRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GL;
@@ -62,6 +64,8 @@ public final class GLDisplay implements GLEventListener
 	private final GLRenderSelector _renderSelector;
 	private final GLCamera _camera;
 	private final AWTInput _input;
+	private final GLGeoBlockSelector _geoBlockSelector;
+	private GeoCell _prevPick;
 	
 	private GLU _glu;
 	private int _width;
@@ -95,6 +99,7 @@ public final class GLDisplay implements GLEventListener
 		_renderSelector = new GLRenderSelector(this);
 		_camera = new GLCamera(this);
 		_input = new AWTInput(this);
+		_geoBlockSelector = new GLGeoBlockSelector(this);
 	}
 	
 	public final GLCanvas getCanvas()
@@ -247,6 +252,21 @@ public final class GLDisplay implements GLEventListener
 		}
 		
 		_renderer.disableRender(gl);
+		
+		if (_input.getMouseButton1())
+		{
+			final float[] point = _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY());
+			if (point != null)
+			{
+				final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
+				if (cell != null && cell != _prevPick)
+				{
+					_prevPick = cell;
+					_geoBlockSelector.selectGeoCell(cell, _input.getCtrl(), _input.getShift());
+				}
+			}
+		}
+		
 		gl.glFlush();
 	}
 	

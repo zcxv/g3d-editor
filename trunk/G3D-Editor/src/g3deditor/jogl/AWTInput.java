@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
@@ -36,10 +37,13 @@ import javax.media.opengl.awt.GLCanvas;
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class AWTInput implements MouseListener, KeyListener
+public final class AWTInput implements MouseListener, MouseMotionListener, KeyListener
 {
 	private final GLDisplay _display;
 	private final Cursor _cursor;
+	
+	private int _mouseX;
+	private int _mouseY;
 	
 	private boolean _mouse1;
 	private boolean _mouse2;
@@ -54,6 +58,9 @@ public final class AWTInput implements MouseListener, KeyListener
 	private boolean _keyQ;
 	private boolean _keyE;
 	private boolean _keySpace;
+	private boolean _keyShift;
+	private boolean _keyCtrl;
+	private boolean _keyAlt;
 	
 	private Robot _robot;
 	
@@ -77,18 +84,60 @@ public final class AWTInput implements MouseListener, KeyListener
 		return _display;
 	}
 	
+	public final int getMouseX()
+	{
+		return _mouseX;
+	}
+	
+	public final int getMouseY()
+	{
+		return _mouseY;
+	}
+	
+	public final boolean getMouseButton1()
+	{
+		return _mouse1;
+	}
+	
+	public final boolean getMouseButton2()
+	{
+		return _mouse2;
+	}
+	
+	public final boolean getMouseButton3()
+	{
+		return _mouse3;
+	}
+	
+	public final boolean getShift()
+	{
+		return _keyShift;
+	}
+	
+	public final boolean getCtrl()
+	{
+		return _keyCtrl;
+	}
+	
+	public final boolean getAlt()
+	{
+		return _keyAlt;
+	}
+	
 	public final void setEnabled(final boolean enabled)
 	{
 		final GLCanvas canvas = _display.getCanvas();
 		if (enabled)
 		{
 			canvas.addMouseListener(this);
+			canvas.addMouseMotionListener(this);
 			canvas.addKeyListener(this);
 			resetKeys();
 		}
 		else
 		{
 			canvas.removeMouseListener(this);
+			canvas.removeMouseMotionListener(this);
 			canvas.removeKeyListener(this);
 			resetKeys();
 		}
@@ -202,6 +251,26 @@ public final class AWTInput implements MouseListener, KeyListener
 	}
 	
 	/**
+	 * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public final void mouseDragged(final MouseEvent e)
+	{
+		_mouseX = e.getX();
+		_mouseY = e.getY();
+	}
+	
+	/**
+	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public final void mouseMoved(final MouseEvent e)
+	{
+		_mouseX = e.getX();
+		_mouseY = e.getY();
+	}
+	
+	/**
 	 * @see java.awt.event.KeyListener#keyTyped(java.awt.event.KeyEvent)
 	 */
 	@Override
@@ -259,6 +328,18 @@ public final class AWTInput implements MouseListener, KeyListener
 			case KeyEvent.VK_SPACE:
 				_keySpace = state;
 				break;
+				
+			case KeyEvent.VK_SHIFT:
+				_keyShift = state;
+				break;
+				
+			case KeyEvent.VK_CONTROL:
+				_keyCtrl = state;
+				break;
+				
+			case KeyEvent.VK_ALT:
+				_keyAlt = state;
+				break;
 		}
 	}
 	
@@ -268,5 +349,8 @@ public final class AWTInput implements MouseListener, KeyListener
 		_keyA = false;
 		_keyS = false;
 		_keyD = false;
+		_keyQ = false;
+		_keyE = false;
+		_keySpace = false;
 	}
 }

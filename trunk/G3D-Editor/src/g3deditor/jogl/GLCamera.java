@@ -323,10 +323,16 @@ public final class GLCamera
 		mouseY = _viewport[3] - mouseY;
 		_pickZBuffer.clear();
         gl.glReadPixels(mouseX, mouseY, 1, 1, GL2.GL_DEPTH_COMPONENT, GL.GL_FLOAT, _pickZBuffer);
-        _pickZBuffer.flip();
         
-        glu.gluUnProject(mouseX, mouseY, _pickZBuffer.get(), _modelviewMatrix, 0, _projectionMatrix, 0, _viewport, 0, _pickResult, 0);
-        return new float[]{_pickResult[0], _pickResult[1], _pickResult[2]};
+        final float mouseZ = _pickZBuffer.get(0);
+        if (mouseZ < 1f && glu.gluUnProject(mouseX, mouseY, mouseZ, _modelviewMatrix, 0, _projectionMatrix, 0, _viewport, 0, _pickResult, 0))
+        {
+            return new float[]{_pickResult[0], _pickResult[1], _pickResult[2]};
+        }
+        else
+        {
+        	return null;
+        }
 	}
 	
 	public final float getX()
