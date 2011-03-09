@@ -14,15 +14,20 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.jogl.GLGeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.jogl.GLRenderSelector.GLSubRenderSelector;
+import g3deditor.jogl.GLTextRenderer.GLText;
 import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
+import g3deditor.util.FastArrayList;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.File;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GL;
@@ -61,19 +66,26 @@ public final class GLDisplay implements GLEventListener
 	
 	private final GLCanvas _canvas;
 	private final GLRenderer _renderer;
+	private final GLTextRenderer _textRenderer;
 	private final GLRenderSelector _renderSelector;
 	private final GLCamera _camera;
 	private final AWTInput _input;
 	private final GLGeoBlockSelector _geoBlockSelector;
+	private final GLText _fpsText;
+	private final GLText _callsText;
+	
 	private GeoCell _prevPick;
 	
 	private GLU _glu;
 	private int _width;
 	private int _height;
 	private long _time;
-	private long _time10;
-	private int _elements;
+	private long _timeFPS;
+	private int _loopsFPS;
+	private int _elementsFPS;
+	
 	private Texture _nsweTexture;
+	private Texture _fontTexture;
 	
 	public GLDisplay(final GLCanvas canvas)
 	{
@@ -96,10 +108,13 @@ public final class GLDisplay implements GLEventListener
 				break;
 		}
 		
+		_textRenderer = new GLTextRenderer(this);
 		_renderSelector = new GLRenderSelector(this);
 		_camera = new GLCamera(this);
 		_input = new AWTInput(this);
 		_geoBlockSelector = new GLGeoBlockSelector(this);
+		_fpsText = _textRenderer.newText(10, 26);
+		_callsText = _textRenderer.newText(10, 10);
 	}
 	
 	public final GLCanvas getCanvas()
@@ -159,6 +174,7 @@ public final class GLDisplay implements GLEventListener
 		//gl.glEnable(GL2.GL_POLYGON_SMOOTH);
 		
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		gl.glClearDepthf(1.0f);
 		
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
@@ -172,6 +188,7 @@ public final class GLDisplay implements GLEventListener
 		_camera.onProjectionMatrixChanged();
 		//_camera.checkPositionOrRotationChanged();
 		_renderer.init(gl);
+		_textRenderer.init(gl);
 		_renderSelector.init();
 		_input.setEnabled(true);
 		
@@ -181,6 +198,11 @@ public final class GLDisplay implements GLEventListener
 			_nsweTexture.enable();
 			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
 			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+			
+			_fontTexture = TextureIO.newTexture(new File("./data/textures/font.png"), false);
+			_fontTexture.enable();
+			_fontTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+			_fontTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
 		}
 		catch (final Exception e)
 		{
@@ -188,7 +210,8 @@ public final class GLDisplay implements GLEventListener
 		}
 		
 		_time = System.nanoTime();
-		_time10 = _time;
+		_timeFPS = 0L;
+		_loopsFPS = 0;
 	}
 	
 	/**
@@ -199,11 +222,17 @@ public final class GLDisplay implements GLEventListener
 	{
 		final GL2 gl = glautodrawable.getGL().getGL2();
 		_renderer.dispose(gl);
+		_textRenderer.dispose(gl);
 		_nsweTexture.destroy(gl);
+		_fontTexture.destroy(gl);
 		_renderSelector.dispose();
 	}
 	
-	private int _fpsCounter;
+	
+	private static final double getFPS(final double fps)
+	{
+		return ((int) (fps * 100f)) / 100d;
+	}
 	
 	/**
 	 * @see javax.media.opengl.GLEventListener#display(javax.media.opengl.GLAutoDrawable)
@@ -212,16 +241,20 @@ public final class GLDisplay implements GLEventListener
 	public final void display(final GLAutoDrawable glautodrawable)
 	{
 		final long currentTime = System.nanoTime();
-		final double fps = nanosToFps(currentTime - _time);
 		final double tpf = nanosToTpf(currentTime - _time);
+		_timeFPS += currentTime - _time;
+		_loopsFPS++;
 		_time = currentTime;
 		
-		if (++_fpsCounter == 10)
+		if (TimeUnit.SECONDS.convert(_timeFPS, TimeUnit.NANOSECONDS) >= 1)
 		{
-			final double fps10 = nanosToFps((currentTime - _time10) / 10);
-			_time10 = currentTime;
-			_fpsCounter = 0;
-			System.out.println("FPS: " + fps + ", FPS10: " + fps10 + ", ELEMENTS: " + _elements + ", RAM: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024l / 1024l);
+			final double fps = _loopsFPS == 0 ? Double.POSITIVE_INFINITY : nanosToFps(_timeFPS / _loopsFPS);
+			final int elements = _elementsFPS / (_loopsFPS == 0 ? 1 : _loopsFPS);
+			_timeFPS = 0L;
+			_loopsFPS = 0;
+			_elementsFPS = 0;
+			_fpsText.setText("Fps:   " + getFPS(fps));
+			_callsText.setText("Calls: " + elements);
 		}
 		
 		final GL2 gl = glautodrawable.getGL().getGL2();
@@ -239,37 +272,73 @@ public final class GLDisplay implements GLEventListener
 		_renderer.enableRender(gl);
 		_nsweTexture.bind();
 		
-		_elements = 0;
 		GLSubRenderSelector selector;
 		for (int i = _renderSelector.getElementsToRender(), y; i-- > 0;)
 		{
 			selector = _renderSelector.getElementToRender(i);
 			for (y = selector.getElementsToRender(); y-- > 0;)
 			{
-				_elements++;
+				_elementsFPS++;
 				_renderer.render(gl, selector.getElementToRender(y));
 			}
 		}
 		
 		_renderer.disableRender(gl);
 		
-		if (_input.getMouseButton1())
+		final FastArrayList<MouseEvent> mouseEvents = _input.getMouseEvents();
+		for (int i = 0; i < mouseEvents.size(); i++)
 		{
-			final float[] point = _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY());
-			if (point != null)
+			final MouseEvent event = mouseEvents.getUnsafe(i);
+			if (event instanceof MouseWheelEvent)
 			{
-				final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
-				if (cell != null && cell != _prevPick)
+				if (event.isControlDown())
 				{
-					_prevPick = cell;
-					_geoBlockSelector.selectGeoCell(cell, _input.getCtrl(), _input.getShift());
+					final MouseWheelEvent scrollevent = (MouseWheelEvent) event;
+					final short addHeight = (short) (scrollevent.getWheelRotation() * -8);
+					_geoBlockSelector.forEachGeoCell(new ForEachGeoCellProcedure()
+					{
+						@Override
+						public final boolean execute(final GeoCell cell)
+						{
+							cell.addHeight(addHeight);
+							return true;
+						}
+					});
+					_renderSelector.forceUpdateFrustum();
+				}
+			}
+			else
+			{
+				final float[] point = _camera.pick(gl, _glu, event.getX(), event.getY());
+				if (point != null)
+				{
+					final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
+					if (cell != null)
+					{
+						if (event.getID() == MouseEvent.MOUSE_DRAGGED)
+						{
+							if (_prevPick == cell)
+								continue;
+							
+							final GeoBlock prevBlock = _prevPick != null ? _prevPick.getBlock() : null;
+							_prevPick = cell;
+							
+							if (event.isAltDown() && prevBlock == cell.getBlock())
+								continue;
+						}
+						
+						_geoBlockSelector.selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
+					}
 				}
 			}
 		}
+		mouseEvents.clear();
+		
+		_fontTexture.bind();
+		_textRenderer.render(gl);
 		
 		gl.glFlush();
 	}
-	
 	/**
 	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable, int, int, int, int)
 	 */

@@ -91,6 +91,12 @@ public abstract class GeoBlock implements Cloneable
 		return _maxHeight;
 	}
 	
+	public final void updateMaxMinHeight(final short height)
+	{
+		_minHeight = (short) Math.min(_minHeight, height);
+		_maxHeight = (short) Math.max(_maxHeight, height);;
+	}
+	
 	public final String getStringType()
 	{
 		return getStringType(getType());

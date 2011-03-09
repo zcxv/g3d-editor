@@ -16,10 +16,7 @@ package g3deditor;
 
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;
-
-import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import g3deditor.swing.FrameMain;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -51,12 +48,15 @@ public final class Main
 		if (!GLProfile.isAWTAvailable())
 			throw new RuntimeException("AWT support is required to run this software");
 		
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		
+		GeoEngine.init();
+		
 		try
 		{
-			GeoEngine.init();
 			GeoEngine.getInstance().reloadGeo(10, 12, true);
 			System.out.println(GeoEngine.getInstance().getActiveRegion());
-			
 		}
 		catch (Exception e1)
 		{
@@ -64,37 +64,17 @@ public final class Main
 			e1.printStackTrace();
 		}
 		
-		
-		
-		//ThreadingImpl.disableSingleThreading();
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-        
 		GLProfile.initSingleton(false);
-		
 		GLProfile glp = GLProfile.get(GLProfile.GL2);
+		GLCapabilities caps = new GLCapabilities(glp);
+		GLCanvas canvas = new GLCanvas(caps);
+		GLDisplay display = new GLDisplay(canvas);
+		canvas.addGLEventListener(display);
 		
-        GLCapabilities caps = new GLCapabilities(glp);
-        GLCanvas canvas = new GLCanvas(caps);
-        
-       // _canvas.setAutoSwapBufferMode(false);
-        canvas.addGLEventListener(new GLDisplay(canvas));
-
-        Frame frame = new Frame("AWT Window Test");
-        frame.setSize(600, 600);
-        frame.add(canvas);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-
-        frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-
-       
-       final FPSAnimator animator = new FPSAnimator(canvas, 60);
-       //animator.setRunAsFastAsPossible(false);
-       animator.start();
+		FrameMain.init(display);
+		
+		final FPSAnimator animator = new FPSAnimator(canvas, 60);
+		//animator.setRunAsFastAsPossible(false);
+		animator.start();
 	}
 }
