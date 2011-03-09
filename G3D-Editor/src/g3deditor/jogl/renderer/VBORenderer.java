@@ -15,7 +15,6 @@
 package g3deditor.jogl.renderer;
 
 import g3deditor.entity.CellColor;
-import g3deditor.entity.SelectionState;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;

@@ -14,6 +14,8 @@
  */
 package g3deditor.entity;
 
+import java.awt.Color;
+
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
@@ -21,9 +23,19 @@ package g3deditor.entity;
  */
 public final class CellColor
 {
+	private static final float intToFloat(final int rgb)
+	{
+		return Math.max(Math.min(rgb / 255f, 1f), 0f);
+	}
+	
 	private final float _r;
 	private final float _g;
 	private final float _b;
+	
+	public CellColor(Color color)
+	{
+		this(intToFloat(color.getRed()), intToFloat(color.getGreen()), intToFloat(color.getBlue()));
+	}
 	
 	public CellColor(final float r, final float g, final float b)
 	{

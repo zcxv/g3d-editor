@@ -63,6 +63,49 @@ public final class GLGeoBlockSelector
 		}
 	}
 	
+	public final boolean forEachGeoCell(final ForEachGeoCellProcedure proc)
+	{
+		_lock.lock();
+		
+		try
+		{
+			FastArrayList<GeoCell> selected;
+			for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
+			{
+				selected = e.getValue();
+				for (int i = selected.size(); i-- > 0;)
+				{
+					if (!proc.execute(selected.getUnsafe(i)))
+						return false;
+				}
+			}
+			return true;
+		}
+		finally
+		{
+			_lock.unlock();
+		}
+	}
+	
+	public final boolean forEachGeoBlock(final ForEachGeoBlockProcedure proc)
+	{
+		_lock.lock();
+		
+		try
+		{
+			for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
+			{
+				if (!proc.execute(e.getKey()))
+					return false;
+			}
+			return true;
+		}
+		finally
+		{
+			_lock.unlock();
+		}
+	}
+	
 	public final boolean isGeoCellSelected(final GeoCell cell)
 	{
 		return false;
@@ -139,7 +182,7 @@ public final class GLGeoBlockSelector
 			{
 				for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
 				{
-					setStateOf(e.getValue(), SelectionState.NORMAL);
+					setStateOf(e.getKey().getCells(), SelectionState.NORMAL);
 				}
 				_selected.clear();
 				
@@ -163,5 +206,15 @@ public final class GLGeoBlockSelector
 		{
 			_lock.unlock();
 		}
+	}
+	
+	public static interface ForEachGeoCellProcedure
+	{
+		public boolean execute(final GeoCell cell);
+	}
+	
+	public static interface ForEachGeoBlockProcedure
+	{
+		public boolean execute(final GeoBlock cell);
 	}
 }

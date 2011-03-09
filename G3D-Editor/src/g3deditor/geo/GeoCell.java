@@ -63,7 +63,6 @@ public final class GeoCell
 	public final void setSelectionState(final SelectionState selectionState)
 	{
 		_selectionState = selectionState;
-		System.out.println("Setting state of " + selectionState);
 	}
 	
 	public final short getHeight()
@@ -84,6 +83,12 @@ public final class GeoCell
 	public final void setHeightAndNSWE(final short heightAndNSWE)
 	{
 		_heightAndNSWE = heightAndNSWE;
+		getBlock().updateMaxMinHeight(getHeight());
+	}
+	
+	public final void addHeight(final short height)
+	{
+		setHeightAndNSWE(GeoEngine.updateHeightOfHeightAndNSWE(getHeightAndNSWE(), (short) (getHeight() + height)));
 	}
 	
 	public final int getGeoX()

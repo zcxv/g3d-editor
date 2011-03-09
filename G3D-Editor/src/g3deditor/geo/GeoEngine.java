@@ -187,7 +187,7 @@ public final class GeoEngine
 		return layers > 0 && layers <= Byte.MAX_VALUE;
 	}
 	
-	public static final String debugNSWE(final short NSWE)
+	public static final String nameOfNSWE(final int NSWE)
 	{
 		if ((NSWE & NSWE_ALL) == NSWE_ALL)
 		{

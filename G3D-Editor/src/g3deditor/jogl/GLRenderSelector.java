@@ -46,6 +46,7 @@ public final class GLRenderSelector
 	
 	private int _camBlockX;
 	private int _camBlockY;
+	private boolean _forceUpdateFrustum;
 	
 	public GLRenderSelector(final GLDisplay display)
 	{
@@ -75,6 +76,11 @@ public final class GLRenderSelector
 	public final GeoCellComparator getGeoCellComparator()
 	{
 		return _cellComparator;
+	}
+	
+	public final void forceUpdateFrustum()
+	{
+		_forceUpdateFrustum = true;
 	}
 	
 	public final void select(final GL2 gl, final GLCamera camera)
@@ -123,8 +129,9 @@ public final class GLRenderSelector
 			}
 		}
 		
-		if (camera.positionXZChanged() || camera.positionYChanged() || camera.rotationChanged())
+		if (camera.positionXZChanged() || camera.positionYChanged() || camera.rotationChanged() || _forceUpdateFrustum)
 		{
+			_forceUpdateFrustum = false;
 			_frustum = camera.getFrustum(gl);
 			_taskExecutor.execute(_geoBlocks, _geoBlocksSize);
 			System.arraycopy(_geoBlocks, 0, _geoBlocksSorted, 0, _geoBlocksSize);

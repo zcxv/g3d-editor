@@ -14,11 +14,12 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.util.FastArrayList;
+
 import java.awt.AWTException;
 import java.awt.Cursor;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.PointerInfo;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
@@ -26,8 +27,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.awt.GLCanvas;
@@ -37,17 +39,16 @@ import javax.media.opengl.awt.GLCanvas;
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class AWTInput implements MouseListener, MouseMotionListener, KeyListener
+public final class AWTInput implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
 	private final GLDisplay _display;
 	private final Cursor _cursor;
-	
-	private int _mouseX;
-	private int _mouseY;
+	private final FastArrayList<MouseEvent> _mouseEvents;
 	
 	private boolean _mouse1;
 	private boolean _mouse2;
 	private boolean _mouse3;
+	
 	private int _mouse3DragX;
 	private int _mouse3DragY;
 	
@@ -58,9 +59,6 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 	private boolean _keyQ;
 	private boolean _keyE;
 	private boolean _keySpace;
-	private boolean _keyShift;
-	private boolean _keyCtrl;
-	private boolean _keyAlt;
 	
 	private Robot _robot;
 	
@@ -68,6 +66,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 	{
 		_display = display;
 		_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR), new Point(0, 0), "CCursor");
+		_mouseEvents = new FastArrayList<MouseEvent>();
 		
 		try
 		{
@@ -84,14 +83,9 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 		return _display;
 	}
 	
-	public final int getMouseX()
+	public final FastArrayList<MouseEvent> getMouseEvents()
 	{
-		return _mouseX;
-	}
-	
-	public final int getMouseY()
-	{
-		return _mouseY;
+		return _mouseEvents;
 	}
 	
 	public final boolean getMouseButton1()
@@ -109,21 +103,6 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 		return _mouse3;
 	}
 	
-	public final boolean getShift()
-	{
-		return _keyShift;
-	}
-	
-	public final boolean getCtrl()
-	{
-		return _keyCtrl;
-	}
-	
-	public final boolean getAlt()
-	{
-		return _keyAlt;
-	}
-	
 	public final void setEnabled(final boolean enabled)
 	{
 		final GLCanvas canvas = _display.getCanvas();
@@ -131,6 +110,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 		{
 			canvas.addMouseListener(this);
 			canvas.addMouseMotionListener(this);
+			canvas.addMouseWheelListener(this);
 			canvas.addKeyListener(this);
 			resetKeys();
 		}
@@ -138,6 +118,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 		{
 			canvas.removeMouseListener(this);
 			canvas.removeMouseMotionListener(this);
+			canvas.removeMouseWheelListener(this);
 			canvas.removeKeyListener(this);
 			resetKeys();
 		}
@@ -188,7 +169,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 	@Override
 	public final void mouseClicked(final MouseEvent mouseevent)
 	{
-		
+		if ((mouseevent.getModifiers() & MouseEvent.BUTTON1_MASK) != 0)
+			_mouseEvents.addLast(mouseevent);
 	}
 	
 	/**
@@ -256,8 +238,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 	@Override
 	public final void mouseDragged(final MouseEvent e)
 	{
-		_mouseX = e.getX();
-		_mouseY = e.getY();
+		if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0)
+			_mouseEvents.addLast(e);
 	}
 	
 	/**
@@ -266,8 +248,16 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 	@Override
 	public final void mouseMoved(final MouseEvent e)
 	{
-		_mouseX = e.getX();
-		_mouseY = e.getY();
+		
+	}
+	
+	/**
+	 * @see java.awt.event.MouseWheelListener#mouseWheelMoved(java.awt.event.MouseWheelEvent)
+	 */
+	@Override
+	public final void mouseWheelMoved(final MouseWheelEvent e)
+	{
+		_mouseEvents.addLast(e);
 	}
 	
 	/**
@@ -327,18 +317,6 @@ public final class AWTInput implements MouseListener, MouseMotionListener, KeyLi
 				
 			case KeyEvent.VK_SPACE:
 				_keySpace = state;
-				break;
-				
-			case KeyEvent.VK_SHIFT:
-				_keyShift = state;
-				break;
-				
-			case KeyEvent.VK_CONTROL:
-				_keyCtrl = state;
-				break;
-				
-			case KeyEvent.VK_ALT:
-				_keyAlt = state;
 				break;
 		}
 	}

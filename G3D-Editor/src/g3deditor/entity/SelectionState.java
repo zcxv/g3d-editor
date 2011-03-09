@@ -14,6 +14,8 @@
  */
 package g3deditor.entity;
 
+import java.awt.Color;
+
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.blocks.GeoBlockComplex;
@@ -26,9 +28,9 @@ import g3deditor.geo.blocks.GeoBlockFlat;
  */
 public enum SelectionState
 {
-	NORMAL		(new CellColor(0.0f, 0.0f, 1.0f), new CellColor(0.0f, 1.0f, 0.0f), new CellColor(1.0f, 0.0f, 0.0f)),
-	HIGHLIGHTED	(new CellColor(0.1f, 0.1f, 1.0f), new CellColor(0.1f, 1.0f, 0.1f), new CellColor(1.0f, 0.1f, 0.1f)),
-	SELECTED	(new CellColor(0.5f, 0.5f, 1.0f), new CellColor(0.5f, 1.0f, 0.5f), new CellColor(1.0f, 0.5f, 0.5f));
+	NORMAL		(new CellColor(Color.BLUE), new CellColor(Color.GREEN), new CellColor(Color.RED)),
+	HIGHLIGHTED	(new CellColor(Color.CYAN), new CellColor(Color.CYAN), new CellColor(Color.CYAN)),
+	SELECTED	(new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA));
 	
 	private final CellColor _colorFlat;
 	private final CellColor _colorComplex;
