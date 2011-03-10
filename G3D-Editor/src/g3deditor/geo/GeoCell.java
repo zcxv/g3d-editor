@@ -23,6 +23,8 @@ import g3deditor.entity.SelectionState;
  */
 public abstract class GeoCell
 {
+	public static final GeoCell[] EMPTY_ARRAY = new GeoCell[0];
+	
 	private final GeoBlock _block;
 	private SelectionState _selectionState;
 	

@@ -42,16 +42,12 @@ public final class GeoBlockFlat extends GeoBlock
 		
 		if (!l2j)
 			bb.getShort();
-		
-		calcMaxMinHeight();
 	}
 	
 	public GeoBlockFlat(final GeoBlock block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		_cells = new GeoCell[]{new GeoCellFlat(this, block.getMinHeight())};
-		
-		calcMaxMinHeight();
 	}
 	
 	private GeoBlockFlat(final GeoBlockFlat block)
@@ -91,13 +87,6 @@ public final class GeoBlockFlat extends GeoBlock
 	}
 	
 	@Override
-	public final void calcMaxMinHeight()
-	{
-		_maxHeight = _cells[0].getHeight();
-		_minHeight = _maxHeight;
-	}
-	
-	@Override
 	public final GeoBlockFlat clone()
 	{
 		final GeoBlockFlat clone = new GeoBlockFlat(this);
@@ -108,8 +97,6 @@ public final class GeoBlockFlat extends GeoBlock
 	public final void copyDataTo(final GeoBlockFlat block)
 	{
 		block._cells[0].setHeightAndNSWE(_cells[0].getHeightAndNSWE());
-		block._maxHeight = _maxHeight;
-		block._minHeight = _minHeight;
 	}
 	
 	@Override
@@ -146,5 +133,32 @@ public final class GeoBlockFlat extends GeoBlock
 	public final GeoCell[] getCells()
 	{
 		return _cells;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getMinHeight()
+	 */
+	@Override
+	public final short getMinHeight()
+	{
+		return _cells[0].getHeight();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getMaxHeight()
+	 */
+	@Override
+	public final short getMaxHeight()
+	{
+		return getMinHeight();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#updateMinMaxHeight(short)
+	 */
+	@Override
+	public final void updateMinMaxHeight(final short height)
+	{
+		
 	}
 }

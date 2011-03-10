@@ -32,9 +32,6 @@ public abstract class GeoBlock implements Cloneable
 	
 	private GeoRegion _region;
 	
-	protected short _minHeight;
-	protected short _maxHeight;
-	
 	protected GeoBlock(final int geoX, final int geoY)
 	{
 		_geoX = geoX;
@@ -79,22 +76,6 @@ public abstract class GeoBlock implements Cloneable
 	public final int getMaxGeoY()
 	{
 		return _geoY + GeoEngine.GEO_BLOCK_SHIFT - 1;
-	}
-	
-	public final short getMinHeight()
-	{
-		return _minHeight;
-	}
-	
-	public final short getMaxHeight()
-	{
-		return _maxHeight;
-	}
-	
-	public final void updateMaxMinHeight(final short height)
-	{
-		_minHeight = (short) Math.min(_minHeight, height);
-		_maxHeight = (short) Math.max(_maxHeight, height);;
 	}
 	
 	public final String getStringType()
@@ -142,8 +123,6 @@ public abstract class GeoBlock implements Cloneable
 	
 	public abstract GeoBlock clone();
 	
-	public abstract void calcMaxMinHeight();
-	
 	public abstract int getMaxLayerCount();
 	
 	public abstract int addLayer(final int geoX, final int geoY, final short heightAndNSWE);
@@ -153,4 +132,10 @@ public abstract class GeoBlock implements Cloneable
 	public abstract void saveTo(final IncBufferedFileWriter writer, final boolean l2j) throws IOException;
 	
 	public abstract GeoCell[] getCells();
+	
+	public abstract short getMinHeight();
+	
+	public abstract short getMaxHeight();
+	
+	public abstract void updateMinMaxHeight(final short height);
 }

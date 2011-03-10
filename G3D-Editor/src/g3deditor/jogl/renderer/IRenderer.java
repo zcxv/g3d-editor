@@ -88,6 +88,6 @@ public final class IRenderer extends GLRenderer
 	@Override
 	public final String toString()
 	{
-		return "Immediate Renderer";
+		return "Immediate";
 	}
 }

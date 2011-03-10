@@ -15,9 +15,10 @@
 package g3deditor.jogl;
 
 import g3deditor.geo.GeoBlock;
+import g3deditor.geo.GeoBlockSelector;
+import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
-import g3deditor.jogl.GLGeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.jogl.GLRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLTextRenderer.GLText;
 import g3deditor.jogl.renderer.DLRenderer;
@@ -72,6 +73,11 @@ public final class GLDisplay implements GLEventListener
 	private final AWTInput _input;
 	private final GLText _fpsText;
 	private final GLText _callsText;
+	private final GLText _memoryText;
+	private final GLText _renderInfoText;
+	private final GLText _glInfoText;
+	private final GLText _worldPositionText;
+	private final GLText _geoPositionText;
 	
 	private GeoCell _prevPick;
 	
@@ -111,8 +117,15 @@ public final class GLDisplay implements GLEventListener
 		_renderSelector = new GLRenderSelector(this);
 		_camera = new GLCamera(this);
 		_input = new AWTInput(this);
-		_fpsText = _textRenderer.newText(10, 26);
+		
 		_callsText = _textRenderer.newText(10, 10);
+		_fpsText = _textRenderer.newText(10, _callsText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		_memoryText = _textRenderer.newText(10, _fpsText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		_renderInfoText = _textRenderer.newText(10, _memoryText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		_glInfoText = _textRenderer.newText(10, _renderInfoText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		_geoPositionText = _textRenderer.newText(10, _glInfoText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		_worldPositionText = _textRenderer.newText(10, _geoPositionText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		
 	}
 	
 	public final GLCanvas getCanvas()
@@ -179,8 +192,8 @@ public final class GLDisplay implements GLEventListener
 		_glu.gluPerspective(VIEW_ANGLE, 1.0f, VIEW_Z_NEAR, VIEW_Z_FAR);
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		
-		int camX = GeoEngine.getGeoXY(10, 50);
-		int camY = GeoEngine.getGeoXY(12, 50);
+		int camX = GeoEngine.getGeoXY(13, 50);
+		int camY = GeoEngine.getGeoXY(8, 50);
 		
 		_camera.setXYZ(camX, GeoEngine.getInstance().nGetCell(camX, camY, 0).getHeight() / 16f, camY);
 		_camera.onProjectionMatrixChanged();
@@ -210,6 +223,9 @@ public final class GLDisplay implements GLEventListener
 		_time = System.nanoTime();
 		_timeFPS = 0L;
 		_loopsFPS = 0;
+		
+		_renderInfoText.setText("Renderer: " + _renderer);
+		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
 	}
 	
 	/**
@@ -255,6 +271,10 @@ public final class GLDisplay implements GLEventListener
 			_callsText.setText("Calls: " + elements);
 		}
 		
+		_worldPositionText.setText("World-Pos XYZ: " + _camera.getWorldX() + ", " + _camera.getWorldY() + ", " + _camera.getWorldZ());
+		_geoPositionText.setText("Geo-Pos XYZ: " + _camera.getGeoX() + ", " + _camera.getGeoY() + ", " + _camera.getGeoZ());
+		_memoryText.setText("Memory: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024l / 1024l + "mb");
+		
 		final GL2 gl = glautodrawable.getGL().getGL2();
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		gl.glLoadIdentity();
@@ -293,7 +313,7 @@ public final class GLDisplay implements GLEventListener
 				{
 					final MouseWheelEvent scrollevent = (MouseWheelEvent) event;
 					final short addHeight = (short) (scrollevent.getWheelRotation() * -8);
-					GLGeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
+					GeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
 					{
 						@Override
 						public final boolean execute(final GeoCell cell)
@@ -325,7 +345,7 @@ public final class GLDisplay implements GLEventListener
 								continue;
 						}
 						
-						GLGeoBlockSelector.getInstance().selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
+						GeoBlockSelector.getInstance().selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
 					}
 				}
 			}

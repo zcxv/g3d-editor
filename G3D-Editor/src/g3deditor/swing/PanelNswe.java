@@ -14,10 +14,10 @@
  */
 package g3deditor.swing;
 
+import g3deditor.geo.GeoBlockSelector;
+import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
-import g3deditor.jogl.GLGeoBlockSelector;
-import g3deditor.jogl.GLGeoBlockSelector.ForEachGeoCellProcedure;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -102,7 +102,7 @@ public final class PanelNswe extends JPanel implements ActionListener
 	{
 		final NsweButton nsweButton = (NsweButton) e.getSource();
 		setButtonSelected(nsweButton);
-		GLGeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
+		GeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
 		{
 			@Override
 			public final boolean execute(final GeoCell cell)

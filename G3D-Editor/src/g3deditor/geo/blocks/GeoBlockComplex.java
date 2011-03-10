@@ -39,6 +39,8 @@ public final class GeoBlockComplex extends GeoBlock
 	}
 	
 	private final GeoCell[] _cells;
+	private short _minHeight;
+	private short _maxHeight;
 	
 	public GeoBlockComplex(final ByteBuffer bb, final int geoX, final int geoY, final boolean l2j)
 	{
@@ -124,7 +126,6 @@ public final class GeoBlockComplex extends GeoBlock
 		return new GeoCell[]{_cells[indexOf(cellX, cellY)]};
 	}
 	
-	@Override
 	public final void calcMaxMinHeight()
 	{
 		short minHeight = Short.MAX_VALUE, maxHeight = Short.MIN_VALUE;
@@ -201,5 +202,33 @@ public final class GeoBlockComplex extends GeoBlock
 	public final GeoCell[] getCells()
 	{
 		return _cells;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getMinHeight()
+	 */
+	@Override
+	public final short getMinHeight()
+	{
+		return _minHeight;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getMaxHeight()
+	 */
+	@Override
+	public final short getMaxHeight()
+	{
+		return _maxHeight;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#updateMinMaxHeight(short)
+	 */
+	@Override
+	public final void updateMinMaxHeight(final short height)
+	{
+		_maxHeight = (short) (Math.max(_maxHeight, height));
+		_minHeight = (short) (Math.min(_minHeight, height));
 	}
 }

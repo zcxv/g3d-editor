@@ -14,9 +14,9 @@
  */
 package g3deditor;
 
+import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;
-import g3deditor.jogl.GLGeoBlockSelector;
 import g3deditor.swing.FrameMain;
 
 import javax.media.opengl.GLCapabilities;
@@ -65,11 +65,11 @@ public final class Main
 		}
 		
 		GeoEngine.init();
-		GLGeoBlockSelector.init();
+		GeoBlockSelector.init();
 		
 		try
 		{
-			GeoEngine.getInstance().reloadGeo(10, 12, true);
+			GeoEngine.getInstance().reloadGeo(13, 8, true);
 			System.out.println(GeoEngine.getInstance().getActiveRegion());
 		}
 		catch (Exception e1)
@@ -79,7 +79,7 @@ public final class Main
 		}
 		
 		GLProfile.initSingleton(false);
-		GLProfile glp = GLProfile.get(GLProfile.GL2);
+		GLProfile glp = GLProfile.get("GL_DEFAULT");
 		GLCapabilities caps = new GLCapabilities(glp);
 		GLCanvas canvas = new GLCanvas(caps);
 		GLDisplay display = new GLDisplay(canvas);

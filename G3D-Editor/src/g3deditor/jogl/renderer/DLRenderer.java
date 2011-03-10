@@ -102,6 +102,6 @@ public final class DLRenderer extends GLRenderer
 	@Override
 	public final String toString()
 	{
-		return "DisplayList Renderer";
+		return "DL";
 	}
 }

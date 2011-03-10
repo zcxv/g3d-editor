@@ -23,6 +23,16 @@ import java.util.Comparator;
  */
 public final class Util
 {
+	public static final int arrayIndexOf(final Object[] array, final Object value)
+	{
+		for (int i = array.length; i-- > 0;)
+		{
+			if (array[i] == value)
+				return i;
+		}
+		return -1;
+	}
+	
 	/**
 	 * @see java.util.Arrays#mergeSort(Object[] src,Object[] dest,int low,int high,int off)
 	 */

@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.geo.GeoEngine;
 import g3deditor.util.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -350,6 +351,36 @@ public final class GLCamera
 		return _prevCamPosZ;
 	}
 	
+	public final int getGeoX()
+	{
+		return (int) getX();
+	}
+	
+	public final int getGeoY()
+	{
+		return (int) getZ();
+	}
+	
+	public final int getGeoZ()
+	{
+		return (int) (getY() * 16f);
+	}
+	
+	public final int getWorldX()
+	{
+		return GeoEngine.getWorldX(getGeoX());
+	}
+	
+	public final int getWorldY()
+	{
+		return GeoEngine.getWorldY(getGeoY());
+	}
+	
+	public final int getWorldZ()
+	{
+		return getGeoZ();
+	}
+	
 	public final float getRotX()
 	{
 		return _prevCamRotX;
@@ -373,9 +404,21 @@ public final class GLCamera
 	public final void moveForeward(final double move)
 	{
 		final double radians = Math.toRadians(_curCamRotY);
-		_curCamPosX += Math.sin(radians) * move;
-		_curCamPosY += Math.tan(Math.toRadians(_curCamRotX)) * -move;
-		_curCamPosZ += Math.cos(radians) * move;
+		double x = Math.sin(radians);
+		double y = Math.tan(Math.toRadians(_curCamRotX));
+		double z = Math.cos(radians);
+		double length = x * x + y * y + z * z;
+        if (length != 1d && length != 0d)
+        {
+            length = 1.0d / Math.sqrt(length);
+            x *= length;
+            y *= length;
+            z *= length;
+        }
+		
+		_curCamPosX += x * move;
+		_curCamPosY += y * -move;
+		_curCamPosZ += z * move;
 	}
 	
 	public final void moveSideways(final double move)
