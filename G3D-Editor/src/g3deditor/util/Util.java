@@ -1,3 +1,17 @@
+/*
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package g3deditor.util;
 
 import java.util.Comparator;
@@ -9,11 +23,17 @@ import java.util.Comparator;
  */
 public final class Util
 {
+	/**
+	 * @see java.util.Arrays#mergeSort(Object[] src,Object[] dest,int low,int high,int off)
+	 */
 	public static final <T> void mergeSort(final T[] src, final T[] dest, final int length, final Comparator<T> comparator)
 	{
 		mergeSort(src, dest, 0, length, comparator);
 	}
 	
+	/**
+	 * @see java.util.Arrays#mergeSort(Object[] src,Object[] dest,int low,int high,int off)
+	 */
 	private static final <T> void mergeSort(final T[] src, final T[] dest, int low, int high, final Comparator<T> comparator)
 	{
 		int length = high - low;

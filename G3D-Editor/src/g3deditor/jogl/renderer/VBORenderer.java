@@ -230,4 +230,10 @@ public final class VBORenderer extends GLRenderer
 	{
 		gl.glDeleteBuffers(3, new int[]{_vboIndex, _vboVertex, _vboTexture}, 0);
 	}
+	
+	@Override
+	public final String toString()
+	{
+		return "VertexBufferObject Renderer";
+	}
 }

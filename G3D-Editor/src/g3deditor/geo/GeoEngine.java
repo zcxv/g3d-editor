@@ -182,6 +182,13 @@ public final class GeoEngine
 		return heightAndNSWE;
 	}
 	
+	public static final short getGeoHeightOfHeight(short height)
+	{
+		height <<= 1;
+		height &= GeoEngine.HEIGHT_MASK;
+		return (short) (height >> 1);
+	}
+	
 	public static final boolean layersValid(final int layers)
 	{
 		return layers > 0 && layers <= Byte.MAX_VALUE;

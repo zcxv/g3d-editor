@@ -16,6 +16,7 @@ package g3deditor;
 
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;
+import g3deditor.jogl.GLGeoBlockSelector;
 import g3deditor.swing.FrameMain;
 
 import javax.media.opengl.GLCapabilities;
@@ -23,8 +24,11 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import com.jogamp.opengl.util.FPSAnimator;
+import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -51,7 +55,17 @@ public final class Main
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		
+		try
+		{
+			UIManager.setLookAndFeel(new NimbusLookAndFeel());
+		}
+		catch (final UnsupportedLookAndFeelException e)
+		{
+			e.printStackTrace();
+		}
+		
 		GeoEngine.init();
+		GLGeoBlockSelector.init();
 		
 		try
 		{

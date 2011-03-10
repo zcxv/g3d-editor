@@ -17,6 +17,7 @@ package g3deditor.geo.blocks;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.cells.GeoCellCM;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -82,7 +83,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 				_cells3D[x][y] = new GeoCell[layers];
 				for (int i = layers; i-- > 0;)
 				{
-					_cells3D[x][y][i] = new GeoCell(this, bb.getShort(), x, y);
+					_cells3D[x][y][i] = new GeoCellCM(this, bb.getShort(), x, y);
 				}
 			}
 		}
@@ -101,7 +102,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		{
 			for (int y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				final GeoCell cell = new GeoCell(this, GeoEngine.convertHeightToHeightAndNSWEALL(block.getMinHeight()), x, y);
+				final GeoCell cell = new GeoCellCM(this, GeoEngine.convertHeightToHeightAndNSWEALL(block.getMinHeight()), x, y);
 				_cells3D[x][y][0] = cell;
 				_cells[x * GeoEngine.GEO_BLOCK_SHIFT + y] =cell; 
 			}
@@ -119,7 +120,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		{
 			for (int y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				final GeoCell cell = new GeoCell(this, block.nGetCellByLayer(x, y, 0).getHeightAndNSWE(), x, y);
+				final GeoCell cell = new GeoCellCM(this, block.nGetCellByLayer(x, y, 0).getHeightAndNSWE(), x, y);
 				_cells3D[x][y][0] = cell;
 				_cells[x * GeoEngine.GEO_BLOCK_SHIFT + y] =cell; 
 			}
@@ -235,7 +236,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 				layersCopy = block._cells3D[x][y] = new GeoCell[z];
 				while (z-- > 0)
 				{
-					layersCopy[z] = new GeoCell(this, layers[z].getHeightAndNSWE(), x, y);
+					layersCopy[z] = new GeoCellCM(this, layers[z].getHeightAndNSWE(), x, y);
 				}
 			}
 		}
