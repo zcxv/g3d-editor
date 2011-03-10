@@ -18,6 +18,7 @@ import g3deditor.entity.SelectionState;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.blocks.GeoBlockFlat;
+import g3deditor.swing.FrameMain;
 import g3deditor.util.FastArrayList;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,20 +32,25 @@ import javolution.util.FastMap;
  */
 public final class GLGeoBlockSelector
 {
-	private final GLDisplay _display;
+	private static GLGeoBlockSelector _instance;
+	
+	public static final void init()
+	{
+		_instance = new GLGeoBlockSelector();
+	}
+	
+	public static final GLGeoBlockSelector getInstance()
+	{
+		return _instance;
+	}
+	
 	private final ReentrantLock _lock;
 	private final FastMap<GeoBlock, FastArrayList<GeoCell>> _selected;
 	
-	public GLGeoBlockSelector(final GLDisplay display)
+	public GLGeoBlockSelector()
 	{
-		_display = display;
 		_lock = new ReentrantLock();
 		_selected = new FastMap<GeoBlock, FastArrayList<GeoCell>>();
-	}
-	
-	public final GLDisplay getDisplay()
-	{
-		return _display;
 	}
 	
 	private final void setStateOf(final FastArrayList<GeoCell> cells, final SelectionState state)
@@ -113,6 +119,8 @@ public final class GLGeoBlockSelector
 	
 	public final void selectGeoCell(final GeoCell cell, boolean fullBlock, final boolean append)
 	{
+		final GeoCell guiSelected;
+		
 		_lock.lock();
 		
 		try
@@ -151,7 +159,15 @@ public final class GLGeoBlockSelector
 						{
 							if (selected.remove(cell))
 							{
-								cell.setSelectionState(SelectionState.HIGHLIGHTED);
+								if (selected.isEmpty())
+								{
+									setStateOf(cells, SelectionState.NORMAL);
+									_selected.remove(block);
+								}
+								else
+								{
+									cell.setSelectionState(SelectionState.HIGHLIGHTED);
+								}
 							}
 							else
 							{
@@ -201,11 +217,30 @@ public final class GLGeoBlockSelector
 				setStateOf(selected, SelectionState.SELECTED);
 				_selected.put(block, selected);
 			}
+			
+			if (_selected.isEmpty())
+			{
+				guiSelected = null;
+			}
+			else
+			{
+				final FastArrayList<GeoCell> temp = _selected.get(block);
+				if (temp != null)
+				{
+					guiSelected = temp.getUnsafe(temp.size() - 1);
+				}
+				else
+				{
+					guiSelected = null;
+				}
+			}
 		}
 		finally
 		{
 			_lock.unlock();
 		}
+		
+		FrameMain.getInstance().setSelectedGeoCell(guiSelected);
 	}
 	
 	public static interface ForEachGeoCellProcedure

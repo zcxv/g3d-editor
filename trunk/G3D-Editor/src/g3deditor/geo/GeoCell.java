@@ -15,44 +15,26 @@
 package g3deditor.geo;
 
 import g3deditor.entity.SelectionState;
-import g3deditor.geo.blocks.GeoBlockFlat;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class GeoCell
+public abstract class GeoCell
 {
 	private final GeoBlock _block;
-	private final byte _cellX;
-	private final byte _cellY;
-	
-	private short _heightAndNSWE;
 	private SelectionState _selectionState;
 	
-	public GeoCell(final GeoBlock block, final short heightAndNSWE)
-	{
-		this(block, heightAndNSWE, 0, 0);
-	}
-	
-	public GeoCell(final GeoBlock block, final short heightAndNSWE, final int cellX, final int cellY)
+	public GeoCell(final GeoBlock block)
 	{
 		_block = block;
-		_cellX = (byte) cellX;
-		_cellY = (byte) cellY;
-		_heightAndNSWE = heightAndNSWE;
 		_selectionState = SelectionState.NORMAL;
 	}
 	
 	public final GeoBlock getBlock()
 	{
 		return _block;
-	}
-	
-	public final boolean isBig()
-	{
-		return _block instanceof GeoBlockFlat;
 	}
 	
 	public final SelectionState getSelectionState()
@@ -63,42 +45,6 @@ public final class GeoCell
 	public final void setSelectionState(final SelectionState selectionState)
 	{
 		_selectionState = selectionState;
-	}
-	
-	public final short getHeight()
-	{
-		return GeoEngine.getHeight(_heightAndNSWE);
-	}
-	
-	public final short getNSWE()
-	{
-		return GeoEngine.getNSWE(_heightAndNSWE);
-	}
-	
-	public final short getHeightAndNSWE()
-	{
-		return _heightAndNSWE;
-	}
-	
-	public final void setHeightAndNSWE(final short heightAndNSWE)
-	{
-		_heightAndNSWE = heightAndNSWE;
-		getBlock().updateMaxMinHeight(getHeight());
-	}
-	
-	public final void addHeight(final short height)
-	{
-		setHeightAndNSWE(GeoEngine.updateHeightOfHeightAndNSWE(getHeightAndNSWE(), (short) (getHeight() + height)));
-	}
-	
-	public final int getGeoX()
-	{
-		return _block.getGeoX() + _cellX;
-	}
-	
-	public final int getGeoY()
-	{
-		return _block.getGeoY() + _cellY;
 	}
 	
 	public final float getRenderX()
@@ -119,4 +65,22 @@ public final class GeoCell
 	{
 		return getGeoY();
 	}
+	
+	public abstract boolean isBig();
+	
+	public abstract short getHeight();
+	
+	public abstract short getNSWE();
+	
+	public abstract short getHeightAndNSWE();
+	
+	public abstract void addHeight(final short height);
+	
+	public abstract int getGeoX();
+	
+	public abstract int getGeoY();
+	
+	public abstract void setHeightAndNSWE(final short heightAndNSWE);
+	
+	public abstract void setNswe(final short nswe);
 }

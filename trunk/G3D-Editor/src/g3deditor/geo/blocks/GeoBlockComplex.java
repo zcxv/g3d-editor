@@ -17,6 +17,7 @@ package g3deditor.geo.blocks;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.cells.GeoCellCM;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -47,7 +48,7 @@ public final class GeoBlockComplex extends GeoBlock
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				_cells[indexOf(x, y)] = new GeoCell(this, bb.getShort(), x, y);
+				_cells[indexOf(x, y)] = new GeoCellCM(this, bb.getShort(), x, y);
 			}
 		}
 		calcMaxMinHeight();
@@ -62,7 +63,7 @@ public final class GeoBlockComplex extends GeoBlock
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				_cells[indexOf(x, y)] = new GeoCell(this, GeoEngine.convertHeightToHeightAndNSWEALL(block.getMinHeight()), x, y);
+				_cells[indexOf(x, y)] = new GeoCellCM(this, GeoEngine.convertHeightToHeightAndNSWEALL(block.getMinHeight()), x, y);
 			}
 		}
 		calcMaxMinHeight();
@@ -77,7 +78,7 @@ public final class GeoBlockComplex extends GeoBlock
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				_cells[indexOf(x, y)] = new GeoCell(this, block.nGetCellByLayer(x, y, block.nGetLayerCount(x, y) - 1).getHeightAndNSWE(), x, y);
+				_cells[indexOf(x, y)] = new GeoCellCM(this, block.nGetCellByLayer(x, y, block.nGetLayerCount(x, y) - 1).getHeightAndNSWE(), x, y);
 			}
 		}
 		calcMaxMinHeight();

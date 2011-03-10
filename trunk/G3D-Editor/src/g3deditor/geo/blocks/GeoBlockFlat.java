@@ -17,6 +17,7 @@ package g3deditor.geo.blocks;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.cells.GeoCellFlat;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -37,7 +38,7 @@ public final class GeoBlockFlat extends GeoBlock
 	public GeoBlockFlat(final ByteBuffer bb, final int geoX, final int geoY, final boolean l2j)
 	{
 		super(geoX, geoY);
-		_cells = new GeoCell[]{new GeoCell(this, GeoEngine.convertHeightToHeightAndNSWEALL(bb.getShort()))};
+		_cells = new GeoCell[]{new GeoCellFlat(this, bb.getShort())};
 		
 		if (!l2j)
 			bb.getShort();
@@ -48,7 +49,7 @@ public final class GeoBlockFlat extends GeoBlock
 	public GeoBlockFlat(final GeoBlock block)
 	{
 		super(block.getGeoX(), block.getGeoY());
-		_cells = new GeoCell[]{new GeoCell(this, GeoEngine.convertHeightToHeightAndNSWEALL(block.getMinHeight()))};
+		_cells = new GeoCell[]{new GeoCellFlat(this, block.getMinHeight())};
 		
 		calcMaxMinHeight();
 	}

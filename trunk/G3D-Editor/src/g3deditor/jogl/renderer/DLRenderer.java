@@ -98,4 +98,10 @@ public final class DLRenderer extends GLRenderer
 	{
 		gl.glDeleteLists(_listId, NSWE_COMBINATIONS + 1);
 	}
+	
+	@Override
+	public final String toString()
+	{
+		return "DisplayList Renderer";
+	}
 }

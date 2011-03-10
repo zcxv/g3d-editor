@@ -70,7 +70,6 @@ public final class GLDisplay implements GLEventListener
 	private final GLRenderSelector _renderSelector;
 	private final GLCamera _camera;
 	private final AWTInput _input;
-	private final GLGeoBlockSelector _geoBlockSelector;
 	private final GLText _fpsText;
 	private final GLText _callsText;
 	
@@ -112,7 +111,6 @@ public final class GLDisplay implements GLEventListener
 		_renderSelector = new GLRenderSelector(this);
 		_camera = new GLCamera(this);
 		_input = new AWTInput(this);
-		_geoBlockSelector = new GLGeoBlockSelector(this);
 		_fpsText = _textRenderer.newText(10, 26);
 		_callsText = _textRenderer.newText(10, 10);
 	}
@@ -295,7 +293,7 @@ public final class GLDisplay implements GLEventListener
 				{
 					final MouseWheelEvent scrollevent = (MouseWheelEvent) event;
 					final short addHeight = (short) (scrollevent.getWheelRotation() * -8);
-					_geoBlockSelector.forEachGeoCell(new ForEachGeoCellProcedure()
+					GLGeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
 					{
 						@Override
 						public final boolean execute(final GeoCell cell)
@@ -327,7 +325,7 @@ public final class GLDisplay implements GLEventListener
 								continue;
 						}
 						
-						_geoBlockSelector.selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
+						GLGeoBlockSelector.getInstance().selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
 					}
 				}
 			}
