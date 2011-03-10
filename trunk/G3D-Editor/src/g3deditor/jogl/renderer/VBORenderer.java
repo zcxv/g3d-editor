@@ -234,6 +234,6 @@ public final class VBORenderer extends GLRenderer
 	@Override
 	public final String toString()
 	{
-		return "VertexBufferObject Renderer";
+		return "VBO";
 	}
 }

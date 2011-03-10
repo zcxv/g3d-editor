@@ -87,6 +87,7 @@ public final class GeoCellCM extends GeoCell
 	public final void addHeight(final short height)
 	{
 		_heightAndNSWE = GeoEngine.updateHeightOfHeightAndNSWE(_heightAndNSWE, (short) (getHeight() + height));
+		getBlock().updateMinMaxHeight(getHeight());
 	}
 	
 	/**

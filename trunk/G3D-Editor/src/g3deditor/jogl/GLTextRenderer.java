@@ -29,8 +29,10 @@ import javax.media.opengl.GL2;
  */
 public final class GLTextRenderer
 {
+	public static final int TEXT_HEIGHT = 16;
+	public static final Charset UTF_8 = Charset.forName("UTF-8");
+	
 	private final GLDisplay _display;
-	private final ByteBuffer _stringBuffer;
 	private final FastArrayList<GLText> _texts;
 	
 	private int _listId;
@@ -38,7 +40,6 @@ public final class GLTextRenderer
 	public GLTextRenderer(final GLDisplay display)
 	{
 		_display = display;
-		_stringBuffer = BufferUtils.createByteBuffer(256);
 		_texts = new FastArrayList<GLText>();
 	}
 	
@@ -97,23 +98,20 @@ public final class GLTextRenderer
 		gl.glListBase(_listId - 32 + (128 * 0));
 		gl.glColor4f(1f, 1f, 1f, 1f);
 		
+		ByteBuffer buffer;
 		GLText gltext;
-		String text;
 		for (int i = _texts.size(); i-- > 0;)
 		{
 			gltext = _texts.getUnsafe(i);
-			text = gltext.getText();
-			if (text == null)
-				continue;
-			
-			_stringBuffer.clear();
-			_stringBuffer.put(text.getBytes(Charset.forName("UTF-8")));
-			_stringBuffer.flip();
-			
-			gl.glPushMatrix();
-			gl.glTranslatef(gltext.getX(), gltext.getY(), 0);
-			gl.glCallLists(text.length(), GL2.GL_BYTE, _stringBuffer);
-			gl.glPopMatrix();
+			buffer = gltext.getBuffer();
+			buffer.rewind();
+			if (buffer.hasRemaining())
+			{
+				gl.glPushMatrix();
+				gl.glTranslatef(gltext.getX(), gltext.getY(), 0);
+				gl.glCallLists(buffer.remaining(), GL2.GL_BYTE, buffer);
+				gl.glPopMatrix();
+			}
 		}
 		
 		gl.glMatrixMode(GL2.GL_PROJECTION);
@@ -131,13 +129,13 @@ public final class GLTextRenderer
 	
 	public static final class GLText
 	{
+		private final ByteBuffer _buffer;
 		private final int _x;
 		private final int _y;
 		
-		private String _text;
-		
 		public GLText(final int x, final int y)
 		{
+			_buffer = BufferUtils.createByteBuffer(256);
 			_x = x;
 			_y = y;
 		}
@@ -154,12 +152,18 @@ public final class GLTextRenderer
 		
 		public final void setText(final String text)
 		{
-			_text = text;
+			if (text != null && text.length() > _buffer.capacity())
+				throw new IllegalArgumentException("Text is too long");
+			
+			_buffer.clear();
+			if (text != null)
+				_buffer.put(text.getBytes(UTF_8));
+			_buffer.flip();
 		}
 		
-		public final String getText()
+		public final ByteBuffer getBuffer()
 		{
-			return _text;
+			return _buffer;
 		}
 	}
 }

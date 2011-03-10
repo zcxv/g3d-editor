@@ -36,6 +36,8 @@ public final class GeoBlockMultiLevel extends GeoBlock
 {
 	private final GeoCell[][][] _cells3D;
 	private GeoCell[] _cells;
+	private short _minHeight;
+	private short _maxHeight;
 	
 	private final void copyCells()
 	{
@@ -193,7 +195,6 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		return Arrays.copyOf(layers, layers.length);
 	}
 	
-	@Override
 	public final void calcMaxMinHeight()
 	{
 		GeoCell[] heights;
@@ -335,5 +336,33 @@ public final class GeoBlockMultiLevel extends GeoBlock
 	public final GeoCell[] getCells()
 	{
 		return _cells;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getMinHeight()
+	 */
+	@Override
+	public final short getMinHeight()
+	{
+		return _minHeight;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getMaxHeight()
+	 */
+	@Override
+	public final short getMaxHeight()
+	{
+		return _maxHeight;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#updateMinMaxHeight(short)
+	 */
+	@Override
+	public final void updateMinMaxHeight(final short height)
+	{
+		_maxHeight = (short) (Math.max(_maxHeight, height));
+		_minHeight = (short) (Math.min(_minHeight, height));
 	}
 }

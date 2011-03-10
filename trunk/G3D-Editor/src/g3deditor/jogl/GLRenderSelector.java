@@ -192,6 +192,10 @@ public final class GLRenderSelector
 	
 	public final boolean isVisible(final GeoCell cell)
 	{
+		//final double dx = cell.getRenderX() - camera.getX();
+		//final double dy = cell.getRenderY() - camera.getY();
+		//final double dz = cell.getRenderZ() - camera.getZ();
+		
 		final float x;
 		final float y;
 		final float z;
@@ -206,6 +210,9 @@ public final class GLRenderSelector
 		}
 		else
 		{
+			if (cell.getBlock().nGetLayerCount(cell.getGeoX(), cell.getGeoY()) > 6 && Math.abs(cell.getRenderY() - getDisplay().getCamera().getY()) >= 200)
+				return false;
+			
 			x = cell.getRenderX() + 0.5f;
 			y = cell.getRenderY() - 0.1f;
 			z = cell.getRenderZ() + 0.5f;
