@@ -19,7 +19,7 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
-import g3deditor.jogl.GLRenderSelector.GLSubRenderSelector;
+import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLTextRenderer.GLText;
 import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
@@ -66,9 +66,9 @@ public final class GLDisplay implements GLEventListener
 	private static final float VIEW_Z_FAR = 1000f;
 	
 	private final GLCanvas _canvas;
-	private final GLRenderer _renderer;
+	private final GLCellRenderer _renderer;
 	private final GLTextRenderer _textRenderer;
-	private final GLRenderSelector _renderSelector;
+	private final GLCellRenderSelector _renderSelector;
 	private final GLCamera _camera;
 	private final AWTInput _input;
 	private final GLText _fpsText;
@@ -92,6 +92,8 @@ public final class GLDisplay implements GLEventListener
 	private Texture _nsweTexture;
 	private Texture _fontTexture;
 	
+	private GLTerrain _terrain;
+	
 	public GLDisplay(final GLCanvas canvas)
 	{
 		_canvas = canvas;
@@ -114,7 +116,7 @@ public final class GLDisplay implements GLEventListener
 		}
 		
 		_textRenderer = new GLTextRenderer(this);
-		_renderSelector = new GLRenderSelector(this);
+		_renderSelector = new GLCellRenderSelector(this);
 		_camera = new GLCamera(this);
 		_input = new AWTInput(this);
 		
@@ -133,12 +135,12 @@ public final class GLDisplay implements GLEventListener
 		return _canvas;
 	}
 	
-	public final GLRenderer getRenderer()
+	public final GLCellRenderer getRenderer()
 	{
 		return _renderer;
 	}
 	
-	public final GLRenderSelector getRenderSelector()
+	public final GLCellRenderSelector getRenderSelector()
 	{
 		return _renderSelector;
 	}
@@ -181,8 +183,6 @@ public final class GLDisplay implements GLEventListener
 		gl.glDisable(GL2.GL_POLYGON_STIPPLE);
 		gl.glDisable(GL2.GL_ALPHA_TEST);
 		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
-		//gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
-		//gl.glEnable(GL2.GL_POLYGON_SMOOTH);
 		
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		gl.glClearDepthf(1.0f);
@@ -192,8 +192,8 @@ public final class GLDisplay implements GLEventListener
 		_glu.gluPerspective(VIEW_ANGLE, 1.0f, VIEW_Z_NEAR, VIEW_Z_FAR);
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		
-		int camX = GeoEngine.getGeoXY(13, 50);
-		int camY = GeoEngine.getGeoXY(8, 50);
+		int camX = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionX(), GeoEngine.GEO_REGION_SIZE / 2);
+		int camY = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionY(), GeoEngine.GEO_REGION_SIZE / 2);
 		
 		_camera.setXYZ(camX, GeoEngine.getInstance().nGetCell(camX, camY, 0).getHeight() / 16f, camY);
 		_camera.onProjectionMatrixChanged();
@@ -226,6 +226,9 @@ public final class GLDisplay implements GLEventListener
 		
 		_renderInfoText.setText("Renderer: " + _renderer);
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
+		_terrain = new GLTerrain(GeoEngine.getInstance().getActiveRegion(), GLTerrain.TerrainDetailLevel.LOW);
+		_terrain.init(gl);
+		_terrain.setWireframe(true);
 	}
 	
 	/**
@@ -240,6 +243,7 @@ public final class GLDisplay implements GLEventListener
 		_nsweTexture.destroy(gl);
 		_fontTexture.destroy(gl);
 		_renderSelector.dispose();
+		_terrain.dispose(gl);
 	}
 	
 	
@@ -285,6 +289,12 @@ public final class GLDisplay implements GLEventListener
 		gl.glRotatef(360f - _camera.getRotX(), 1.0f, 0.0f, 0.0f);
 		gl.glRotatef(360f - _camera.getRotY(), 0.0f, 1.0f, 0.0f);
 		gl.glTranslatef(-_camera.getX(), -_camera.getY(), -_camera.getZ());
+		
+		// TODO Let the terrain itself bind the correct texture
+		// TODO Add options to disable terrain
+		// TODO And also do not generate the terrain on init :P
+		_nsweTexture.bind();
+		_terrain.render(gl);
 		
 		_renderSelector.select(gl, _camera);
 		_renderer.enableRender(gl);

@@ -23,7 +23,7 @@ import javax.media.opengl.GL2;
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public abstract class GLRenderer
+public abstract class GLCellRenderer
 {
 	protected static final float COLOR_ALPHA = 0.7f;
 	protected static final int NSWE_COMBINATIONS = 16;
@@ -32,7 +32,7 @@ public abstract class GLRenderer
 	
 	private final GLDisplay _display;
 	
-	public GLRenderer(final GLDisplay display)
+	public GLCellRenderer(final GLDisplay display)
 	{
 		_display = display;
 	}
