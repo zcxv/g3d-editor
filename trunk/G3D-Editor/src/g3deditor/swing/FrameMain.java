@@ -122,7 +122,6 @@ public final class FrameMain extends JFrame
 		
 		setSize(1024, 768);
 		setLocationRelativeTo(null);
-        setVisible(true);
 	}
 	
 	public final GLDisplay getDisplay()

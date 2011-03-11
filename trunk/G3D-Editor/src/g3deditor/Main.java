@@ -29,7 +29,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.Animator;
 import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 
 /**
@@ -41,21 +41,8 @@ public final class Main
 {
 	public static final void main(final String[] args)
 	{
-		System.out.println("OpenGL Test");
-		System.out.println("GL2:   " + (GLProfile.isGL2Available() ? "Yes" : "No"));
-		System.out.println("GL3:   " + (GLProfile.isGL3Available() ? "Yes" : "No"));
-		System.out.println("GL3bc: " + (GLProfile.isGL3bcAvailable() ? "Yes" : "No"));
-		System.out.println("GL4:   " + (GLProfile.isGL4Available() ? "Yes" : "No"));
-		System.out.println("GL4bc: " + (GLProfile.isGL4bcAvailable() ? "Yes" : "No"));
-		
-		if (!GLProfile.isGL2Available())
-			throw new RuntimeException("OpenGL2 is required to run this software");
-		
-		if (!GLProfile.isAWTAvailable())
-			throw new RuntimeException("AWT support is required to run this software");
-		
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		//ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		//JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		
 		try
 		{
@@ -72,6 +59,20 @@ public final class Main
 			@Override
 			public final void run()
 			{
+				System.out.println("OpenGL Test");
+				System.out.println("GL2:   " + (GLProfile.isGL2Available() ? "Yes" : "No"));
+				System.out.println("GL3:   " + (GLProfile.isGL3Available() ? "Yes" : "No"));
+				System.out.println("GL3bc: " + (GLProfile.isGL3bcAvailable() ? "Yes" : "No"));
+				System.out.println("GL4:   " + (GLProfile.isGL4Available() ? "Yes" : "No"));
+				System.out.println("GL4bc: " + (GLProfile.isGL4bcAvailable() ? "Yes" : "No"));
+				
+				if (!GLProfile.isGL2Available())
+					throw new RuntimeException("OpenGL2 is required to run this software");
+				
+				if (!GLProfile.isAWTAvailable())
+					throw new RuntimeException("AWT support is required to run this software");
+				
+				
 				GeoEngine.init();
 				GeoBlockSelector.init();
 				
@@ -120,7 +121,7 @@ public final class Main
 			public final void run()
 			{
 				FrameMain.getInstance().setVisible(true);
-				new FPSAnimator(FrameMain.getInstance().getDisplay().getCanvas(), 60).start();
+				new Animator(FrameMain.getInstance().getDisplay().getCanvas()).start();
 			}
 		});
 	}
