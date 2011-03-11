@@ -227,7 +227,7 @@ public final class GLDisplay implements GLEventListener
 		_renderInfoText.setText("Renderer: " + _renderer);
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
 		_terrain = new GLTerrain(GeoEngine.getInstance().getActiveRegion(), GLTerrain.TerrainDetailLevel.LOW);
-		_terrain.init(gl);
+		//_terrain.init(gl);
 		_terrain.setWireframe(true);
 	}
 	

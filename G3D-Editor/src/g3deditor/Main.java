@@ -18,6 +18,8 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;
 import g3deditor.swing.FrameMain;
+import g3deditor.swing.Splash;
+import g3deditor.swing.Splash.CheckedRunnable;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -64,33 +66,62 @@ public final class Main
 			e.printStackTrace();
 		}
 		
-		GeoEngine.init();
-		GeoBlockSelector.init();
-		
-		try
+		new Splash(3000,
+		new Runnable()
 		{
-			int regionX = 20;
-			int regionY = 22;
-			GeoEngine.getInstance().reloadGeo(regionX - 10, regionY - 10, true);
-			System.out.println(GeoEngine.getInstance().getActiveRegion());
-		}
-		catch (Exception e1)
+			@Override
+			public final void run()
+			{
+				GeoEngine.init();
+				GeoBlockSelector.init();
+				
+				try
+				{
+					int regionX = 20;
+					int regionY = 22;
+					GeoEngine.getInstance().reloadGeo(regionX - 10, regionY - 10, true);
+					System.out.println(GeoEngine.getInstance().getActiveRegion());
+				}
+				catch (Exception e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				GLProfile.initSingleton(false);
+				GLProfile glp = GLProfile.get("GL_DEFAULT");
+				GLCapabilities caps = new GLCapabilities(glp);
+				GLCanvas canvas = new GLCanvas(caps);
+				GLDisplay display = new GLDisplay(canvas);
+				canvas.addGLEventListener(display);
+				
+				FrameMain.init(display);
+			}
+		},
+		new CheckedRunnable()
 		{
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		GLProfile.initSingleton(false);
-		GLProfile glp = GLProfile.get("GL_DEFAULT");
-		GLCapabilities caps = new GLCapabilities(glp);
-		GLCanvas canvas = new GLCanvas(caps);
-		GLDisplay display = new GLDisplay(canvas);
-		canvas.addGLEventListener(display);
-		
-		FrameMain.init(display);
-		
-		final FPSAnimator animator = new FPSAnimator(canvas, 60);
-		//animator.setRunAsFastAsPossible(false);
-		animator.start();
+			@Override
+			public final boolean run()
+			{
+				if (GeoEngine.getInstance() == null)
+					return false;
+				
+				if (GeoBlockSelector.getInstance() == null)
+					return false;
+				
+				if (FrameMain.getInstance() == null)
+					return false;
+				return true;
+			}
+		},
+		new Runnable()
+		{
+			@Override
+			public final void run()
+			{
+				FrameMain.getInstance().setVisible(true);
+				new FPSAnimator(FrameMain.getInstance().getDisplay().getCanvas(), 60).start();
+			}
+		});
 	}
 }

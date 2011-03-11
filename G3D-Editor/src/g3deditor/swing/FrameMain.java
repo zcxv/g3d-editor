@@ -58,6 +58,8 @@ public final class FrameMain extends JFrame
 	private final PanelBlockConvert _panelBlockConvert;
 	private final PanelLayers _panelLayers;
 	
+	private final DialogJumpTo _dialogJumpTo;
+	
 	private final JMenuBar _menuBar;
 	private final JMenu _menuData;
 	private final JMenuItem _itemLoad;
@@ -80,10 +82,20 @@ public final class FrameMain extends JFrame
 		_panelCellInfo = new PanelCellInfo();
 		_panelBlockConvert = new PanelBlockConvert();
 		_panelLayers = new PanelLayers();
+		_dialogJumpTo = new DialogJumpTo(this);
 		
 		_menuBar = new JMenuBar();
 		_menuData = new JMenu("File");
 		_itemLoad = new JMenuItem("Load");
+		_itemLoad.addActionListener(new ActionListener()
+		{
+			@Override
+			public final void actionPerformed(final ActionEvent e)
+			{
+				// TODO move listener to FrameMain
+				_dialogJumpTo.setVisible(true);
+			}
+		});
 		_itemSave = new JMenuItem("Save");
 		_itemDataExit = new JMenuItem("Exit");
 		_menuHelp = new JMenu("Help");
@@ -111,6 +123,11 @@ public final class FrameMain extends JFrame
 		setSize(1024, 768);
 		setLocationRelativeTo(null);
         setVisible(true);
+	}
+	
+	public final GLDisplay getDisplay()
+	{
+		return _display;
 	}
 	
 	private final void initLayout()
@@ -170,6 +187,7 @@ public final class FrameMain extends JFrame
 		setLayout(new GridBagLayout());
 		
 		gbc.fill = GridBagConstraints.BOTH;
+		gbc.anchor = GridBagConstraints.CENTER;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
@@ -179,6 +197,7 @@ public final class FrameMain extends JFrame
 		add(_display.getCanvas(), gbc);
 		
 		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.anchor = GridBagConstraints.EAST;
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
@@ -188,6 +207,7 @@ public final class FrameMain extends JFrame
 		add(_panelBottom, gbc);
 		
 		gbc.fill = GridBagConstraints.VERTICAL;
+		gbc.anchor = GridBagConstraints.SOUTH;
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;

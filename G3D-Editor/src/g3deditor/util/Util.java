@@ -14,7 +14,14 @@
  */
 package g3deditor.util;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Comparator;
+
+import javax.imageio.ImageIO;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -87,5 +94,68 @@ public final class Util
 		final T t = x[a];
 		x[a] = x[b];
 		x[b] = t;
+	}
+	
+	public static final BufferedImage loadImage(final String file)
+	{
+		return loadImage(new File(file));
+	}
+	
+	public static final BufferedImage loadImage(final File file)
+	{
+		try
+		{
+			return ImageIO.read(file);
+		}
+		catch (final IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * Scales the source image to the given width/height.<br>
+	 * Faster then BufferedImage.getScaledInstance(width, height, hints) and returning an BufferedImage instead of an ToolkitImage.
+	 * 
+	 * @param img The image to be scaled
+	 * @param width The resulting image width
+	 * @param height The resulting image height
+	 * @param quality The quality level (0 = lowest, 1 = medium, 2 = highest, anything else = default)
+	 * @return The scaled image
+	 */
+	public static final BufferedImage scaleImage(final BufferedImage img, final int width, final int height, final int quality)
+	{
+		final BufferedImage scaled = new BufferedImage(width, height, img.getType() == 0 ? BufferedImage.TYPE_4BYTE_ABGR : img.getType());
+		final Graphics2D g = scaled.createGraphics();
+		
+		switch (quality)
+		{
+			case 0:
+			{
+				g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+				break;
+			}
+				
+			case 1:
+			{
+				g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				break;
+			}
+				
+			case 2:
+			{
+				g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+				break;
+			}
+		}
+		
+		g.drawImage(img, 0, 0, width, height, null);
+		g.dispose();
+		
+		return scaled;
 	}
 }
