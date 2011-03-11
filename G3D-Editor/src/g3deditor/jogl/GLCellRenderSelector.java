@@ -31,7 +31,7 @@ import javax.media.opengl.GL2;
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class GLRenderSelector
+public final class GLCellRenderSelector
 {
 	private final GLDisplay _display;
 	private final GLSubRenderSelectorComparator _glSubRenderSelectorComparator;
@@ -48,7 +48,7 @@ public final class GLRenderSelector
 	private int _camBlockY;
 	private boolean _forceUpdateFrustum;
 	
-	public GLRenderSelector(final GLDisplay display)
+	public GLCellRenderSelector(final GLDisplay display)
 	{
 		_display = display;
 		_glSubRenderSelectorComparator = new GLSubRenderSelectorComparator();
@@ -192,10 +192,6 @@ public final class GLRenderSelector
 	
 	public final boolean isVisible(final GeoCell cell)
 	{
-		//final double dx = cell.getRenderX() - camera.getX();
-		//final double dy = cell.getRenderY() - camera.getY();
-		//final double dz = cell.getRenderZ() - camera.getZ();
-		
 		final float x;
 		final float y;
 		final float z;
@@ -210,8 +206,9 @@ public final class GLRenderSelector
 		}
 		else
 		{
-			if (cell.getBlock().nGetLayerCount(cell.getGeoX(), cell.getGeoY()) > 6 && Math.abs(cell.getRenderY() - getDisplay().getCamera().getY()) >= 200)
-				return false;
+			// TODO Implement proper (Used for heavy locations like ToI)
+			//if (cell.getBlock().nGetLayerCount(cell.getGeoX(), cell.getGeoY()) > 6 && Math.abs(cell.getRenderY() - getDisplay().getCamera().getY()) >= 200)
+			//	return false;
 			
 			x = cell.getRenderX() + 0.5f;
 			y = cell.getRenderY() - 0.1f;
@@ -267,7 +264,7 @@ public final class GLRenderSelector
 		public final void run()
 		{
 			_count = 0;
-			if (!GLRenderSelector.this.isVisible(_block))
+			if (!GLCellRenderSelector.this.isVisible(_block))
 				return;
 			
 			final GeoCell[] cells = _block.getCells();
@@ -279,12 +276,12 @@ public final class GLRenderSelector
 			
 			for (final GeoCell cell : cells)
 			{
-				if (GLRenderSelector.this.isVisible(cell))
+				if (GLCellRenderSelector.this.isVisible(cell))
 					_culledCells[_count++] = cell;
 			}
 			
 			System.arraycopy(_culledCells, 0, _sortedCells, 0, _count);
-			Util.mergeSort(_culledCells, _sortedCells, _count, GLRenderSelector.this.getGeoCellComparator());
+			Util.mergeSort(_culledCells, _sortedCells, _count, GLCellRenderSelector.this.getGeoCellComparator());
 		}
 	}
 	

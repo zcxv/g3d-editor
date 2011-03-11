@@ -18,7 +18,7 @@ import g3deditor.entity.CellColor;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLDisplay;
-import g3deditor.jogl.GLRenderer;
+import g3deditor.jogl.GLCellRenderer;
 import g3deditor.util.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -31,7 +31,7 @@ import javax.media.opengl.GL2;
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class VBORenderer extends GLRenderer
+public final class VBORenderer extends GLCellRenderer
 {
 	private static final int TEX_COORDS = 24;
 	
@@ -126,7 +126,7 @@ public final class VBORenderer extends GLRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLRenderer#init(javax.media.opengl.GL2)
+	 * @see g3deditor.jogl.GLCellRenderer#init(javax.media.opengl.GL2)
 	 */
 	@Override
 	public final void init(final GL2 gl)
@@ -170,7 +170,7 @@ public final class VBORenderer extends GLRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLRenderer#enableRender(javax.media.opengl.GL2)
+	 * @see g3deditor.jogl.GLCellRenderer#enableRender(javax.media.opengl.GL2)
 	 */
 	@Override
 	public final void enableRender(final GL2 gl)
@@ -188,7 +188,7 @@ public final class VBORenderer extends GLRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLRenderer#render(javax.media.opengl.GL2, g3deditor.geo.GeoCell)
+	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.geo.GeoCell)
 	 */
 	public final void render(final GL2 gl, final GeoCell cell)
 	{
@@ -210,7 +210,7 @@ public final class VBORenderer extends GLRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLRenderer#disableRender(javax.media.opengl.GL2)
+	 * @see g3deditor.jogl.GLCellRenderer#disableRender(javax.media.opengl.GL2)
 	 */
 	@Override
 	public final void disableRender(final GL2 gl)
@@ -223,7 +223,7 @@ public final class VBORenderer extends GLRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLRenderer#dispose(javax.media.opengl.GL2)
+	 * @see g3deditor.jogl.GLCellRenderer#dispose(javax.media.opengl.GL2)
 	 */
 	@Override
 	public final void dispose(final GL2 gl)
