@@ -36,7 +36,7 @@ import javax.swing.JPanel;
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
 @SuppressWarnings("serial")
-public final class FrameMain extends JFrame
+public final class FrameMain extends JFrame implements ActionListener
 {
 	private static FrameMain _instance;
 	
@@ -87,27 +87,12 @@ public final class FrameMain extends JFrame
 		_menuBar = new JMenuBar();
 		_menuData = new JMenu("File");
 		_itemLoad = new JMenuItem("Load");
-		_itemLoad.addActionListener(new ActionListener()
-		{
-			@Override
-			public final void actionPerformed(final ActionEvent e)
-			{
-				// TODO move listener to FrameMain
-				_dialogJumpTo.setVisible(true);
-			}
-		});
+		_itemLoad.addActionListener(this);
 		_itemSave = new JMenuItem("Save");
 		_itemDataExit = new JMenuItem("Exit");
 		_menuHelp = new JMenu("Help");
 		_itemAbout = new JMenuItem("About");
-		_itemAbout.addActionListener(new ActionListener()
-		{
-			@Override
-			public final void actionPerformed(final ActionEvent e)
-			{
-				JOptionPane.showMessageDialog(FrameMain.this, "<html>G3D-Editor<br>By Forsaiken<br>If you like this programm please donate!<br>PayPal: patrickbiesenbach@yahoo.de</html>", "About", JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
+		_itemAbout.addActionListener(this);
 		
 		_menuData.add(_itemLoad);
 		_menuData.add(_itemSave);
@@ -235,5 +220,18 @@ public final class FrameMain extends JFrame
 	public final boolean isSelectedGeoCell(final GeoCell cell)
 	{
 		return _selectedCell == cell;
+	}
+	
+	@Override
+	public final void actionPerformed(final ActionEvent e)
+	{
+		if (e.getSource() == _itemLoad)
+		{
+			_dialogJumpTo.setVisible(true);
+		}
+		else if (e.getSource() == _itemAbout)
+		{
+			JOptionPane.showMessageDialog(FrameMain.this, "<html>G3D-Editor<br>By Forsaiken<br>If you like this programm please donate!<br>PayPal: patrickbiesenbach@yahoo.de</html>", "About", JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 }

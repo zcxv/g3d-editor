@@ -1,16 +1,20 @@
 package g3deditor.jogl;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
 import g3deditor.util.BufferUtils;
 import g3deditor.util.Vector3f;
 
+import java.io.File;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 public final class GLTerrain
 {
@@ -23,6 +27,7 @@ public final class GLTerrain
 	private int _vboIndex;
 	private int _vboVertex;
 	private int _vboTexture;
+	private Texture _texture;
 	
 	private boolean _initialized;
 	private boolean _wireframe;
@@ -31,6 +36,7 @@ public final class GLTerrain
 	{
 		_region = region;
 		_detailLevel = detailLevel;
+		
 		final Vector3f[][] vertex = getVertex(region.getGeoBlocks(), detailLevel);
 		
 		final int xUp = vertex[0].length;
@@ -106,6 +112,18 @@ public final class GLTerrain
 		
 		_initialized = true;
 		
+		try
+		{
+			_texture = TextureIO.newTexture(new File("./data/textures/region/" + (_region.getRegionX() + 10) + "_" + (_region.getRegionY() + 10) + ".jpg"), false);
+			_texture.enable();
+			_texture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+			_texture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		}
+		catch (final Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		final int[] temp = new int[3];
 		gl.glGenBuffers(3, temp, 0);
 		_vboIndex = temp[0];
@@ -127,6 +145,9 @@ public final class GLTerrain
 		// TODO Make multiple small terrain blocks and check for frustum culling + LOD
 		if (!_initialized)
 			return;
+		
+		if (_texture != null)
+			_texture.bind();
 		
 		if (_wireframe)
 			gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_LINE);
@@ -167,6 +188,9 @@ public final class GLTerrain
 			return;
 		
 		_initialized = false;
+		
+		if (_texture != null)
+			_texture.destroy(gl);
 		
 		gl.glDeleteBuffers(3, new int[]{_vboIndex, _vboVertex, _vboTexture}, 0);
 	}

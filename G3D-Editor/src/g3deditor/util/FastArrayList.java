@@ -91,6 +91,9 @@ public final class FastArrayList<E> implements List<E>
 		_values = (E[]) new Object[initialCapacity];
 	}
 	
+	/**
+	 * @see java.util.List#add(java.lang.Object)
+	 */
 	@Override
 	public final boolean add(final E value)
 	{
@@ -98,6 +101,9 @@ public final class FastArrayList<E> implements List<E>
 		return true;
 	}
 	
+	/**
+	 * @see java.util.List#add(int, java.lang.Object)
+	 */
 	@Override
 	public final void add(final int index, final E value)
 	{
@@ -107,6 +113,9 @@ public final class FastArrayList<E> implements List<E>
 		addUnsafe(index, value);
 	}
 	
+	/**
+	 * @see java.util.List#addAll(java.util.Collection)
+	 */
 	@Override
 	public final boolean addAll(final Collection<? extends E> collection)
 	{
@@ -149,6 +158,9 @@ public final class FastArrayList<E> implements List<E>
 		return true;
 	}
 	
+	/**
+	 * @see java.util.List#addAll(int, java.util.Collection)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public final boolean addAll(final int index, final Collection<? extends E> collection)
@@ -237,6 +249,9 @@ public final class FastArrayList<E> implements List<E>
 		_size = spaceNeeded;
 	}
 	
+	/**
+	 * @see java.util.List#clear()
+	 */
 	@Override
 	public final void clear()
 	{
@@ -303,6 +318,9 @@ public final class FastArrayList<E> implements List<E>
 		}
 	}
 	
+	/**
+	 * @see java.util.List#get(int)
+	 */
 	@Override
 	public final E get(final int index)
 	{
@@ -317,6 +335,9 @@ public final class FastArrayList<E> implements List<E>
 		return _values[index];
 	}
 	
+	/**
+	 * @see java.util.List#indexOf(java.lang.Object)
+	 */
 	@Override
 	public final int indexOf(final Object obj)
 	{
@@ -339,12 +360,18 @@ public final class FastArrayList<E> implements List<E>
 		return -1;
 	}
 	
+	/**
+	 * @see java.util.List#iterator()
+	 */
 	@Override
 	public final Iterator<E> iterator()
 	{
 		return new FastIterator();
 	}
 	
+	/**
+	 * @see java.util.List#lastIndexOf(java.lang.Object)
+	 */
 	@Override
 	public final int lastIndexOf(final Object obj)
 	{
@@ -367,18 +394,31 @@ public final class FastArrayList<E> implements List<E>
 		return -1;
 	}
 	
+	/**
+	 * NOT SUPPORTED!
+	 * 
+	 * @see java.util.List#listIterator()
+	 */
 	@Override
 	public final ListIterator<E> listIterator()
 	{
 		throw new UnsupportedOperationException();
 	}
 	
+	/**
+	 * NOT SUPPORTED!
+	 * 
+	 * @see java.util.List#listIterator(int)
+	 */
 	@Override
 	public final ListIterator<E> listIterator(final int index)
 	{
 		throw new UnsupportedOperationException();
 	}
 	
+	/**
+	 * @see java.util.List#remove(int)
+	 */
 	@Override
 	public final E remove(final int index)
 	{
@@ -388,6 +428,9 @@ public final class FastArrayList<E> implements List<E>
 		return removeUnsafe(index);
 	}
 	
+	/**
+	 * @see java.util.List#remove(java.lang.Object)
+	 */
 	@Override
 	public final boolean remove(final Object obj)
 	{
@@ -397,6 +440,9 @@ public final class FastArrayList<E> implements List<E>
 		return removeUnsafe(obj);
 	}
 	
+	/**
+	 * @see java.util.List#removeAll(java.util.Collection)
+	 */
 	@Override
 	public final boolean removeAll(final Collection<?> c)
 	{
@@ -558,12 +604,18 @@ public final class FastArrayList<E> implements List<E>
 		_values[index2] = value;
 	}
 	
+	/**
+	 * @see java.util.List#toArray()
+	 */
 	@Override
 	public final Object[] toArray()
 	{
 		return toArray(new Object[_size]);
 	}
 	
+	/**
+	 * @see java.util.List#toArray(T[])
+	 */
 	@Override
 	public final <T> T[] toArray(final T[] array)
 	{
@@ -577,6 +629,9 @@ public final class FastArrayList<E> implements List<E>
 		return array;
 	}
 	
+	/**
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public final String toString()
 	{
@@ -635,15 +690,23 @@ public final class FastArrayList<E> implements List<E>
 	@Override
 	public final boolean containsAll(final Collection<?> c)
 	{
-		return false;
+		final Iterator<?> iter = c.iterator();
+		while (iter.hasNext())
+		{
+			if (!contains(iter.next()))
+				return false;
+		}
+		return true;
 	}
 	
 	/**
+	 * NOT SUPPORTED!
+	 * 
 	 * @see java.util.List#subList(int, int)
 	 */
 	@Override
 	public final List<E> subList(final int fromIndex, final int toIndex)
 	{
-		return null;
+		throw new UnsupportedOperationException();
 	}
 }
