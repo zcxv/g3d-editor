@@ -4,8 +4,10 @@ import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
 import g3deditor.util.BufferUtils;
+import g3deditor.util.Util;
 import g3deditor.util.Vector3f;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -13,8 +15,9 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.ImageUtil;
 import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 public final class GLTerrain
 {
@@ -114,10 +117,16 @@ public final class GLTerrain
 		
 		try
 		{
-			_texture = TextureIO.newTexture(new File("./data/textures/region/" + (_region.getRegionX() + 10) + "_" + (_region.getRegionY() + 10) + ".jpg"), false);
-			_texture.enable();
-			_texture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
-			_texture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			final File file = new File("./data/textures/region/" + (_region.getRegionX() + 10) + "_" + (_region.getRegionY() + 10) + ".jpg");
+			if (file.isFile())
+			{
+				final BufferedImage img = Util.loadImage(file);
+				ImageUtil.flipImageVertically(img);
+				_texture = AWTTextureIO.newTexture(gl.getGLProfile(), img, false);
+				_texture.enable();
+				_texture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+				_texture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			}
 		}
 		catch (final Exception e)
 		{
