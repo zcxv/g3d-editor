@@ -76,8 +76,8 @@ public final class Main
 				
 				try
 				{
-					int regionX = 20;
-					int regionY = 22;
+					int regionX = 24;
+					int regionY = 18;
 					GeoEngine.getInstance().reloadGeo(regionX - 10, regionY - 10, true);
 					System.out.println(GeoEngine.getInstance().getActiveRegion());
 				}
