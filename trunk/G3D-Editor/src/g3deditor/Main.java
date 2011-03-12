@@ -24,8 +24,6 @@ import g3deditor.swing.Splash.CheckedRunnable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
-import javax.swing.JPopupMenu;
-import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
