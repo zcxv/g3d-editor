@@ -17,27 +17,35 @@ package g3deditor.jogl;
 import g3deditor.util.BufferUtils;
 import g3deditor.util.FastArrayList;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import javax.media.opengl.GL2;
+
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class GLTextRenderer
+public final class GLGUIRenderer
 {
 	public static final int TEXT_HEIGHT = 16;
+	public static final int COMPASS_HEIGHT = 96;
+	public static final int COMPASS_HALF_HEIGHT = COMPASS_HEIGHT / 2;
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
 	
 	private final GLDisplay _display;
 	private final FastArrayList<GLText> _texts;
 	
 	private int _listId;
+	private Texture _fontTexture;
+	private Texture _compassTexture;
 	
-	public GLTextRenderer(final GLDisplay display)
+	public GLGUIRenderer(final GLDisplay display)
 	{
 		_display = display;
 		_texts = new FastArrayList<GLText>();
@@ -55,7 +63,7 @@ public final class GLTextRenderer
 	
 	public final void init(final GL2 gl)
 	{
-		_listId = gl.glGenLists(256); // Creating 256 Display Lists
+		_listId = gl.glGenLists(257); // Creating 256 Display Lists
 		for (int loop = 0; loop < 256; loop++) // Loop Through All 256 Lists
 		{
 			final float u1 = (loop % FONT_TEX_ROWS_COLS) * FONT_TEX_BLOCK;
@@ -65,26 +73,52 @@ public final class GLTextRenderer
 			
 			gl.glNewList(_listId + loop, GL2.GL_COMPILE);
 			gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-			
 			gl.glTexCoord2f(u1, v1);
-			gl.glVertex3f(0.0f, 16.0f, 0.0f);
-			
+			gl.glVertex3f(0.0f, TEXT_HEIGHT, 0.0f);
 			gl.glTexCoord2f(u1, v2);
 			gl.glVertex3f(0.0f, 0.0f, 0.0f);
-			
 			gl.glTexCoord2f(u2, v1);
-			gl.glVertex3f(16.0f, 16.0f, 0.0f);
-			
+			gl.glVertex3f(TEXT_HEIGHT, TEXT_HEIGHT, 0.0f);
 			gl.glTexCoord2f(u2, v2);
-			gl.glVertex3f(16.0f, 0.0f, 0.0f);
-			
+			gl.glVertex3f(TEXT_HEIGHT, 0.0f, 0.0f);
 			gl.glEnd();
 			gl.glTranslatef(9f, 0, 0);
 			gl.glEndList();
 		}
+		
+		gl.glNewList(_listId + 256, GL2.GL_COMPILE);
+		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+		gl.glTexCoord2f(0.0f, 0.0f);
+		gl.glVertex3f(-COMPASS_HALF_HEIGHT, COMPASS_HALF_HEIGHT, 0.0f);
+		gl.glTexCoord2f(0.0f, 1.0f);
+		gl.glVertex3f(-COMPASS_HALF_HEIGHT, -COMPASS_HALF_HEIGHT, 0.0f);
+		gl.glTexCoord2f(1.0f, 0.0f);
+		gl.glVertex3f(COMPASS_HALF_HEIGHT, COMPASS_HALF_HEIGHT, 0.0f);
+		gl.glTexCoord2f(1.0f, 1.0f);
+		gl.glVertex3f(COMPASS_HALF_HEIGHT, -COMPASS_HALF_HEIGHT, 0.0f);
+		gl.glEnd();
+		gl.glTranslatef(9f, 0, 0);
+		gl.glEndList();
+		
+		try
+		{
+			_fontTexture = TextureIO.newTexture(new File("./data/textures/font.png"), false);
+			_fontTexture.enable();
+			_fontTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+			_fontTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+			
+			_compassTexture = TextureIO.newTexture(new File("./data/textures/compass.png"), false);
+			_compassTexture.enable();
+			_compassTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+			_compassTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		}
+		catch (final Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
-	public final void render(final GL2 gl)
+	public final void render(final GL2 gl, final GLCamera camera)
 	{
 		gl.glDisable(GL2.GL_DEPTH_TEST);
 		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE);
@@ -95,8 +129,10 @@ public final class GLTextRenderer
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
-		gl.glListBase(_listId - 32 + (128 * 0));
 		gl.glColor4f(1f, 1f, 1f, 1f);
+		
+		gl.glListBase(_listId - 32 + (128 * 0));
+		_fontTexture.bind();
 		
 		ByteBuffer buffer;
 		GLText gltext;
@@ -114,6 +150,14 @@ public final class GLTextRenderer
 			}
 		}
 		
+		gl.glListBase(0);
+		_compassTexture.bind();
+		gl.glPushMatrix();
+		gl.glTranslatef(COMPASS_HALF_HEIGHT, camera.getDisplay().getHeight() - COMPASS_HALF_HEIGHT, 0);
+		gl.glRotatef(360f - camera.getRotY(), 0.0f, 0.0f, 1.0f);
+		gl.glCallList(_listId + 256);
+		gl.glPopMatrix();
+		
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -125,6 +169,8 @@ public final class GLTextRenderer
 	public final void dispose(final GL2 gl)
 	{
 		gl.glDeleteLists(_listId, 256);
+		_fontTexture.destroy(gl);
+		_compassTexture.destroy(gl);
 	}
 	
 	public static final class GLText
