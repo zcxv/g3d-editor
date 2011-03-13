@@ -20,7 +20,7 @@ import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
-import g3deditor.jogl.GLTextRenderer.GLText;
+import g3deditor.jogl.GLGUIRenderer.GLText;
 import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
@@ -67,7 +67,7 @@ public final class GLDisplay implements GLEventListener
 	
 	private final GLCanvas _canvas;
 	private final GLCellRenderer _renderer;
-	private final GLTextRenderer _textRenderer;
+	private final GLGUIRenderer _guiRenderer;
 	private final GLCellRenderSelector _renderSelector;
 	private final GLCamera _camera;
 	private final AWTInput _input;
@@ -90,7 +90,6 @@ public final class GLDisplay implements GLEventListener
 	private int _elementsFPS;
 	
 	private Texture _nsweTexture;
-	private Texture _fontTexture;
 	
 	private GLTerrain _terrain;
 	
@@ -115,18 +114,18 @@ public final class GLDisplay implements GLEventListener
 				break;
 		}
 		
-		_textRenderer = new GLTextRenderer(this);
+		_guiRenderer = new GLGUIRenderer(this);
 		_renderSelector = new GLCellRenderSelector(this);
 		_camera = new GLCamera(this);
 		_input = new AWTInput(this);
 		
-		_callsText = _textRenderer.newText(10, 10);
-		_fpsText = _textRenderer.newText(10, _callsText.getY() + GLTextRenderer.TEXT_HEIGHT);
-		_memoryText = _textRenderer.newText(10, _fpsText.getY() + GLTextRenderer.TEXT_HEIGHT);
-		_renderInfoText = _textRenderer.newText(10, _memoryText.getY() + GLTextRenderer.TEXT_HEIGHT);
-		_glInfoText = _textRenderer.newText(10, _renderInfoText.getY() + GLTextRenderer.TEXT_HEIGHT);
-		_geoPositionText = _textRenderer.newText(10, _glInfoText.getY() + GLTextRenderer.TEXT_HEIGHT);
-		_worldPositionText = _textRenderer.newText(10, _geoPositionText.getY() + GLTextRenderer.TEXT_HEIGHT);
+		_callsText = _guiRenderer.newText(10, 10);
+		_fpsText = _guiRenderer.newText(10, _callsText.getY() + GLGUIRenderer.TEXT_HEIGHT);
+		_memoryText = _guiRenderer.newText(10, _fpsText.getY() + GLGUIRenderer.TEXT_HEIGHT);
+		_renderInfoText = _guiRenderer.newText(10, _memoryText.getY() + GLGUIRenderer.TEXT_HEIGHT);
+		_glInfoText = _guiRenderer.newText(10, _renderInfoText.getY() + GLGUIRenderer.TEXT_HEIGHT);
+		_geoPositionText = _guiRenderer.newText(10, _glInfoText.getY() + GLGUIRenderer.TEXT_HEIGHT);
+		_worldPositionText = _guiRenderer.newText(10, _geoPositionText.getY() + GLGUIRenderer.TEXT_HEIGHT);
 		
 	}
 	
@@ -199,7 +198,7 @@ public final class GLDisplay implements GLEventListener
 		_camera.onProjectionMatrixChanged();
 		//_camera.checkPositionOrRotationChanged();
 		_renderer.init(gl);
-		_textRenderer.init(gl);
+		_guiRenderer.init(gl);
 		_renderSelector.init();
 		_input.setEnabled(true);
 		
@@ -209,11 +208,6 @@ public final class GLDisplay implements GLEventListener
 			_nsweTexture.enable();
 			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
 			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
-			
-			_fontTexture = TextureIO.newTexture(new File("./data/textures/font.png"), false);
-			_fontTexture.enable();
-			_fontTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
-			_fontTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
 		}
 		catch (final Exception e)
 		{
@@ -226,9 +220,9 @@ public final class GLDisplay implements GLEventListener
 		
 		_renderInfoText.setText("Renderer: " + _renderer);
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
-		_terrain = new GLTerrain(GeoEngine.getInstance().getActiveRegion(), GLTerrain.TerrainDetailLevel.LOW);
+		_terrain = new GLTerrain(GeoEngine.getInstance().getActiveRegion(), GLTerrain.TerrainDetailLevel.MEDIUM);
 		_terrain.init(gl);
-		//_terrain.setWireframe(true);
+		_terrain.setWireframe(true);
 	}
 	
 	/**
@@ -239,9 +233,8 @@ public final class GLDisplay implements GLEventListener
 	{
 		final GL2 gl = glautodrawable.getGL().getGL2();
 		_renderer.dispose(gl);
-		_textRenderer.dispose(gl);
+		_guiRenderer.dispose(gl);
 		_nsweTexture.destroy(gl);
-		_fontTexture.destroy(gl);
 		_renderSelector.dispose();
 		_terrain.dispose(gl);
 	}
@@ -362,8 +355,7 @@ public final class GLDisplay implements GLEventListener
 		}
 		mouseEvents.clear();
 		
-		_fontTexture.bind();
-		_textRenderer.render(gl);
+		_guiRenderer.render(gl, _camera);
 		
 		gl.glFlush();
 	}
