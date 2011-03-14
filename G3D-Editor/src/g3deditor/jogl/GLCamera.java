@@ -323,17 +323,20 @@ public final class GLCamera
 		
 		mouseY = _viewport[3] - mouseY;
 		_pickZBuffer.clear();
-        gl.glReadPixels(mouseX, mouseY, 1, 1, GL2.GL_DEPTH_COMPONENT, GL.GL_FLOAT, _pickZBuffer);
-        
-        final float mouseZ = _pickZBuffer.get(0);
-        if (mouseZ < 1f && glu.gluUnProject(mouseX, mouseY, mouseZ, _modelviewMatrix, 0, _projectionMatrix, 0, _viewport, 0, _pickResult, 0))
-        {
-            return new float[]{_pickResult[0], _pickResult[1], _pickResult[2]};
-        }
-        else
-        {
-        	return null;
-        }
+		gl.glReadPixels(mouseX, mouseY, 1, 1, GL2.GL_DEPTH_COMPONENT, GL.GL_FLOAT, _pickZBuffer);
+		
+		final float mouseZ = _pickZBuffer.get(0);
+		if (mouseZ < 1f && glu.gluUnProject(mouseX, mouseY, mouseZ, _modelviewMatrix, 0, _projectionMatrix, 0, _viewport, 0, _pickResult, 0))
+		{
+			return new float[]
+			{
+				_pickResult[0], _pickResult[1], _pickResult[2]
+			};
+		}
+		else
+		{
+			return null;
+		}
 	}
 	
 	public final float getX()
@@ -408,13 +411,13 @@ public final class GLCamera
 		double y = Math.tan(Math.toRadians(_curCamRotX));
 		double z = Math.cos(radians);
 		double length = x * x + y * y + z * z;
-        if (length != 1d && length != 0d)
-        {
-            length = 1.0d / Math.sqrt(length);
-            x *= length;
-            y *= length;
-            z *= length;
-        }
+		if (length != 1d && length != 0d)
+		{
+			length = 1.0d / Math.sqrt(length);
+			x *= length;
+			y *= length;
+			z *= length;
+		}
 		
 		_curCamPosX += x * move;
 		_curCamPosY += y * -move;

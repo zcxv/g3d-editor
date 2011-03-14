@@ -18,6 +18,7 @@ import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.cells.GeoCellFlat;
+import g3deditor.swing.FrameMain;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -159,6 +160,6 @@ public final class GeoBlockFlat extends GeoBlock
 	@Override
 	public final void updateMinMaxHeight(final short height)
 	{
-		
+		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();
 	}
 }

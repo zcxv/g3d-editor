@@ -33,14 +33,18 @@ public enum SelectionState
 	SELECTED	(new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA));
 	
 	private final CellColor _colorFlat;
-	private final CellColor _colorComplex;
-	private final CellColor _colorMutliLayer;
+	private final CellColor _colorComplex1;
+	private final CellColor _colorComplex2;
+	private final CellColor _colorMutliLayer1;
+	private final CellColor _colorMutliLayer2;
 	
 	private SelectionState(final CellColor colorFlat, final CellColor colorComplex, final CellColor colorMutliLayer)
 	{
 		_colorFlat = colorFlat;
-		_colorComplex = colorComplex;
-		_colorMutliLayer = colorMutliLayer;
+		_colorComplex1 = colorComplex;
+		_colorComplex2 = new CellColor(colorComplex.getR() * 0.85f, colorComplex.getG() * 0.85f, colorComplex.getB() * 0.85f);
+		_colorMutliLayer1 = colorMutliLayer;
+		_colorMutliLayer2 = new CellColor(colorMutliLayer.getR() * 0.85f, colorMutliLayer.getG() * 0.85f, colorMutliLayer.getB() * 0.85f);
 	}
 	
 	public final CellColor getColor(final GeoCell cell)
@@ -54,8 +58,8 @@ public enum SelectionState
 			return _colorFlat;
 		
 		if (block instanceof GeoBlockComplex)
-			return _colorComplex;
+			return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorComplex2 : _colorComplex1;
 		
-		return _colorMutliLayer;
+		return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2 : _colorMutliLayer1;
 	}
 }

@@ -18,6 +18,7 @@ import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.cells.GeoCellCM;
+import g3deditor.swing.FrameMain;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -228,7 +229,19 @@ public final class GeoBlockComplex extends GeoBlock
 	@Override
 	public final void updateMinMaxHeight(final short height)
 	{
-		_maxHeight = (short) (Math.max(_maxHeight, height));
-		_minHeight = (short) (Math.min(_minHeight, height));
+		if (height > _maxHeight)
+		{
+			_maxHeight = height;
+		}
+		else if (height < _minHeight)
+		{
+			_minHeight = height;
+		}
+		else
+		{
+			calcMaxMinHeight();
+		}
+		
+		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();
 	}
 }

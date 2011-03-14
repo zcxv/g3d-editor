@@ -154,6 +154,11 @@ public final class GLDisplay implements GLEventListener
 		return _input;
 	}
 	
+	public final GLTerrain getTerrain()
+	{
+		return _terrain;
+	}
+	
 	public final int getWidth()
 	{
 		return _width;
@@ -220,9 +225,8 @@ public final class GLDisplay implements GLEventListener
 		
 		_renderInfoText.setText("Renderer: " + _renderer);
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
-		_terrain = new GLTerrain(GeoEngine.getInstance().getActiveRegion(), GLTerrain.TerrainDetailLevel.MEDIUM);
+		_terrain = new GLTerrain();
 		_terrain.init(gl);
-		_terrain.setWireframe(true);
 	}
 	
 	/**
@@ -283,28 +287,31 @@ public final class GLDisplay implements GLEventListener
 		gl.glRotatef(360f - _camera.getRotY(), 0.0f, 1.0f, 0.0f);
 		gl.glTranslatef(-_camera.getX(), -_camera.getY(), -_camera.getZ());
 		
-		// TODO Let the terrain itself bind the correct texture
-		// TODO Add options to disable terrain
-		// TODO And also do not generate the terrain on init :P
-		_nsweTexture.bind();
+		_terrain.setRegion(GeoEngine.getInstance().getActiveRegion());
+		_terrain.setEnabled(_input.getKeyTToggle());
+		_terrain.setWireframe(_input.getKeyRToggle());
 		_terrain.render(gl);
 		
 		_renderSelector.select(gl, _camera);
-		_renderer.enableRender(gl);
-		_nsweTexture.bind();
 		
-		GLSubRenderSelector selector;
-		for (int i = _renderSelector.getElementsToRender(), y; i-- > 0;)
+		if (_input.getKeyGToggle())
 		{
-			selector = _renderSelector.getElementToRender(i);
-			for (y = selector.getElementsToRender(); y-- > 0;)
+			_renderer.enableRender(gl);
+			_nsweTexture.bind();
+			
+			GLSubRenderSelector selector;
+			for (int i = _renderSelector.getElementsToRender(), y; i-- > 0;)
 			{
-				_elementsFPS++;
-				_renderer.render(gl, selector.getElementToRender(y));
+				selector = _renderSelector.getElementToRender(i);
+				for (y = selector.getElementsToRender(); y-- > 0;)
+				{
+					_elementsFPS++;
+					_renderer.render(gl, selector.getElementToRender(y));
+				}
 			}
+			
+			_renderer.disableRender(gl);
 		}
-		
-		_renderer.disableRender(gl);
 		
 		final FastArrayList<MouseEvent> mouseEvents = _input.getMouseEvents();
 		for (int i = 0; i < mouseEvents.size(); i++)
@@ -334,7 +341,8 @@ public final class GLDisplay implements GLEventListener
 				if (point != null)
 				{
 					final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
-					if (cell != null)
+					// check height difference from cell to picked point to eliminate ground/terrain picking
+					if (cell != null && Math.abs(cell.getHeight() - (int) (point[1] * 16f)) <= 4)
 					{
 						if (event.getID() == MouseEvent.MOUSE_DRAGGED)
 						{
