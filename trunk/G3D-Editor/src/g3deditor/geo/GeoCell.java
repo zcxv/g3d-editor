@@ -82,6 +82,10 @@ public abstract class GeoCell
 	
 	public abstract int getGeoY();
 	
+	public abstract int getCellX();
+	
+	public abstract int getCellY();
+	
 	public abstract void setHeightAndNSWE(final short heightAndNSWE);
 	
 	public abstract void setNswe(final short nswe);

@@ -79,6 +79,7 @@ public final class GeoCellFlat extends GeoCell
 	public final void addHeight(final short height)
 	{
 		_height = GeoEngine.getGeoHeightOfHeight((short) (_height + height));
+		getBlock().updateMinMaxHeight(_height);
 	}
 	
 	/**
@@ -100,12 +101,31 @@ public final class GeoCellFlat extends GeoCell
 	}
 	
 	/**
+	 * @see g3deditor.geo.GeoCell#getCellX()
+	 */
+	@Override
+	public final int getCellX()
+	{
+		return 0;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoCell#getCellY()
+	 */
+	@Override
+	public final int getCellY()
+	{
+		return 0;
+	}
+	
+	/**
 	 * @see g3deditor.geo.GeoCell#setHeightAndNSWE(short)
 	 */
 	@Override
 	public final void setHeightAndNSWE(final short heightAndNSWE)
 	{
 		_height = GeoEngine.getHeight(heightAndNSWE);
+		getBlock().updateMinMaxHeight(_height);
 	}
 	
 	/**

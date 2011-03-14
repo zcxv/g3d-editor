@@ -96,7 +96,7 @@ public final class GeoCellCM extends GeoCell
 	@Override
 	public final int getGeoX()
 	{
-		return getBlock().getGeoX() + _cellX;
+		return getBlock().getGeoX() + getCellX();
 	}
 	
 	/**
@@ -105,7 +105,25 @@ public final class GeoCellCM extends GeoCell
 	@Override
 	public final int getGeoY()
 	{
-		return getBlock().getGeoY() + _cellY;
+		return getBlock().getGeoY() + getCellY();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoCell#getCellX()
+	 */
+	@Override
+	public final int getCellX()
+	{
+		return _cellX;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoCell#getCellY()
+	 */
+	@Override
+	public final int getCellY()
+	{
+		return _cellY;
 	}
 	
 	/**
@@ -115,6 +133,7 @@ public final class GeoCellCM extends GeoCell
 	public final void setHeightAndNSWE(final short heightAndNSWE)
 	{
 		_heightAndNSWE = heightAndNSWE;
+		getBlock().updateMinMaxHeight(getHeight());
 	}
 	
 	/**

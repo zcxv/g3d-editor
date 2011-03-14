@@ -121,7 +121,6 @@ public final class GLGUIRenderer
 	public final void render(final GL2 gl, final GLCamera camera)
 	{
 		gl.glDisable(GL2.GL_DEPTH_TEST);
-		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
@@ -131,6 +130,7 @@ public final class GLGUIRenderer
 		gl.glLoadIdentity();
 		gl.glColor4f(1f, 1f, 1f, 1f);
 		
+		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE);
 		gl.glListBase(_listId - 32 + (128 * 0));
 		_fontTexture.bind();
 		
@@ -149,6 +149,7 @@ public final class GLGUIRenderer
 				gl.glPopMatrix();
 			}
 		}
+		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		
 		gl.glListBase(0);
 		_compassTexture.bind();
@@ -162,7 +163,6 @@ public final class GLGUIRenderer
 		gl.glPopMatrix();
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPopMatrix();
-		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
 	}
 	
