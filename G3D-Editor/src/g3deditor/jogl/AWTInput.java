@@ -64,6 +64,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	private boolean _keyTToggle;
 	private boolean _keyG;
 	private boolean _keyGToggle;
+	private boolean _keyF;
+	private boolean _keyFToggle;
 	private boolean _keySpace;
 	
 	private Robot _robot;
@@ -137,6 +139,16 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	public final boolean getKeyGToggle()
 	{
 		return _keyGToggle;
+	}
+	
+	public final boolean getKeyF()
+	{
+		return _keyF;
+	}
+	
+	public final boolean getKeyFToggle()
+	{
+		return _keyFToggle;
 	}
 	
 	public final void setEnabled(final boolean enabled)
@@ -369,6 +381,12 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 					_keyGToggle = !_keyGToggle;
 				break;
 				
+			case KeyEvent.VK_F:
+				_keyF = state;
+				if (state)
+					_keyFToggle = !_keyFToggle;
+				break;
+				
 			case KeyEvent.VK_SPACE:
 				_keySpace = state;
 				break;
@@ -389,6 +407,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 		_keyTToggle = false;
 		_keyG = false;
 		_keyGToggle = true;
+		_keyF =  false;
+		_keyFToggle = false;
 		_keySpace = false;
 	}
 }

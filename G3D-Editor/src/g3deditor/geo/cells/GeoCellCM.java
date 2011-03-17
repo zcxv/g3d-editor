@@ -86,8 +86,9 @@ public final class GeoCellCM extends GeoCell
 	@Override
 	public final void addHeight(final short height)
 	{
+		final short oldHeight = getHeight();
 		_heightAndNSWE = GeoEngine.updateHeightOfHeightAndNSWE(_heightAndNSWE, (short) (getHeight() + height));
-		getBlock().updateMinMaxHeight(getHeight());
+		getBlock().updateMinMaxHeight(getHeight(), oldHeight);
 	}
 	
 	/**
@@ -132,8 +133,9 @@ public final class GeoCellCM extends GeoCell
 	@Override
 	public final void setHeightAndNSWE(final short heightAndNSWE)
 	{
+		final short oldHeight = getHeight();
 		_heightAndNSWE = heightAndNSWE;
-		getBlock().updateMinMaxHeight(getHeight());
+		getBlock().updateMinMaxHeight(getHeight(), oldHeight);
 	}
 	
 	/**

@@ -158,7 +158,7 @@ public final class GeoBlockFlat extends GeoBlock
 	 * @see g3deditor.geo.GeoBlock#updateMinMaxHeight(short)
 	 */
 	@Override
-	public final void updateMinMaxHeight(final short height)
+	public final void updateMinMaxHeight(final short newHeight, final short oldHeight)
 	{
 		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();
 	}

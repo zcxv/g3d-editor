@@ -18,14 +18,14 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.util.Util;
 
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -53,7 +53,7 @@ public final class PanelNswe extends JPanel implements ActionListener
 	
 	private final void initLayout()
 	{
-		super.setLayout(new GridLayout(4, 4));
+		super.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		for (final NsweButton buttonNswe : _buttonsNswe)
 		{
 			super.add(buttonNswe);
@@ -121,12 +121,17 @@ public final class PanelNswe extends JPanel implements ActionListener
 		{
 			_nswe = (short) nswe;
 			
-			try
+			final BufferedImage img = Util.loadImage("./data/icon/nswe-" + nswe + ".png");
+			if (img != null)
 			{
-				setIcon(new ImageIcon(ImageIO.read(new File("./data/icon/nswe-" + nswe + ".png"))));
-				//setPreferredSize(new Dimension(getIcon().getIconWidth() + 8, getIcon().getIconHeight() + 8));
+				setIcon(new ImageIcon(img));
+				final int width = img.getWidth() + 15;
+				final int height = img.getHeight() + 15;
+				setPreferredSize(new Dimension(width, height));
+				setMaximumSize(new Dimension(width, height));
+				setMinimumSize(new Dimension(width, height));
 			}
-			catch (final IOException e)
+			else
 			{
 				setText(GeoEngine.nameOfNSWE(nswe));
 			}

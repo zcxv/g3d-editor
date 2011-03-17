@@ -24,11 +24,8 @@ import g3deditor.swing.Splash.CheckedRunnable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import com.jogamp.opengl.util.Animator;
-import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -41,15 +38,7 @@ public final class Main
 	{
 		//ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		//JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-		
-		try
-		{
-			UIManager.setLookAndFeel(new NimbusLookAndFeel());
-		}
-		catch (final UnsupportedLookAndFeelException e)
-		{
-			e.printStackTrace();
-		}
+		Config.load();
 		
 		new Splash(3000,
 		new Runnable()
@@ -70,22 +59,8 @@ public final class Main
 				if (!GLProfile.isAWTAvailable())
 					throw new RuntimeException("AWT support is required to run this software");
 				
-				
 				GeoEngine.init();
 				GeoBlockSelector.init();
-				
-				try
-				{
-					int regionX = 24;
-					int regionY = 18;
-					GeoEngine.getInstance().reloadGeo(regionX - 10, regionY - 10, true);
-					System.out.println(GeoEngine.getInstance().getActiveRegion());
-				}
-				catch (Exception e1)
-				{
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 				
 				GLProfile.initSingleton(false);
 				GLProfile glp = GLProfile.get("GL_DEFAULT");
@@ -118,6 +93,7 @@ public final class Main
 			@Override
 			public final void run()
 			{
+				FrameMain.getInstance().validate();
 				FrameMain.getInstance().setVisible(true);
 				new Animator(FrameMain.getInstance().getDisplay().getCanvas()).start();
 			}

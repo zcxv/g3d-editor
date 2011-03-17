@@ -17,13 +17,13 @@ package g3deditor.swing;
 import g3deditor.geo.GeoCell;
 import g3deditor.jogl.GLDisplay;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -51,7 +51,6 @@ public final class FrameMain extends JFrame implements ActionListener
 	}
 	
 	private final GLDisplay _display;
-	private final JPanel _panelBottom;
 	private final JPanel _panelRight;
 	private final PanelNswe _panelNswe;
 	private final PanelCellInfo _panelCellInfo;
@@ -59,11 +58,13 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final PanelLayers _panelLayers;
 	
 	private final DialogJumpTo _dialogJumpTo;
+	private final DialogConfig _dialogConfig;
 	
 	private final JMenuBar _menuBar;
 	private final JMenu _menuData;
 	private final JMenuItem _itemLoad;
 	private final JMenuItem _itemSave;
+	private final JMenuItem _itemConfig;
 	private final JMenuItem _itemDataExit;
 	private final JMenu _menuHelp;
 	private final JMenuItem _itemAbout;
@@ -76,19 +77,22 @@ public final class FrameMain extends JFrame implements ActionListener
 		super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		_display = display;
-		_panelBottom = new JPanel();
 		_panelRight = new JPanel();
 		_panelNswe = new PanelNswe();
 		_panelCellInfo = new PanelCellInfo();
 		_panelBlockConvert = new PanelBlockConvert();
 		_panelLayers = new PanelLayers();
 		_dialogJumpTo = new DialogJumpTo(this);
+		_dialogConfig = new DialogConfig(this);
 		
 		_menuBar = new JMenuBar();
 		_menuData = new JMenu("File");
 		_itemLoad = new JMenuItem("Load");
 		_itemLoad.addActionListener(this);
 		_itemSave = new JMenuItem("Save");
+		_itemSave.addActionListener(this);
+		_itemConfig = new JMenuItem("Config");
+		_itemConfig.addActionListener(this);
 		_itemDataExit = new JMenuItem("Exit");
 		_menuHelp = new JMenu("Help");
 		_itemAbout = new JMenuItem("About");
@@ -96,6 +100,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		
 		_menuData.add(_itemLoad);
 		_menuData.add(_itemSave);
+		_menuData.add(_itemConfig);
 		_menuData.add(_itemDataExit);
 		_menuBar.add(_menuData);
 		_menuHelp.add(_itemAbout);
@@ -105,7 +110,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		
 		initLayout();
 		
-		setSize(1024, 768);
+		setMinimumSize(new Dimension(1024, 768));
 		setLocationRelativeTo(null);
 	}
 	
@@ -117,31 +122,13 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final void initLayout()
 	{
 		final GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.BOTH;
+		
 		//gbc.insets = new Insets(2, 2, 2, 2);
-		
-		_panelBottom.setLayout(new GridBagLayout());
-		
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 1;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
-		_panelBottom.add(_panelNswe, gbc);
-		
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 1;
-		gbc.weightx = 1;
-		gbc.weighty = 0;
-		_panelBottom.add(new JLabel(), gbc);
 		
 		_panelRight.setLayout(new GridBagLayout());
 		
-		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
@@ -150,7 +137,6 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weighty = 0;
 		_panelRight.add(_panelCellInfo, gbc);
 		
-		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
@@ -159,7 +145,6 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weighty = 0;
 		_panelRight.add(_panelBlockConvert, gbc);
 		
-		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		gbc.gridwidth = 1;
@@ -170,8 +155,6 @@ public final class FrameMain extends JFrame implements ActionListener
 		
 		setLayout(new GridBagLayout());
 		
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.CENTER;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
@@ -180,18 +163,14 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weighty = 1;
 		add(_display.getCanvas(), gbc);
 		
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.anchor = GridBagConstraints.EAST;
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
 		gbc.weighty = 0;
-		add(_panelBottom, gbc);
+		add(_panelNswe, gbc);
 		
-		gbc.fill = GridBagConstraints.VERTICAL;
-		gbc.anchor = GridBagConstraints.SOUTH;
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
@@ -228,6 +207,14 @@ public final class FrameMain extends JFrame implements ActionListener
 		if (e.getSource() == _itemLoad)
 		{
 			_dialogJumpTo.setVisible(true);
+		}
+		else if (e.getSource() == _itemSave)
+		{
+			
+		}
+		else if (e.getSource() == _itemConfig)
+		{
+			_dialogConfig.setVisible(true);
 		}
 		else if (e.getSource() == _itemAbout)
 		{

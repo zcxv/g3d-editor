@@ -14,10 +14,15 @@
  */
 package g3deditor;
 
+import g3deditor.jogl.GLCellRenderSelector;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.util.Properties;
+
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -26,20 +31,53 @@ import java.util.Properties;
  */
 public final class Config
 {
-	private static final File CONFIG_FILE					= new File("./config.dat");
+	private static final LookAndFeelInfo[] LOOK_AND_FEEL_INFOS;
+
+	private static final File CONFIG_FILE					= new File("./g3d.ini");
 	private static final ConfigProperties PROPERTIES		= new ConfigProperties();
 	
 	public static String PATH_TO_GEO_FILES					= "./data/geodata/";
-	public static boolean SHOW_EXIT_PROMT					= false;
-	
-	public static boolean OPTIMIZE_FOR_1024x768				= false;
-	
 	public static boolean TERRAIN_DEFAULT_ON				= false;
-	//public static TerrainDetailLevel TERRAIN_DETAIL_LEVEL	= TerrainDetailLevel.LOW;
-	public static boolean TERRAIN_WIREFRAME					= false;
+	public static int VIS_GRID_RANGE						= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
+	public static String LOOK_AND_FEEL						= UIManager.getSystemLookAndFeelClassName();
 	
-	public static int VIS_GRID_RANGE						= 8;//DisplayGrid.MIN_VIS_GRID_RANGE;
-	public static int VIS_GRID_HEIGHT						= 8;//DisplayGrid.MIN_VIS_GRID_HEIGHT;
+	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
+	{
+		return LOOK_AND_FEEL_INFOS;
+	}
+	
+	public static final LookAndFeelInfo getLookAndFeel(final String className, final LookAndFeelInfo dftl)
+	{
+		
+		for (int i = LOOK_AND_FEEL_INFOS.length; i-- > 0;)
+		{
+			if (LOOK_AND_FEEL_INFOS[i].getClassName().equals(className))
+				return LOOK_AND_FEEL_INFOS[i];
+		}
+		return dftl;
+	}
+	
+	public static final LookAndFeelInfo getActiveLookAndFeel()
+	{
+		return getLookAndFeel(UIManager.getLookAndFeel().getClass().getName(), null);
+	}
+	
+	static
+	{
+		final LookAndFeelInfo[] temp = UIManager.getInstalledLookAndFeels();
+		LOOK_AND_FEEL_INFOS = new LookAndFeelInfo[temp.length];
+		for (int i = temp.length; i-- > 0;)
+		{
+			LOOK_AND_FEEL_INFOS[i] = new LookAndFeelInfo(temp[i].getName(), temp[i].getClassName())
+			{
+				@Override
+				public final String toString()
+				{
+					return getName();
+				}
+			};
+		}
+	}
 	
 	public static final void load()
 	{
@@ -48,15 +86,9 @@ public final class Config
 			PROPERTIES.load(CONFIG_FILE);
 			
 			PATH_TO_GEO_FILES		= PROPERTIES.getProperty("GeodataPath", "./data/geodata/");
-			SHOW_EXIT_PROMT			= Boolean.parseBoolean(PROPERTIES.getProperty("ShowExitPromt", "false"));
-			OPTIMIZE_FOR_1024x768	= Boolean.parseBoolean(PROPERTIES.getProperty("OptimizeFor1024x768", "false"));
-			
 			TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainDefaultOn", "false"));
-			//TERRAIN_DETAIL_LEVEL	= TerrainDetailLevel.valueOf(PROPERTIES.getProperty("TerrainDetailLevel", TerrainDetailLevel.LOW.name()));
-			TERRAIN_WIREFRAME		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainWireframe", "false"));
-			
-			VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(8)));//DisplayGrid.MIN_VIS_GRID_RANGE)));
-			VIS_GRID_HEIGHT			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridHeight", String.valueOf(8)));//DisplayGrid.MIN_VIS_GRID_HEIGHT)));
+			VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
+			LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", UIManager.getSystemLookAndFeelClassName());
 		}
 		catch (final Exception e)
 		{
@@ -65,6 +97,17 @@ public final class Config
 		finally
 		{
 			checkConfigs();
+		}
+		
+		try
+		{
+			final LookAndFeelInfo lookAndFeelInfo = getLookAndFeel(LOOK_AND_FEEL, null);
+			if (lookAndFeelInfo != null)
+				UIManager.setLookAndFeel(lookAndFeelInfo.getClassName());
+		}
+		catch (final Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -75,38 +118,23 @@ public final class Config
 			PATH_TO_GEO_FILES = "./data/geodata/";
 		}
 		
-		/*if (VIS_GRID_RANGE < DisplayGrid.MIN_VIS_GRID_RANGE)
+		if (VIS_GRID_RANGE < GLCellRenderSelector.MIN_VIS_GRID_RANGE)
 		{
-			VIS_GRID_RANGE = DisplayGrid.MIN_VIS_GRID_RANGE;
+			VIS_GRID_RANGE = GLCellRenderSelector.MIN_VIS_GRID_RANGE;
 		}
-		else if (VIS_GRID_RANGE > DisplayGrid.MAX_VIS_GRID_RANGE)
+		else if (VIS_GRID_RANGE > GLCellRenderSelector.MAX_VIS_GRID_RANGE)
 		{
-			VIS_GRID_RANGE = DisplayGrid.MAX_VIS_GRID_RANGE;
+			VIS_GRID_RANGE = GLCellRenderSelector.MAX_VIS_GRID_RANGE;
 		}
-		
-		if (VIS_GRID_HEIGHT < DisplayGrid.MIN_VIS_GRID_HEIGHT)
-		{
-			VIS_GRID_HEIGHT = DisplayGrid.MIN_VIS_GRID_HEIGHT;
-		}
-		else if (VIS_GRID_HEIGHT > DisplayGrid.MAX_VIS_GRID_HEIGHT)
-		{
-			VIS_GRID_HEIGHT = DisplayGrid.MAX_VIS_GRID_HEIGHT;
-		}*/
 	}
 	
 	public static final void save()
 	{
 		PROPERTIES.clear();
 		PROPERTIES.put("GeodataPath", String.valueOf(PATH_TO_GEO_FILES));
-		PROPERTIES.put("ShowExitPromt", String.valueOf(SHOW_EXIT_PROMT));
-		PROPERTIES.put("OptimizeFor1024x768", String.valueOf(OPTIMIZE_FOR_1024x768));
-		
 		PROPERTIES.put("TerrainDefaultOn", String.valueOf(TERRAIN_DEFAULT_ON));
-		//PROPERTIES.put("TerrainDetailLevel", TERRAIN_DETAIL_LEVEL.name());
-		PROPERTIES.put("TerrainWireframe", String.valueOf(TERRAIN_WIREFRAME));
-		
 		PROPERTIES.put("VisibleGridRange", String.valueOf(VIS_GRID_RANGE));
-		PROPERTIES.put("VisibleGridHeight", String.valueOf(VIS_GRID_HEIGHT));
+		PROPERTIES.put("LookAndFeel", LOOK_AND_FEEL);
 		PROPERTIES.save(CONFIG_FILE);
 	}
 	

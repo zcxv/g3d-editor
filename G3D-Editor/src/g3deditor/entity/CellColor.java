@@ -32,7 +32,7 @@ public final class CellColor
 	private final float _g;
 	private final float _b;
 	
-	public CellColor(Color color)
+	public CellColor(final Color color)
 	{
 		this(intToFloat(color.getRed()), intToFloat(color.getGreen()), intToFloat(color.getBlue()));
 	}

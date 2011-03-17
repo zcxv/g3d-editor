@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.Config;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
@@ -33,6 +34,9 @@ import javax.media.opengl.GL2;
  */
 public final class GLCellRenderSelector
 {
+	public static final int MIN_VIS_GRID_RANGE = 8;
+	public static final int MAX_VIS_GRID_RANGE = 96;
+	
 	private final GLDisplay _display;
 	private final GLSubRenderSelectorComparator _glSubRenderSelectorComparator;
 	private final GeoCellComparator _cellComparator;
@@ -47,6 +51,8 @@ public final class GLCellRenderSelector
 	private int _camBlockX;
 	private int _camBlockY;
 	private boolean _forceUpdateFrustum;
+	private boolean _freezeGrid;
+	private int _gridRange;
 	
 	public GLCellRenderSelector(final GLDisplay display)
 	{
@@ -83,31 +89,30 @@ public final class GLCellRenderSelector
 		_forceUpdateFrustum = true;
 	}
 	
-	public final void select(final GL2 gl, final GLCamera camera)
+	public final void select(final GL2 gl, final GLCamera camera, final boolean freezeGrid)
 	{
-		if (camera.positionXZChanged())
+		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+		if (region == null)
 		{
-			final int geoX = (int) camera.getX();
-			final int geoY = (int) camera.getZ();
+			_geoBlocksSize = 0;
+			return;
+		}
+		
+		if (camera.positionXZChanged() || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE)
+		{
+			final int geoX = Math.max(Math.min(camera.getGeoX(), region.getGeoX(GeoEngine.GEO_REGION_SIZE - 1)), region.getGeoX(0));
+			final int geoY = Math.max(Math.min(camera.getGeoY(), region.getGeoY(GeoEngine.GEO_REGION_SIZE - 1)), region.getGeoY(0));
 			final int camBlockX = GeoEngine.getBlockXY(geoX);
 			final int camBlockY = GeoEngine.getBlockXY(geoY);
 			
-			if (camBlockX != _camBlockX || camBlockY != _camBlockY)
+			if (camBlockX != _camBlockX || camBlockY != _camBlockY || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE)
 			{
 				_camBlockX = camBlockX;
 				_camBlockY = camBlockY;
 				
-				final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
-				if (region == null)
-					throw new NullPointerException("Fuuu");
-				
-				final int range = 10;
-				final int minBlockX = Math.max(camBlockX - range, 0);
-				final int maxBlockX = Math.min(camBlockX + range, GeoEngine.GEO_REGION_SIZE - 1);
-				final int minBlockY = Math.max(camBlockY - range, 0);
-				final int maxBlockY = Math.min(camBlockY + range, GeoEngine.GEO_REGION_SIZE - 1);
-				
+				final int range = Config.VIS_GRID_RANGE;
 				final int requiredSize = (range * 2 + 1) * (range * 2 + 1);
+				final boolean needUpdate = _geoBlocks.length != requiredSize;
 				if (_geoBlocks.length != requiredSize)
 				{
 					_geoBlocks = new GLSubRenderSelector[requiredSize];
@@ -118,16 +123,34 @@ public final class GLCellRenderSelector
 					}
 				}
 				
-				_geoBlocksSize = 0;
-				for (int x = minBlockX, y; x < maxBlockX; x++)
+				if (!freezeGrid || needUpdate)
 				{
-					for (y = minBlockY; y < maxBlockY; y++)
+					final int diffBlockXNeg = camBlockX - range;
+					final int diffBlockXPos = camBlockX + range;
+					final int diffBlockYNeg = camBlockY - range;
+					final int diffBlockYPos = camBlockY + range;
+					
+					final int minBlockX = Math.max(diffBlockXNeg + (diffBlockXPos > GeoEngine.GEO_REGION_SIZE - 1 ? GeoEngine.GEO_REGION_SIZE - 1 - diffBlockXPos : 0), 0);
+					final int maxBlockX = Math.min(diffBlockXPos + (diffBlockXNeg < 0 ? -diffBlockXNeg : 0), GeoEngine.GEO_REGION_SIZE - 1);
+					final int minBlockY = Math.max(diffBlockYNeg + (diffBlockYPos > GeoEngine.GEO_REGION_SIZE - 1 ? GeoEngine.GEO_REGION_SIZE - 1 - diffBlockYPos : 0), 0);
+					final int maxBlockY = Math.min(diffBlockYPos + (diffBlockYNeg < 0 ? -diffBlockYNeg : 0), GeoEngine.GEO_REGION_SIZE - 1);
+					
+					_geoBlocksSize = 0;
+					for (int x = minBlockX, y; x < maxBlockX; x++)
 					{
-						_geoBlocks[_geoBlocksSize++].setGeoBlock(region.getBlockByBlockXY(x, y));
+						for (y = minBlockY; y < maxBlockY; y++)
+						{
+							_geoBlocks[_geoBlocksSize++].setGeoBlock(region.getBlockByBlockXY(x, y));
+						}
 					}
+					
+					_forceUpdateFrustum = true;
 				}
 			}
 		}
+		
+		_freezeGrid = freezeGrid;
+		_gridRange = Config.VIS_GRID_RANGE;
 		
 		if (camera.positionXZChanged() || camera.positionYChanged() || camera.rotationChanged() || _forceUpdateFrustum)
 		{
