@@ -137,5 +137,5 @@ public abstract class GeoBlock implements Cloneable
 	
 	public abstract short getMaxHeight();
 	
-	public abstract void updateMinMaxHeight(final short height);
+	public abstract void updateMinMaxHeight(final short height, final short oldHeight);
 }

@@ -125,6 +125,16 @@ public final class GeoRegion
 		return _regionY;
 	}
 	
+	public final int getGeoX(final int blockX)
+	{
+		return GeoEngine.getGeoXY(getRegionX(), blockX);
+	}
+	
+	public final int getGeoY(final int blockY)
+	{
+		return GeoEngine.getGeoXY(getRegionY(), blockY);
+	}
+	
 	public final String getName()
 	{
 		return (getRegionX() + 10) + "_" + (getRegionY() + 10);

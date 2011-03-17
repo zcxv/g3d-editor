@@ -89,6 +89,7 @@ public final class GLCamera
 		_curCamPosX = x;
 		_curCamPosY = y;
 		_curCamPosZ = z;
+		onProjectionMatrixChanged();
 	}
 	
 	/**

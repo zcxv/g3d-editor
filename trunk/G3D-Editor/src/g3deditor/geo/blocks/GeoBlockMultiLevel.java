@@ -361,19 +361,23 @@ public final class GeoBlockMultiLevel extends GeoBlock
 	 * @see g3deditor.geo.GeoBlock#updateMinMaxHeight(short)
 	 */
 	@Override
-	public final void updateMinMaxHeight(final short height)
+	public final void updateMinMaxHeight(final short newHeight, final short oldHeight)
 	{
-		if (height > _maxHeight)
+		if (newHeight > _maxHeight)
 		{
-			_maxHeight = height;
+			_maxHeight = newHeight;
 		}
-		else if (height < _minHeight)
+		else if (newHeight < _minHeight)
 		{
-			_minHeight = height;
+			_minHeight = newHeight;
+		}
+		else if (oldHeight == _maxHeight || oldHeight == _minHeight)
+		{
+			calcMaxMinHeight();
 		}
 		else
 		{
-			calcMaxMinHeight();
+			return;
 		}
 		
 		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();

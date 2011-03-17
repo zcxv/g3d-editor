@@ -441,6 +441,8 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		{
 			final int worldX = Integer.parseInt(_fieldWorldX.getText());
 			final int worldY = Integer.parseInt(_fieldWorldY.getText());
+			final int geoX = GeoEngine.getGeoX(worldX);
+			final int geoY = GeoEngine.getGeoY(worldY);
 			
 			int worldZ = Integer.MIN_VALUE;
 			
@@ -451,6 +453,17 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			catch (final NumberFormatException e1)
 			{
 				
+			}
+			
+			try
+			{
+				GeoEngine.getInstance().reloadGeo(GeoEngine.getRegionXY(geoX), GeoEngine.getRegionXY(geoY), _comboGeoFileType.getSelectedItem() == "L2j Geo File");
+				FrameMain.getInstance().getDisplay().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+			}
+			catch (Exception e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			
 			//if (GeoEditor.getInstance().getDisplayDriver().jumpTo(worldX, worldY, worldZ, _comboGeoFileType.getSelectedItem() == "L2j Geo File"))
@@ -699,7 +712,14 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 					_fieldGeoX.setText(String.valueOf(geoX));
 					_fieldGeoY.setText(String.valueOf(geoY));
 					
-					setRegionFound(_regionImage, blockX, blockY);
+					if (_regionImage != null)
+					{
+						setRegionFound(_regionImage, blockX, blockY);
+					}
+					else
+					{
+						_labelRegionMap.setIcon(new ImageIcon(createRegionNotFound(regionX, regionY)));
+					}
 				}
 				else if (e.getClickCount() == (e.getButton() == MouseEvent.BUTTON1 ? 2 : 1))
 				{

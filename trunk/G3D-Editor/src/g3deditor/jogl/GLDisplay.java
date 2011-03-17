@@ -196,11 +196,11 @@ public final class GLDisplay implements GLEventListener
 		_glu.gluPerspective(VIEW_ANGLE, 1.0f, VIEW_Z_NEAR, VIEW_Z_FAR);
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		
-		int camX = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionX(), GeoEngine.GEO_REGION_SIZE / 2);
-		int camY = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionY(), GeoEngine.GEO_REGION_SIZE / 2);
+		//int camX = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionX(), GeoEngine.GEO_REGION_SIZE / 2);
+		//int camY = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionY(), GeoEngine.GEO_REGION_SIZE / 2);
 		
-		_camera.setXYZ(camX, GeoEngine.getInstance().nGetCell(camX, camY, 0).getHeight() / 16f, camY);
-		_camera.onProjectionMatrixChanged();
+		//_camera.setXYZ(camX, GeoEngine.getInstance().nGetCell(camX, camY, 0).getHeight() / 16f, camY);
+		//_camera.onProjectionMatrixChanged();
 		//_camera.checkPositionOrRotationChanged();
 		_renderer.init(gl);
 		_guiRenderer.init(gl);
@@ -292,7 +292,7 @@ public final class GLDisplay implements GLEventListener
 		_terrain.setWireframe(_input.getKeyRToggle());
 		_terrain.render(gl);
 		
-		_renderSelector.select(gl, _camera);
+		_renderSelector.select(gl, _camera, _input.getKeyFToggle());
 		
 		if (_input.getKeyGToggle())
 		{
