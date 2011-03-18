@@ -15,6 +15,8 @@
 package g3deditor.swing;
 
 import g3deditor.geo.GeoCell;
+import g3deditor.geo.GeoEngine;
+import g3deditor.geo.GeoRegion;
 import g3deditor.jogl.GLDisplay;
 
 import java.awt.Dimension;
@@ -203,7 +205,15 @@ public final class FrameMain extends JFrame implements ActionListener
 		}
 		else if (e.getSource() == _itemSave)
 		{
-			
+			final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+			if (region != null)
+			{
+				new DialogSave(this, region).setVisible(true);
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(FrameMain.this, "I am sure you want to load a region first ;)", "Save Region UNKOWN?!?", JOptionPane.INFORMATION_MESSAGE);
+			}
 		}
 		else if (e.getSource() == _itemConfig)
 		{
