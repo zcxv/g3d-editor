@@ -298,14 +298,14 @@ public final class PanelCellInfo extends JPanel
 	{
 		public AutoDisableJTextField()
 		{
-			super.setEnabled(false);
+			setEnabled(false);
 		}
 		
 		@Override
 		public final void setText(final String text)
 		{
 			super.setText(text);
-			super.setEnabled(text != null && !text.isEmpty());
+			setEnabled(text != null && !text.isEmpty());
 		}
 	}
 }

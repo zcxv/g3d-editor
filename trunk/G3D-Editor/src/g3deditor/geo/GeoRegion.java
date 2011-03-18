@@ -17,6 +17,7 @@ package g3deditor.geo;
 import g3deditor.geo.blocks.GeoBlockComplex;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.geo.blocks.GeoBlockMultiLevel;
+import g3deditor.swing.DialogSave;
 import g3deditor.util.Util;
 
 import java.io.File;
@@ -187,7 +188,7 @@ public final class GeoRegion
 		return _geoBlocks[blockX][blockY].nGetLayerCount(geoX, geoY);
 	}
 	
-	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
+	public final void saveTo(final OutputStream os, final boolean l2j, final DialogSave observ) throws IOException
 	{
 		if (!l2j)
 		{
@@ -203,6 +204,7 @@ public final class GeoRegion
 			for (int y = 0; y < GeoEngine.GEO_REGION_SIZE; y++)
 			{
 				_geoBlocks[x][y].saveTo(os, l2j);
+				observ.updateProgressRegion(x * GeoEngine.GEO_REGION_SIZE + y, "[" + x + "-" + y + "]");
 			}
 		}
 	}
