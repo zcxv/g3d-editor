@@ -15,10 +15,11 @@
 package g3deditor.swing;
 
 import g3deditor.geo.GeoEngine;
+import g3deditor.jogl.GLCamera;
+import g3deditor.jogl.GLDisplay;
 import g3deditor.util.Util;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics2D;
@@ -158,9 +159,6 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		_buttonCancel.addActionListener(this);
 		
 		_labelRegionMap = new JLabel();
-		_labelRegionMap.setMinimumSize(new Dimension(_worldMapImageScaled.getWidth(), _worldMapImageScaled.getHeight()));
-		_labelRegionMap.setPreferredSize(_labelRegionMap.getMinimumSize());
-		_labelRegionMap.setMinimumSize(_labelRegionMap.getPreferredSize());
 		_labelRegionMap.addMouseListener(this);
 		
 		_worldMap = new ImageIcon(_worldMapImageScaled);
@@ -170,7 +168,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.CENTER;
 		
-		super.setLayout(new GridBagLayout());
+		setLayout(new GridBagLayout());
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -180,7 +178,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelWorldX, gbc);
+		add(_labelWorldX, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 0;
@@ -190,7 +188,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldWorldX, gbc);
+		add(_fieldWorldX, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 1;
@@ -200,7 +198,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelWorldY, gbc);
+		add(_labelWorldY, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 1;
@@ -210,7 +208,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldWorldY, gbc);
+		add(_fieldWorldY, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 2;
@@ -220,7 +218,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelWorldZ, gbc);
+		add(_labelWorldZ, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 2;
@@ -230,7 +228,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldWorldZ, gbc);
+		add(_fieldWorldZ, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 3;
@@ -240,7 +238,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelRegionX, gbc);
+		add(_labelRegionX, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 3;
@@ -250,7 +248,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldRegionX, gbc);
+		add(_fieldRegionX, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 4;
@@ -260,7 +258,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelRegionY, gbc);
+		add(_labelRegionY, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 4;
@@ -270,7 +268,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldRegionY, gbc);
+		add(_fieldRegionY, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 5;
@@ -280,7 +278,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelGeoX, gbc);
+		add(_labelGeoX, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 5;
@@ -290,7 +288,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldGeoX, gbc);
+		add(_fieldGeoX, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 6;
@@ -300,7 +298,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelGeoY, gbc);
+		add(_labelGeoY, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 6;
@@ -310,7 +308,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldGeoY, gbc);
+		add(_fieldGeoY, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 7;
@@ -320,7 +318,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelGeoL2jFound, gbc);
+		add(_labelGeoL2jFound, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 7;
@@ -330,7 +328,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldGeoL2jFound, gbc);
+		add(_fieldGeoL2jFound, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 8;
@@ -340,7 +338,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelGeoL2OffFound, gbc);
+		add(_labelGeoL2OffFound, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 8;
@@ -350,7 +348,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_fieldGeoL2OffFound, gbc);
+		add(_fieldGeoL2OffFound, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 9;
@@ -360,7 +358,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelGeoFileType, gbc);
+		add(_labelGeoFileType, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 9;
@@ -370,7 +368,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_comboGeoFileType, gbc);
+		add(_comboGeoFileType, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 10;
@@ -380,7 +378,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_buttonOk, gbc);
+		add(_buttonOk, gbc);
 		
 		gbc.gridx = 1;
 		gbc.gridy = 10;
@@ -390,7 +388,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_buttonCancel, gbc);
+		add(_buttonCancel, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 11;
@@ -400,7 +398,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 150;
 		gbc.ipady = 0;
-		super.add(new JLabel(), gbc);
+		add(new JLabel(), gbc);
 		
 		gbc.gridx = 2;
 		gbc.gridy = 0;
@@ -410,9 +408,9 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_labelRegionMap, gbc);
+		add(_labelRegionMap, gbc);
 		
-		super.pack();
+		pack();
 	}
 	
 	@Override
@@ -420,15 +418,18 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 	{
 		if (!isVisible() && visible)
 		{
-			/*final int[] geoXY = GeoEditor.getInstance().getDisplayDriver().getCamGeoLocXY();
-			if (geoXY != null)
+			final GLCamera camera = GLDisplay.getInstance().getCamera();
+			final int geoX = camera.getGeoX();
+			final int geoY = camera.getGeoY();
+			if (GeoEngine.getInstance().getActiveRegion() != null && geoX >= GeoEngine.GEOX_MIN && geoX <= GeoEngine.GEOX_MAX && geoY >= GeoEngine.GEOY_MIN && geoY <= GeoEngine.GEOY_MAX)
 			{
-				_fieldWorldX.setText(String.valueOf(GeoEngine.getWorldX(geoXY[0])));
-				_fieldWorldY.setText(String.valueOf(GeoEngine.getWorldY(geoXY[1])));
+				_fieldWorldX.setText(String.valueOf(GeoEngine.getWorldX(geoX)));
+				_fieldWorldY.setText(String.valueOf(GeoEngine.getWorldY(geoY)));
 				_fieldWorldZ.setText("");
 				checkInputs(false);
-			}*/
-			setLocationRelativeTo(super.getOwner());
+			}
+			
+			setLocationRelativeTo(getOwner());
 		}
 		
 		super.setVisible(visible);
@@ -458,16 +459,15 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			try
 			{
 				GeoEngine.getInstance().reloadGeo(GeoEngine.getRegionXY(geoX), GeoEngine.getRegionXY(geoY), _comboGeoFileType.getSelectedItem() == "L2j Geo File");
-				FrameMain.getInstance().getDisplay().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+				if (GeoEngine.getInstance().getActiveRegion() != null)
+					GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
 			}
-			catch (Exception e1)
+			catch (final Exception e1)
 			{
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
-			//if (GeoEditor.getInstance().getDisplayDriver().jumpTo(worldX, worldY, worldZ, _comboGeoFileType.getSelectedItem() == "L2j Geo File"))
-				setVisible(false);
+			setVisible(false);
 		}
 		else if (e.getSource() == _buttonCancel)
 		{
@@ -551,9 +551,9 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			{
 				_regionX = regionX;
 				_regionY = regionY;
-				//_regionImage = RegionImageCreator.getInstance().getScaledRegion(regionX, regionY, _labelRegionMap.getMinimumSize().height, _labelRegionMap.getMinimumSize().height);
-				//if (_regionImage == null)
-				//	_regionImage = ImageLoader.getInstance().getScaledImage("region/lowq/" + (regionX + 10) + "_" + (regionY + 10) + ".png", 512, 512);
+				_regionImage = Util.loadImage("./data/textures/region/" + (regionX + 10) + "_" + (regionY + 10) + ".jpg");
+				if (_regionImage != null)
+					_regionImage = Util.scaleImage(_regionImage, 512, 512, 2);
 			}
 			
 			if (_regionImage != null)
@@ -564,7 +564,6 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			{
 				_labelRegionMap.setIcon(new ImageIcon(createRegionNotFound(regionX, regionY)));
 			}
-			super.pack();
 		}
 		catch (final Exception e)
 		{
@@ -576,8 +575,9 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			_fieldGeoL2OffFound.setText("");
 			_comboGeoFileType.removeAllItems();
 			_comboGeoFileType.setEnabled(false);
-			super.pack();
 		}
+		
+		pack();
 	}
 	
 	private final void setRegionFound(final BufferedImage img, final int blockX, final int blockY)
@@ -652,23 +652,23 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 	
 	private final int getRegionX(final int mouseX)
 	{
-		return getRelativePoint(_labelRegionMap.getMinimumSize().width, mouseX, 17D) + 10;
+		return getRelativePoint(_labelRegionMap.getWidth(), mouseX, 17D) + 10;
 	}
 	
 	private final int getRegionY(final int mouseY)
 	{
-		return getRelativePoint(_labelRegionMap.getMinimumSize().height, mouseY, 16D) + 10;
+		return getRelativePoint(_labelRegionMap.getHeight(), mouseY, 16D) + 10;
 	}
 	
 	private final int getBlockX(final int mouseX)
 	{
-		final int height = _labelRegionMap.getMinimumSize().height;
-		return mouseX > height ? - 1 : getRelativePoint(height, mouseX, GeoEngine.GEO_REGION_SIZE - 1);
+		final int width = _labelRegionMap.getWidth();
+		return mouseX > width ? - 1 : getRelativePoint(width, mouseX, GeoEngine.GEO_REGION_SIZE - 1);
 	}
 	
 	private final int getBlockY(final int mouseY)
 	{
-		return getRelativePoint(_labelRegionMap.getMinimumSize().height, mouseY, GeoEngine.GEO_REGION_SIZE - 1);
+		return getRelativePoint(_labelRegionMap.getHeight(), mouseY, GeoEngine.GEO_REGION_SIZE - 1);
 	}
 	
 	private static final int getRelativePoint(final int val, final int rel, final double scale)
@@ -725,18 +725,10 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 				{
 					_labelRegionMap.setIcon(_worldMap);
 					_buttonOk.setEnabled(false);
-					super.pack();
+					pack();
 				}
 			}
 		}
-	}
-	
-	@Override
-	public final void pack()
-	{
-		super.setResizable(true);
-		super.pack();
-		super.setResizable(false);
 	}
 	
 	@Override

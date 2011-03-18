@@ -17,12 +17,12 @@ package g3deditor.geo;
 import g3deditor.geo.blocks.GeoBlockComplex;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.geo.blocks.GeoBlockMultiLevel;
+import g3deditor.util.Util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
-import org.inc.incolution.util.io.IncBufferedFileWriter;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -187,20 +187,22 @@ public final class GeoRegion
 		return _geoBlocks[blockX][blockY].nGetLayerCount(geoX, geoY);
 	}
 	
-	public final void saveTo(final IncBufferedFileWriter writer, final boolean l2j) throws IOException
+	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
 	{
 		if (!l2j)
 		{
-			writer.writeByte((byte) (_regionX + 10));
-			writer.writeByte((byte) (_regionY + 10));
-			writer.writeBytes(new byte[16]); // TODO the rest
+			Util.writeByte(_regionX + 10, os);
+			Util.writeByte(_regionY + 10, os);
+			
+			// TODO put real data here
+			Util.writeBytes(new byte[16], os);
 		}
 		
 		for (int x = 0; x < GeoEngine.GEO_REGION_SIZE; x++)
 		{
 			for (int y = 0; y < GeoEngine.GEO_REGION_SIZE; y++)
 			{
-				_geoBlocks[x][y].saveTo(writer, l2j);
+				_geoBlocks[x][y].saveTo(os, l2j);
 			}
 		}
 	}

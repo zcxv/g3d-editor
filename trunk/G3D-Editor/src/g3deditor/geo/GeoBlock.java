@@ -15,8 +15,7 @@
 package g3deditor.geo;
 
 import java.io.IOException;
-
-import org.inc.incolution.util.io.IncBufferedFileWriter;
+import java.io.OutputStream;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -129,7 +128,7 @@ public abstract class GeoBlock implements Cloneable
 	
 	public abstract int removeLayer(final int geoX, final int geoY, final int layer);
 	
-	public abstract void saveTo(final IncBufferedFileWriter writer, final boolean l2j) throws IOException;
+	public abstract void saveTo(final OutputStream os, final boolean l2j) throws IOException;
 	
 	public abstract GeoCell[] getCells();
 	

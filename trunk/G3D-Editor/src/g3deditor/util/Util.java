@@ -19,6 +19,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Comparator;
 
 import javax.imageio.ImageIO;
@@ -157,5 +158,29 @@ public final class Util
 		g.dispose();
 		
 		return scaled;
+	}
+	
+	public static final void writeByte(final int value, final OutputStream os) throws IOException
+	{
+		os.write((byte) (value & 0xFF));
+	}
+	
+	public static final void writeBytes(final byte[] values, final OutputStream os) throws IOException
+	{
+		os.write(values);
+	}
+	
+	public static final void writeInt(final int value, final OutputStream os) throws IOException
+	{
+		os.write((byte) (value & 0xFF));
+		os.write((byte) (value >> 8 & 0xFF));
+		os.write((byte) (value >> 16 & 0xFF));
+		os.write((byte) (value >> 24 & 0xFF));
+	}
+	
+	public static final void writeShort(final int value, final OutputStream os) throws IOException
+	{
+		os.write((byte) (value & 0xFF));
+		os.write((byte) (value >> 8 & 0xFF));
 	}
 }

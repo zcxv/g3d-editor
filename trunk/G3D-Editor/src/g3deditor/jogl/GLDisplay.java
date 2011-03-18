@@ -28,7 +28,6 @@ import g3deditor.util.FastArrayList;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import javax.media.opengl.GL;
@@ -37,9 +36,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
-
-import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -51,6 +47,18 @@ public final class GLDisplay implements GLEventListener
 	private static final long NANOS_IN_MILLISECOND = TimeUnit.NANOSECONDS.convert(1, TimeUnit.MILLISECONDS);
 	private static final long NANOS_IN_SECOND = TimeUnit.NANOSECONDS.convert(1, TimeUnit.SECONDS);
 	
+	private static GLDisplay _instance;
+	
+	public static final void init(final GLCanvas canvas)
+	{
+		_instance = new GLDisplay(canvas);
+	}
+	
+	public static final GLDisplay getInstance()
+	{
+		return _instance;
+	}
+	
 	private static final double nanosToFps(final double nanos)
 	{
 		return NANOS_IN_SECOND / nanos;
@@ -59,6 +67,11 @@ public final class GLDisplay implements GLEventListener
 	private static final double nanosToTpf(final double nanos)
 	{
 		return nanos / NANOS_IN_MILLISECOND;
+	}
+	
+	private static final double roundFps(final double fps)
+	{
+		return ((int) (fps * 100f)) / 100d;
 	}
 	
 	private static final float VIEW_ANGLE = 45f;
@@ -70,6 +83,7 @@ public final class GLDisplay implements GLEventListener
 	private final GLGUIRenderer _guiRenderer;
 	private final GLCellRenderSelector _renderSelector;
 	private final GLCamera _camera;
+	private final GLTerrain _terrain;
 	private final AWTInput _input;
 	private final GLText _fpsText;
 	private final GLText _callsText;
@@ -89,11 +103,7 @@ public final class GLDisplay implements GLEventListener
 	private int _loopsFPS;
 	private int _elementsFPS;
 	
-	private Texture _nsweTexture;
-	
-	private GLTerrain _terrain;
-	
-	public GLDisplay(final GLCanvas canvas)
+	private GLDisplay(final GLCanvas canvas)
 	{
 		_canvas = canvas;
 		
@@ -102,22 +112,23 @@ public final class GLDisplay implements GLEventListener
 		{
 			// Old G3D 11 fps - 18092
 			case 0: // 15 fps - 18171 - 136%(OLD)
-				_renderer = new IRenderer(this);
+				_renderer = new IRenderer();
 				break;
 				
 			case 1: // 28 fps - 18171 - 254%(OLD) - 186% (I)
-				_renderer = new DLRenderer(this);
+				_renderer = new DLRenderer();
 				break;
 				
 			default: // 40 fps - 18171 - 363%(OLD) - 124%(DL) - 266%(I)
-				_renderer = new VBORenderer(this);
+				_renderer = new VBORenderer();
 				break;
 		}
 		
-		_guiRenderer = new GLGUIRenderer(this);
-		_renderSelector = new GLCellRenderSelector(this);
-		_camera = new GLCamera(this);
-		_input = new AWTInput(this);
+		_guiRenderer = new GLGUIRenderer();
+		_renderSelector = new GLCellRenderSelector();
+		_camera = new GLCamera();
+		_terrain = new GLTerrain();
+		_input = new AWTInput();
 		
 		_callsText = _guiRenderer.newText(10, 10);
 		_fpsText = _guiRenderer.newText(10, _callsText.getY() + GLGUIRenderer.TEXT_HEIGHT);
@@ -196,28 +207,11 @@ public final class GLDisplay implements GLEventListener
 		_glu.gluPerspective(VIEW_ANGLE, 1.0f, VIEW_Z_NEAR, VIEW_Z_FAR);
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		
-		//int camX = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionX(), GeoEngine.GEO_REGION_SIZE / 2);
-		//int camY = GeoEngine.getGeoXY(GeoEngine.getInstance().getActiveRegion().getRegionY(), GeoEngine.GEO_REGION_SIZE / 2);
-		
-		//_camera.setXYZ(camX, GeoEngine.getInstance().nGetCell(camX, camY, 0).getHeight() / 16f, camY);
-		//_camera.onProjectionMatrixChanged();
-		//_camera.checkPositionOrRotationChanged();
 		_renderer.init(gl);
 		_guiRenderer.init(gl);
 		_renderSelector.init();
+		_terrain.init(gl);
 		_input.setEnabled(true);
-		
-		try
-		{
-			_nsweTexture = TextureIO.newTexture(new File("./data/textures/nswe.png"), true);
-			_nsweTexture.enable();
-			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
-			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
-		}
 		
 		_time = System.nanoTime();
 		_timeFPS = 0L;
@@ -225,8 +219,6 @@ public final class GLDisplay implements GLEventListener
 		
 		_renderInfoText.setText("Renderer: " + _renderer);
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
-		_terrain = new GLTerrain();
-		_terrain.init(gl);
 	}
 	
 	/**
@@ -238,15 +230,8 @@ public final class GLDisplay implements GLEventListener
 		final GL2 gl = glautodrawable.getGL().getGL2();
 		_renderer.dispose(gl);
 		_guiRenderer.dispose(gl);
-		_nsweTexture.destroy(gl);
 		_renderSelector.dispose();
 		_terrain.dispose(gl);
-	}
-	
-	
-	private static final double getFPS(final double fps)
-	{
-		return ((int) (fps * 100f)) / 100d;
 	}
 	
 	/**
@@ -268,7 +253,7 @@ public final class GLDisplay implements GLEventListener
 			_timeFPS = 0L;
 			_loopsFPS = 0;
 			_elementsFPS = 0;
-			_fpsText.setText("Fps:   " + getFPS(fps));
+			_fpsText.setText("Fps:   " + roundFps(fps));
 			_callsText.setText("Calls: " + elements);
 		}
 		
@@ -297,7 +282,6 @@ public final class GLDisplay implements GLEventListener
 		if (_input.getKeyGToggle())
 		{
 			_renderer.enableRender(gl);
-			_nsweTexture.bind();
 			
 			GLSubRenderSelector selector;
 			for (int i = _renderSelector.getElementsToRender(), y; i-- > 0;)
@@ -363,7 +347,7 @@ public final class GLDisplay implements GLEventListener
 		}
 		mouseEvents.clear();
 		
-		_guiRenderer.render(gl, _camera);
+		_guiRenderer.render(gl);
 		
 		gl.glFlush();
 	}

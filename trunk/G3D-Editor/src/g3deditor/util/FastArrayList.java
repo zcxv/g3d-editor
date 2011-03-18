@@ -23,10 +23,6 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import org.inc.incolution.util.IncStringBuilder;
-import org.inc.incolution.util.SimpleRnd;
-import org.inc.incolution.util.list.IncArrayList;
-
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
@@ -459,7 +455,7 @@ public final class FastArrayList<E> implements List<E>
 		return cng;
 	}
 	
-	public final void removeAll(final IncArrayList<? extends E> list)
+	public final void removeAll(final FastArrayList<? extends E> list)
 	{
 		for (int i = list.size(); i-- > 0;)
 		{
@@ -565,14 +561,6 @@ public final class FastArrayList<E> implements List<E>
 		setUnsafeVoid(index, value);
 	}
 	
-	public final void shuffle()
-	{
-		for (int i = _size; i-- > 0;)
-		{
-			swapUnsafe(i, SimpleRnd.getNotLimitedUnsafe(_size));
-		}
-	}
-	
 	public final void shuffle(final Random random)
 	{
 		for (int i = _size; i-- > 0;)
@@ -640,8 +628,8 @@ public final class FastArrayList<E> implements List<E>
 		
 		final E[] values = _values;
 		final int size = _size;
-		final IncStringBuilder isb = new IncStringBuilder(128);
-		isb.appendUnsafe('[');
+		final StringBuilder isb = new StringBuilder(128);
+		isb.append('[');
 		for (int i = 0; i < size; i++)
 		{
 			isb.append(values[i]);

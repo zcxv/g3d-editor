@@ -17,12 +17,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/newt.all.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/incolution.jar" sourcepath="lib/incolution-src.jar"/>
 	<classpathentry kind="lib" path="lib/javolution.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

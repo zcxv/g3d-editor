@@ -18,12 +18,12 @@ import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.cells.GeoCellFlat;
-import g3deditor.swing.FrameMain;
+import g3deditor.jogl.GLDisplay;
+import g3deditor.util.Util;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
-import org.inc.incolution.util.io.IncBufferedFileWriter;
 
 /**
  * Flat block, 1 level, 1 height.<br>
@@ -101,12 +101,12 @@ public final class GeoBlockFlat extends GeoBlock
 	}
 	
 	@Override
-	public final void saveTo(final IncBufferedFileWriter writer, final boolean l2j) throws IOException
+	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
 	{
-		writer.writeByte(GeoEngine.GEO_BLOCK_TYPE_FLAT);
-		writer.writeShort(_cells[0].getHeight());
+		Util.writeByte(GeoEngine.GEO_BLOCK_TYPE_FLAT, os);
+		Util.writeShort(_cells[0].getHeight(), os);
 		if (!l2j)
-			writer.writeShort(_cells[0].getHeight());
+			Util.writeShort(_cells[0].getHeight(), os);
 	}
 	
 	@Override
@@ -160,6 +160,6 @@ public final class GeoBlockFlat extends GeoBlock
 	@Override
 	public final void updateMinMaxHeight(final short newHeight, final short oldHeight)
 	{
-		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();
+		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
 	}
 }

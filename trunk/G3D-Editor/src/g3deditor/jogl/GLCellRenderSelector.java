@@ -37,7 +37,6 @@ public final class GLCellRenderSelector
 	public static final int MIN_VIS_GRID_RANGE = 8;
 	public static final int MAX_VIS_GRID_RANGE = 96;
 	
-	private final GLDisplay _display;
 	private final GLSubRenderSelectorComparator _glSubRenderSelectorComparator;
 	private final GeoCellComparator _cellComparator;
 	private final TaskExecutor _taskExecutor;
@@ -54,9 +53,8 @@ public final class GLCellRenderSelector
 	private boolean _freezeGrid;
 	private int _gridRange;
 	
-	public GLCellRenderSelector(final GLDisplay display)
+	public GLCellRenderSelector()
 	{
-		_display = display;
 		_glSubRenderSelectorComparator = new GLSubRenderSelectorComparator();
 		_cellComparator = new GeoCellComparator();
 		_geoBlocks = new GLSubRenderSelector[0];
@@ -72,11 +70,6 @@ public final class GLCellRenderSelector
 	public final void dispose()
 	{
 		_taskExecutor.dispose();
-	}
-	
-	public final GLDisplay getDisplay()
-	{
-		return _display;
 	}
 	
 	public final GeoCellComparator getGeoCellComparator()
@@ -321,7 +314,7 @@ public final class GLCellRenderSelector
 		@Override
 		public final int compare(final GLSubRenderSelector o1, final GLSubRenderSelector o2)
 		{
-			final GLCamera camera = getDisplay().getCamera();
+			final GLCamera camera = GLDisplay.getInstance().getCamera();
 			final double dx1 = camera.getX() - o1.getGeoBlock().getGeoX();
 			final double dy1 = camera.getZ() - o1.getGeoBlock().getGeoY();
 			final double dx2 = camera.getX() - o2.getGeoBlock().getGeoX();
@@ -343,7 +336,7 @@ public final class GLCellRenderSelector
 		@Override
 		public final int compare(final GeoCell o1, final GeoCell o2)
 		{
-			final GLCamera camera = getDisplay().getCamera();
+			final GLCamera camera = GLDisplay.getInstance().getCamera();
 			final double dx1 = camera.getX() - o1.getGeoX();
 			final double dy1 = camera.getZ() - o1.getGeoY();
 			final double dz1 = camera.getY() - o1.getHeight() / 16f;

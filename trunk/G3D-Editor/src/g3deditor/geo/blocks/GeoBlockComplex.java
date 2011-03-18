@@ -18,12 +18,12 @@ import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.cells.GeoCellCM;
-import g3deditor.swing.FrameMain;
+import g3deditor.jogl.GLDisplay;
+import g3deditor.util.Util;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
-import org.inc.incolution.util.io.IncBufferedFileWriter;
 
 /**
  * Complex block, 1 level, 64 heights (each cell in block).<br>
@@ -166,14 +166,14 @@ public final class GeoBlockComplex extends GeoBlock
 	}
 
 	@Override
-	public final void saveTo(final IncBufferedFileWriter writer, final boolean l2j) throws IOException
+	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
 	{
-		writer.writeByte(GeoEngine.GEO_BLOCK_TYPE_COMPLEX);
+		Util.writeByte(GeoEngine.GEO_BLOCK_TYPE_COMPLEX, os);
 		for (int x = 0, y; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				writer.writeShort(_cells[indexOf(x, y)].getHeightAndNSWE());
+				Util.writeShort(_cells[indexOf(x, y)].getHeightAndNSWE(), os);
 			}
 		}
 	}
@@ -246,6 +246,6 @@ public final class GeoBlockComplex extends GeoBlock
 			return;
 		}
 		
-		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();
+		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
 	}
 }

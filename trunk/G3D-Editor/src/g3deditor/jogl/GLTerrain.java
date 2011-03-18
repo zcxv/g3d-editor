@@ -60,7 +60,6 @@ public final class GLTerrain
 		_vboIndex = -1;
 		_vboVertex = -1;
 		_vboTexture = -1;
-		_enabled = false;
 	}
 	
 	public final void setRegion(final GeoRegion region)
@@ -152,7 +151,7 @@ public final class GLTerrain
 	
 	public final void render(final GL2 gl)
 	{
-		if (_vboIndex == -1 || !_enabled)
+		if (_vboIndex == -1 || !_enabled || _region == null)
 			return;
 		
 		if (_needUpdateTexture)
