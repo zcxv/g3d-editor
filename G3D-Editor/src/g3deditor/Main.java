@@ -66,10 +66,9 @@ public final class Main
 				GLProfile glp = GLProfile.get("GL_DEFAULT");
 				GLCapabilities caps = new GLCapabilities(glp);
 				GLCanvas canvas = new GLCanvas(caps);
-				GLDisplay display = new GLDisplay(canvas);
-				canvas.addGLEventListener(display);
-				
-				FrameMain.init(display);
+				GLDisplay.init(canvas);
+				canvas.addGLEventListener(GLDisplay.getInstance());
+				FrameMain.init();
 			}
 		},
 		new CheckedRunnable()
@@ -95,7 +94,7 @@ public final class Main
 			{
 				FrameMain.getInstance().validate();
 				FrameMain.getInstance().setVisible(true);
-				new Animator(FrameMain.getInstance().getDisplay().getCanvas()).start();
+				new Animator(GLDisplay.getInstance().getCanvas()).start();
 			}
 		});
 	}

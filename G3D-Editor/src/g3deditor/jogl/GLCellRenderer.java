@@ -14,9 +14,14 @@
  */
 package g3deditor.jogl;
 
+import java.io.File;
+
 import g3deditor.geo.GeoCell;
 
 import javax.media.opengl.GL2;
+
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -29,18 +34,6 @@ public abstract class GLCellRenderer
 	protected static final int NSWE_COMBINATIONS = 16;
 	protected static final int NSWE_TEX_ROWS_COLS = 4;
 	protected static final float NSWE_TEX_BLOCK = 1f / NSWE_TEX_ROWS_COLS;
-	
-	private final GLDisplay _display;
-	
-	public GLCellRenderer(final GLDisplay display)
-	{
-		_display = display;
-	}
-	
-	public final GLDisplay getDisplay()
-	{
-		return _display;
-	}
 	
 	protected final void renderCell(final GL2 gl, final boolean big, final int nswe)
 	{
@@ -81,13 +74,37 @@ public abstract class GLCellRenderer
 		gl.glEnd();
 	}
 	
-	public abstract void init(final GL2 gl);
+	private Texture _nsweTexture;
 	
-	public abstract void enableRender(final GL2 gl);
+	public void init(final GL2 gl)
+	{
+		try
+		{
+			_nsweTexture = TextureIO.newTexture(new File("./data/textures/nswe.png"), true);
+			_nsweTexture.enable();
+			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+		}
+		catch (final Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void enableRender(final GL2 gl)
+	{
+		_nsweTexture.bind();
+	}
 	
 	public abstract void render(final GL2 gl, final GeoCell cell);
 	
-	public abstract void disableRender(final GL2 gl);
+	public void disableRender(final GL2 gl)
+	{
+		
+	}
 	
-	public abstract void dispose(final GL2 gl);
+	public void dispose(final GL2 gl)
+	{
+		_nsweTexture.destroy(gl);
+	}
 }

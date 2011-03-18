@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.Config;
 import g3deditor.util.FastArrayList;
 
 import java.awt.AWTException;
@@ -41,7 +42,6 @@ import javax.media.opengl.awt.GLCanvas;
  */
 public final class AWTInput implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
-	private final GLDisplay _display;
 	private final Cursor _cursor;
 	private final FastArrayList<MouseEvent> _mouseEvents;
 	
@@ -70,9 +70,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	
 	private Robot _robot;
 	
-	public AWTInput(final GLDisplay display)
+	public AWTInput()
 	{
-		_display = display;
 		_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR), new Point(0, 0), "CCursor");
 		_mouseEvents = new FastArrayList<MouseEvent>();
 		
@@ -84,11 +83,6 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 		{
 			e.printStackTrace();
 		}
-	}
-	
-	public final GLDisplay getDisplay()
-	{
-		return _display;
 	}
 	
 	public final FastArrayList<MouseEvent> getMouseEvents()
@@ -153,7 +147,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	
 	public final void setEnabled(final boolean enabled)
 	{
-		final GLCanvas canvas = _display.getCanvas();
+		final GLCanvas canvas = GLDisplay.getInstance().getCanvas();
 		if (enabled)
 		{
 			canvas.addMouseListener(this);
@@ -174,7 +168,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	
 	public final void update(final GL2 gl, final double tpf)
 	{
-		final GLCamera camera = _display.getCamera();
+		final GLCamera camera = GLDisplay.getInstance().getCamera();
 		
 		if (_mouse3)
 		{
@@ -253,7 +247,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 				
 			case MouseEvent.BUTTON3:
 			{
-				_display.getCanvas().setCursor(state ? _cursor : Cursor.getDefaultCursor());
+				GLDisplay.getInstance().getCanvas().setCursor(state ? _cursor : Cursor.getDefaultCursor());
 				_mouse3 = state;
 				_mouse3DragX = mouseevent.getXOnScreen();
 				_mouse3DragY = mouseevent.getYOnScreen();
@@ -404,7 +398,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 		_keyR = false;
 		_keyRToggle = false;
 		_keyT = false;
-		_keyTToggle = false;
+		_keyTToggle = Config.TERRAIN_DEFAULT_ON;
 		_keyG = false;
 		_keyGToggle = true;
 		_keyF =  false;

@@ -18,13 +18,13 @@ import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.cells.GeoCellCM;
-import g3deditor.swing.FrameMain;
+import g3deditor.jogl.GLDisplay;
+import g3deditor.util.Util;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
-import org.inc.incolution.util.io.IncBufferedFileWriter;
 
 /**
  * MultiLevel block, x levels, 64 heights + y (each cell can have multiple heights).<br>
@@ -248,10 +248,10 @@ public final class GeoBlockMultiLevel extends GeoBlock
 	}
 	
 	@Override
-	public final void saveTo(final IncBufferedFileWriter writer, final boolean l2j) throws IOException
+	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
 	{
 		GeoCell[] layers;
-		writer.writeByte(GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL);
+		Util.writeByte(GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL, os);
 		for (int x = 0, y, z; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
@@ -259,16 +259,16 @@ public final class GeoBlockMultiLevel extends GeoBlock
 				layers = _cells3D[x][y];
 				if (l2j)
 				{
-					writer.writeByte((byte) layers.length);
+					Util.writeByte(layers.length, os);
 				}
 				else
 				{
-					writer.writeShort((short) layers.length);
+					Util.writeShort(layers.length, os);
 				}
 				
 				for (z = layers.length; z-- > 0;)
 				{
-					writer.writeShort(layers[z].getHeightAndNSWE());
+					Util.writeShort(layers[z].getHeightAndNSWE(), os);
 				}
 			}
 		}
@@ -380,6 +380,6 @@ public final class GeoBlockMultiLevel extends GeoBlock
 			return;
 		}
 		
-		FrameMain.getInstance().getDisplay().getTerrain().setNeedUpdateVBO();
+		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
 	}
 }

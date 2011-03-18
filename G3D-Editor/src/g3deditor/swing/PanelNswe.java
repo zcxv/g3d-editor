@@ -53,10 +53,10 @@ public final class PanelNswe extends JPanel implements ActionListener
 	
 	private final void initLayout()
 	{
-		super.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+		setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		for (final NsweButton buttonNswe : _buttonsNswe)
 		{
-			super.add(buttonNswe);
+			add(buttonNswe);
 		}
 	}
 	

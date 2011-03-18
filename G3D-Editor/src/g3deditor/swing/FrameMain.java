@@ -40,9 +40,9 @@ public final class FrameMain extends JFrame implements ActionListener
 {
 	private static FrameMain _instance;
 	
-	public static final void init(final GLDisplay display)
+	public static final void init()
 	{
-		_instance = new FrameMain(display);
+		_instance = new FrameMain();
 	}
 	
 	public static final FrameMain getInstance()
@@ -50,7 +50,6 @@ public final class FrameMain extends JFrame implements ActionListener
 		return _instance;
 	}
 	
-	private final GLDisplay _display;
 	private final JPanel _panelRight;
 	private final PanelNswe _panelNswe;
 	private final PanelCellInfo _panelCellInfo;
@@ -71,12 +70,11 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	private GeoCell _selectedCell;
 	
-	private FrameMain(final GLDisplay display)
+	private FrameMain()
 	{
 		super("G3D-Editor [A1] by Forsaiken");
 		super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		_display = display;
 		_panelRight = new JPanel();
 		_panelNswe = new PanelNswe();
 		_panelCellInfo = new PanelCellInfo();
@@ -112,11 +110,6 @@ public final class FrameMain extends JFrame implements ActionListener
 		
 		setMinimumSize(new Dimension(1024, 768));
 		setLocationRelativeTo(null);
-	}
-	
-	public final GLDisplay getDisplay()
-	{
-		return _display;
 	}
 	
 	private final void initLayout()
@@ -161,7 +154,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
 		gbc.weighty = 1;
-		add(_display.getCanvas(), gbc);
+		add(GLDisplay.getInstance().getCanvas(), gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 1;

@@ -38,16 +38,14 @@ public final class GLGUIRenderer
 	public static final int COMPASS_HALF_HEIGHT = COMPASS_HEIGHT / 2;
 	public static final Charset UTF_8 = Charset.forName("UTF-8");
 	
-	private final GLDisplay _display;
 	private final FastArrayList<GLText> _texts;
 	
 	private int _listId;
 	private Texture _fontTexture;
 	private Texture _compassTexture;
 	
-	public GLGUIRenderer(final GLDisplay display)
+	public GLGUIRenderer()
 	{
-		_display = display;
 		_texts = new FastArrayList<GLText>();
 	}
 	
@@ -97,7 +95,6 @@ public final class GLGUIRenderer
 		gl.glTexCoord2f(1.0f, 1.0f);
 		gl.glVertex3f(COMPASS_HALF_HEIGHT, -COMPASS_HALF_HEIGHT, 0.0f);
 		gl.glEnd();
-		gl.glTranslatef(9f, 0, 0);
 		gl.glEndList();
 		
 		try
@@ -118,13 +115,13 @@ public final class GLGUIRenderer
 		}
 	}
 	
-	public final void render(final GL2 gl, final GLCamera camera)
+	public final void render(final GL2 gl)
 	{
 		gl.glDisable(GL2.GL_DEPTH_TEST);
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
-		gl.glOrtho(0, _display.getWidth(), 0, _display.getHeight(), -1, 1);
+		gl.glOrtho(0, GLDisplay.getInstance().getWidth(), 0, GLDisplay.getInstance().getHeight(), -1, 1);
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
@@ -154,8 +151,8 @@ public final class GLGUIRenderer
 		gl.glListBase(0);
 		_compassTexture.bind();
 		gl.glPushMatrix();
-		gl.glTranslatef(COMPASS_HALF_HEIGHT, camera.getDisplay().getHeight() - COMPASS_HALF_HEIGHT, 0);
-		gl.glRotatef(360f - camera.getRotY(), 0.0f, 0.0f, 1.0f);
+		gl.glTranslatef(COMPASS_HALF_HEIGHT, GLDisplay.getInstance().getHeight() - COMPASS_HALF_HEIGHT, 0);
+		gl.glRotatef(360f - GLDisplay.getInstance().getCamera().getRotY(), 0.0f, 0.0f, 1.0f);
 		gl.glCallList(_listId + 256);
 		gl.glPopMatrix();
 		

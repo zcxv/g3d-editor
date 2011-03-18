@@ -17,7 +17,6 @@ package g3deditor.jogl.renderer;
 import g3deditor.entity.CellColor;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
-import g3deditor.jogl.GLDisplay;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.util.BufferUtils;
 
@@ -99,14 +98,6 @@ public final class VBORenderer extends GLCellRenderer
 	private int _vboVertex;
 	private int _vboTexture;
 	
-	/**
-	 * @param display
-	 */
-	public VBORenderer(final GLDisplay display)
-	{
-		super(display);
-	}
-	
 	private static final void fillTextureUV(final int nswe, final FloatBuffer textureBuffer)
 	{
 		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
@@ -131,6 +122,7 @@ public final class VBORenderer extends GLCellRenderer
 	@Override
 	public final void init(final GL2 gl)
 	{
+		super.init(gl);
 		_indexBuffer = BufferUtils.createShortBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
 		_vertexBuffer = BufferUtils.createFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * NSWE_COMBINATIONS + GEOMETRY_VERTEX_DATA_SMALL_LENGTH);
 		_textureBuffer = BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_TEXTURE_DATA_LENGTH);
@@ -175,6 +167,7 @@ public final class VBORenderer extends GLCellRenderer
 	@Override
 	public final void enableRender(final GL2 gl)
 	{
+		super.enableRender(gl);
 		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 		
@@ -215,6 +208,7 @@ public final class VBORenderer extends GLCellRenderer
 	@Override
 	public final void disableRender(final GL2 gl)
 	{
+		super.disableRender(gl);
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
 		
@@ -228,6 +222,7 @@ public final class VBORenderer extends GLCellRenderer
 	@Override
 	public final void dispose(final GL2 gl)
 	{
+		super.dispose(gl);
 		gl.glDeleteBuffers(3, new int[]{_vboIndex, _vboVertex, _vboTexture}, 0);
 	}
 	

@@ -30,7 +30,6 @@ import javax.media.opengl.glu.GLU;
  */
 public final class GLCamera
 {
-	private final GLDisplay _display;
 	private final int[] _viewport;
 	private final float[] _projectionMatrix;
 	private final float[] _modelviewMatrix;
@@ -61,9 +60,8 @@ public final class GLCamera
 	private boolean _needUpdateCombinedMatrix;
 	private boolean _needUpdateFrustum;
 	
-	public GLCamera(final GLDisplay display)
+	public GLCamera()
 	{
-		_display = display;
 		_viewport = new int[4];
 		_projectionMatrix = new float[16];
 		_modelviewMatrix = new float[16];
@@ -77,11 +75,6 @@ public final class GLCamera
 		_prevCamPosZ = Float.NEGATIVE_INFINITY;
 		_prevCamRotX = Float.NEGATIVE_INFINITY;
 		_prevCamRotY = Float.NEGATIVE_INFINITY;
-	}
-	
-	public final GLDisplay getDisplay()
-	{
-		return _display;
 	}
 	
 	public final void setXYZ(final float x, final float y, final float z)
