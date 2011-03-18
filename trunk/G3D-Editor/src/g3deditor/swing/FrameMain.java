@@ -18,17 +18,20 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
 import g3deditor.jogl.GLDisplay;
+import g3deditor.util.Util;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -62,13 +65,11 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final DialogConfig _dialogConfig;
 	
 	private final JMenuBar _menuBar;
-	private final JMenu _menuData;
-	private final JMenuItem _itemLoad;
-	private final JMenuItem _itemSave;
-	private final JMenuItem _itemConfig;
-	private final JMenuItem _itemDataExit;
-	private final JMenu _menuHelp;
-	private final JMenuItem _itemAbout;
+	private final JButton _buttonConfig;
+	private final JButton _buttonJumpTo;
+	private final JButton _buttonSave;
+	private final JButton _buttonHelp;
+	private final JLabel _labelLogoL2j;
 	
 	private GeoCell _selectedCell;
 	
@@ -86,25 +87,16 @@ public final class FrameMain extends JFrame implements ActionListener
 		_dialogConfig = new DialogConfig(this);
 		
 		_menuBar = new JMenuBar();
-		_menuData = new JMenu("File");
-		_itemLoad = new JMenuItem("Load");
-		_itemLoad.addActionListener(this);
-		_itemSave = new JMenuItem("Save");
-		_itemSave.addActionListener(this);
-		_itemConfig = new JMenuItem("Config");
-		_itemConfig.addActionListener(this);
-		_itemDataExit = new JMenuItem("Exit");
-		_menuHelp = new JMenu("Help");
-		_itemAbout = new JMenuItem("About");
-		_itemAbout.addActionListener(this);
-		
-		_menuData.add(_itemLoad);
-		_menuData.add(_itemSave);
-		_menuData.add(_itemConfig);
-		_menuData.add(_itemDataExit);
-		_menuBar.add(_menuData);
-		_menuHelp.add(_itemAbout);
-		_menuBar.add(_menuHelp);
+		_buttonConfig = new JButton(new ImageIcon(Util.loadImage("./data/icon/config.png")));
+		_buttonConfig.addActionListener(this);
+		_buttonJumpTo = new JButton(new ImageIcon(Util.loadImage("./data/icon/search.png")));
+		_buttonJumpTo.addActionListener(this);
+		_buttonSave = new JButton(new ImageIcon(Util.loadImage("./data/icon/save.png")));
+		_buttonSave.addActionListener(this);
+		_buttonHelp = new JButton(new ImageIcon(Util.loadImage("./data/icon/help.png")));
+		_buttonHelp.addActionListener(this);
+		final BufferedImage img = Util.loadImage("./data/icon/l2jserverlogo.png");
+		_labelLogoL2j = new JLabel(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
 		
 		setJMenuBar(_menuBar);
 		
@@ -119,6 +111,68 @@ public final class FrameMain extends JFrame implements ActionListener
 		final GridBagConstraints gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.CENTER;
 		gbc.fill = GridBagConstraints.BOTH;
+		
+		_menuBar.setLayout(new GridBagLayout());
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		_menuBar.add(_buttonConfig, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		_menuBar.add(_buttonJumpTo, gbc);
+		
+		gbc.gridx = 2;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.ipadx = 50;
+		_menuBar.add(new JLabel(), gbc);
+		
+		gbc.gridx = 3;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		_menuBar.add(_labelLogoL2j, gbc);
+		
+		gbc.gridx = 4;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.ipadx = 50;
+		_menuBar.add(new JLabel(), gbc);
+		
+		gbc.gridx = 5;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		_menuBar.add(_buttonSave, gbc);
+		
+		gbc.gridx = 6;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		_menuBar.add(_buttonHelp, gbc);
 		
 		//gbc.insets = new Insets(2, 2, 2, 2);
 		
@@ -199,11 +253,11 @@ public final class FrameMain extends JFrame implements ActionListener
 	@Override
 	public final void actionPerformed(final ActionEvent e)
 	{
-		if (e.getSource() == _itemLoad)
+		if (e.getSource() == _buttonJumpTo)
 		{
 			_dialogJumpTo.setVisible(true);
 		}
-		else if (e.getSource() == _itemSave)
+		else if (e.getSource() == _buttonSave)
 		{
 			final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
 			if (region != null)
@@ -215,11 +269,11 @@ public final class FrameMain extends JFrame implements ActionListener
 				JOptionPane.showMessageDialog(FrameMain.this, "I am sure you want to load a region first ;)", "Save Region UNKOWN?!?", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
-		else if (e.getSource() == _itemConfig)
+		else if (e.getSource() == _buttonConfig)
 		{
 			_dialogConfig.setVisible(true);
 		}
-		else if (e.getSource() == _itemAbout)
+		else if (e.getSource() == _buttonHelp)
 		{
 			JOptionPane.showMessageDialog(FrameMain.this, "<html>G3D-Editor<br>By Forsaiken<br>If you like this programm please donate!<br>PayPal: patrickbiesenbach@yahoo.de</html>", "About", JOptionPane.INFORMATION_MESSAGE);
 		}

@@ -18,6 +18,7 @@ import g3deditor.geo.GeoCell;
 import g3deditor.swing.defaults.DefaultTable;
 import g3deditor.util.Util;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
@@ -45,6 +46,7 @@ public final class PanelLayers extends JPanel implements ActionListener
 	{
 		_tableLayers = new CellLayerTable();
 		_paneLayers = new JScrollPane(_tableLayers);
+		_paneLayers.setPreferredSize((Dimension) _tableLayers.getPreferredSize().clone());
 		
 		_buttonLayerAdd = new JButton("Add Layer(s)");
 		_buttonLayerAdd.setEnabled(false);
