@@ -17,13 +17,12 @@ package g3deditor.geo.blocks;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.GeoRegion;
 import g3deditor.geo.cells.GeoCellCM;
 import g3deditor.jogl.GLDisplay;
-import g3deditor.util.Util;
+import g3deditor.util.GeoReader;
+import g3deditor.util.GeoWriter;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -35,23 +34,10 @@ import java.util.Arrays;
  */
 public final class GeoBlockMultiLevel extends GeoBlock
 {
-	private final GeoCell[][][] _cells3D;
+	private GeoCell[][][] _cells3D;
 	private GeoCell[] _cells;
 	private short _minHeight;
 	private short _maxHeight;
-	
-	private final void copyCells()
-	{
-		int count = 0;
-		for (final GeoCell[][] cells2D : _cells3D)
-		{
-			for (final GeoCell[] cells1D : cells2D)
-			{
-				count += cells1D.length;
-			}
-		}
-		copyCells(count);
-	}
 	
 	private final void copyCells(int count)
 	{
@@ -68,7 +54,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		}
 	}
 	
-	public GeoBlockMultiLevel(final ByteBuffer bb, final int geoX, final int geoY, final boolean l2j)
+	public GeoBlockMultiLevel(final GeoReader reader, final int geoX, final int geoY, final boolean l2j)
 	{
 		super(geoX, geoY);
 		_cells3D = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT][GeoEngine.GEO_BLOCK_SHIFT][];
@@ -78,7 +64,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		{
 			for (int y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				layers = l2j ? bb.get() : bb.getShort();
+				layers = l2j ? reader.get() : reader.getShort();
 				if (!GeoEngine.layersValid(layers))
 					throw new RuntimeException("Invalid layer count " + layers);
 				
@@ -86,7 +72,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 				_cells3D[x][y] = new GeoCell[layers];
 				for (int i = layers; i-- > 0;)
 				{
-					_cells3D[x][y][i] = new GeoCellCM(this, bb.getShort(), x, y);
+					_cells3D[x][y][i] = new GeoCellCM(this, reader.getShort(), x, y);
 				}
 			}
 		}
@@ -107,7 +93,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 			{
 				final GeoCell cell = new GeoCellCM(this, GeoEngine.convertHeightToHeightAndNSWEALL(block.getMinHeight()), x, y);
 				_cells3D[x][y][0] = cell;
-				_cells[x * GeoEngine.GEO_BLOCK_SHIFT + y] =cell; 
+				_cells[x * GeoEngine.GEO_BLOCK_SHIFT + y] = cell; 
 			}
 		}
 		calcMaxMinHeight();
@@ -125,16 +111,10 @@ public final class GeoBlockMultiLevel extends GeoBlock
 			{
 				final GeoCell cell = new GeoCellCM(this, block.nGetCellByLayer(x, y, 0).getHeightAndNSWE(), x, y);
 				_cells3D[x][y][0] = cell;
-				_cells[x * GeoEngine.GEO_BLOCK_SHIFT + y] =cell; 
+				_cells[x * GeoEngine.GEO_BLOCK_SHIFT + y] = cell; 
 			}
 		}
 		calcMaxMinHeight();
-	}
-	
-	private GeoBlockMultiLevel(final GeoBlockMultiLevel block)
-	{
-		super(block.getGeoX(), block.getGeoX());
-		_cells3D = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT][GeoEngine.GEO_BLOCK_SHIFT][1];
 	}
 	
 	@Override
@@ -218,60 +198,48 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		_maxHeight = maxHeight;
 	}
 	
+	/**
+	 * @see g3deditor.geo.GeoBlock#writeTo(g3deditor.util.GeoWriter, boolean)
+	 */
 	@Override
-	public final GeoBlockMultiLevel clone()
-	{
-		final GeoBlockMultiLevel clone = new GeoBlockMultiLevel(this);
-		copyDataTo(clone);
-		return clone;
-	}
-	
-	public final void copyDataTo(final GeoBlockMultiLevel block)
-	{
-		GeoCell[] layers, layersCopy;
-		for (int x = GeoEngine.GEO_BLOCK_SHIFT, y, z; x-- > 0;)
-		{
-			for (y = GeoEngine.GEO_BLOCK_SHIFT; y-- > 0;)
-			{
-				layers = _cells3D[x][y];
-				z = layers.length;
-				layersCopy = block._cells3D[x][y] = new GeoCell[z];
-				while (z-- > 0)
-				{
-					layersCopy[z] = new GeoCellCM(this, layers[z].getHeightAndNSWE(), x, y);
-				}
-			}
-		}
-		block._maxHeight = _maxHeight;
-		block._minHeight = _minHeight;
-		block.copyCells();
-	}
-	
-	@Override
-	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
+	public final void writeTo(final GeoWriter writer, final boolean l2j)
 	{
 		GeoCell[] layers;
-		Util.writeByte(GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL, os);
+		GeoRegion.putType(writer, l2j, getType());
 		for (int x = 0, y, z; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
 				layers = _cells3D[x][y];
 				if (l2j)
-				{
-					Util.writeByte(layers.length, os);
-				}
+					writer.put((byte) layers.length);
 				else
-				{
-					Util.writeShort(layers.length, os);
-				}
+					writer.putShort((short) layers.length);
 				
 				for (z = layers.length; z-- > 0;)
 				{
-					Util.writeShort(layers[z].getHeightAndNSWE(), os);
+					writer.putShort(layers[z].getHeightAndNSWE());
 				}
 			}
 		}
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getRequiredCapacity(boolean)
+	 */
+	@Override
+	public final int getRequiredCapacity(final boolean l2j)
+	{
+		int capacity = l2j ? 1 : 2;
+		for (int x = 0, y; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
+		{
+			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
+			{
+				capacity += l2j ? 1 : 2;
+				capacity += _cells3D[x][y].length * 2;
+			}
+		}
+		return capacity;
 	}
 	
 	@Override
@@ -381,5 +349,69 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		}
 		
 		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#unload()
+	 */
+	@Override
+	public final void unload()
+	{
+		for (int i = _cells.length; i-- > 0;)
+		{
+			_cells[i].unload();
+			_cells[i] = null;
+		}
+		_cells = null;
+		
+		GeoCell[][] cells2D;
+		GeoCell[] cells1D;
+		for (int i = _cells3D.length, j, k; i-- > 0;)
+		{
+			cells2D = _cells3D[i];
+			for (j = cells2D.length; j-- > 0;)
+			{
+				cells1D = cells2D[j];
+				for (k = cells1D.length; k-- > 0;)
+				{
+					cells1D[k].unload();
+					cells1D[k] = null;
+				}
+				cells2D[j] = null;
+			}
+			_cells3D[i] = null;
+		}
+		_cells3D = null;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#dataEquals(g3deditor.util.GeoReader)
+	 */
+	@Override
+	public final boolean dataEquals(final GeoReader reader)
+	{
+		if (getType() != GeoRegion.getType(reader, true))
+			return false;
+		
+		GeoCell[][] cells2D;
+		GeoCell[] cells1D;
+		for (int cellX = 0, cellY, layer; cellX < GeoEngine.GEO_BLOCK_SHIFT; cellX++)
+		{
+			cells2D = _cells3D[cellX];
+			for (cellY = 0; cellY < GeoEngine.GEO_BLOCK_SHIFT; cellY++)
+			{
+				cells1D = cells2D[cellY];
+				
+				if (cells1D.length != reader.get())
+					return false;
+				
+				for (layer = cells1D.length; layer-- > 0;)
+				{
+					if (cells1D[layer].getHeightAndNSWE() != reader.getShort())
+						return false;
+				}
+			}
+		}
+		return true;
 	}
 }

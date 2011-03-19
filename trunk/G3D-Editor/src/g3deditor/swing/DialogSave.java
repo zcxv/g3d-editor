@@ -65,6 +65,7 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 	};
 	
 	private final GeoRegion _region;
+	private final Runnable _toRunOnClose;
 	private final JFileChooser _fileChooser;
 	
 	private final JLabel _labelFile;
@@ -83,9 +84,15 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 	
 	public DialogSave(final Frame owner, final GeoRegion region)
 	{
+		this(owner, region, null);
+	}
+	
+	public DialogSave(final Frame owner, final GeoRegion region, final Runnable toRunOnClose)
+	{
 		super(owner, "Save Region " + region.getName(), true);
 		
 		_region = region;
+		_toRunOnClose = toRunOnClose;
 		_fileChooser = new JFileChooser();
 		_fileChooser.removeChoosableFileFilter(_fileChooser.getAcceptAllFileFilter());
 		_fileChooser.setFileFilter(FILE_FILTER);
@@ -239,7 +246,11 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 		
 		super.setVisible(visible);
 		if (!visible)
+		{
 			dispose();
+			if (_toRunOnClose != null)
+				_toRunOnClose.run();
+		}
 	}
 	
 	@Override

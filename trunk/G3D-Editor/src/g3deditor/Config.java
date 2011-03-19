@@ -83,12 +83,15 @@ public final class Config
 	{
 		try
 		{
-			PROPERTIES.load(CONFIG_FILE);
-			
-			PATH_TO_GEO_FILES		= PROPERTIES.getProperty("GeodataPath", "./data/geodata/");
-			TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainDefaultOn", "false"));
-			VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
-			LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", UIManager.getSystemLookAndFeelClassName());
+			if (CONFIG_FILE.isFile())
+			{
+				PROPERTIES.load(CONFIG_FILE);
+				
+				PATH_TO_GEO_FILES		= PROPERTIES.getProperty("GeodataPath", "./data/geodata/");
+				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainDefaultOn", "false"));
+				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
+				LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", UIManager.getSystemLookAndFeelClassName());
+			}
 		}
 		catch (final Exception e)
 		{

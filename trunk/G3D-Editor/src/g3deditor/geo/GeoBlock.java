@@ -14,8 +14,8 @@
  */
 package g3deditor.geo;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import g3deditor.util.GeoReader;
+import g3deditor.util.GeoWriter;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -47,9 +47,10 @@ public abstract class GeoBlock implements Cloneable
 		return _geoY;
 	}
 	
-	public final void setRegion(final GeoRegion region)
+	public final GeoBlock setRegion(final GeoRegion region)
 	{
 		_region = region;
+		return this;
 	}
 	
 	public final GeoRegion getRegion()
@@ -120,15 +121,17 @@ public abstract class GeoBlock implements Cloneable
 	
 	public abstract GeoCell[] nGetLayers(final int geoX, final int geoY);
 	
-	public abstract GeoBlock clone();
-	
 	public abstract int getMaxLayerCount();
 	
 	public abstract int addLayer(final int geoX, final int geoY, final short heightAndNSWE);
 	
 	public abstract int removeLayer(final int geoX, final int geoY, final int layer);
 	
-	public abstract void saveTo(final OutputStream os, final boolean l2j) throws IOException;
+	public abstract void writeTo(final GeoWriter writer, final boolean l2j);
+	
+	public abstract int getRequiredCapacity(final boolean l2j);
+	
+	public abstract boolean dataEquals(final GeoReader reader);
 	
 	public abstract GeoCell[] getCells();
 	
@@ -137,4 +140,6 @@ public abstract class GeoBlock implements Cloneable
 	public abstract short getMaxHeight();
 	
 	public abstract void updateMinMaxHeight(final short height, final short oldHeight);
+	
+	public abstract void unload();
 }

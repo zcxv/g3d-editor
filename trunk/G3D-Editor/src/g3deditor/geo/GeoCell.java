@@ -25,7 +25,7 @@ public abstract class GeoCell
 {
 	public static final GeoCell[] EMPTY_ARRAY = new GeoCell[0];
 	
-	private final GeoBlock _block;
+	private GeoBlock _block;
 	private SelectionState _selectionState;
 	
 	public GeoCell(final GeoBlock block)
@@ -66,6 +66,11 @@ public abstract class GeoCell
 	public final float getRenderZ()
 	{
 		return getGeoY();
+	}
+	
+	public final void unload()
+	{
+		_block = null;
 	}
 	
 	public abstract boolean isBig();
