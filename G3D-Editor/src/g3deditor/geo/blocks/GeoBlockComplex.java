@@ -17,13 +17,11 @@ package g3deditor.geo.blocks;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.GeoRegion;
 import g3deditor.geo.cells.GeoCellCM;
 import g3deditor.jogl.GLDisplay;
-import g3deditor.util.Util;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import g3deditor.util.GeoReader;
+import g3deditor.util.GeoWriter;
 
 /**
  * Complex block, 1 level, 64 heights (each cell in block).<br>
@@ -39,11 +37,11 @@ public final class GeoBlockComplex extends GeoBlock
 		return x * GeoEngine.GEO_BLOCK_SHIFT + y;
 	}
 	
-	private final GeoCell[] _cells;
+	private GeoCell[] _cells;
 	private short _minHeight;
 	private short _maxHeight;
 	
-	public GeoBlockComplex(final ByteBuffer bb, final int geoX, final int geoY, final boolean l2j)
+	public GeoBlockComplex(final GeoReader reader, final int geoX, final int geoY, final boolean l2j)
 	{
 		super(geoX, geoY);
 		_cells = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT * GeoEngine.GEO_BLOCK_SHIFT];
@@ -51,7 +49,7 @@ public final class GeoBlockComplex extends GeoBlock
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				_cells[indexOf(x, y)] = new GeoCellCM(this, bb.getShort(), x, y);
+				_cells[indexOf(x, y)] = new GeoCellCM(this, reader.getShort(), x, y);
 			}
 		}
 		calcMaxMinHeight();
@@ -85,12 +83,6 @@ public final class GeoBlockComplex extends GeoBlock
 			}
 		}
 		calcMaxMinHeight();
-	}
-	
-	private GeoBlockComplex(final GeoBlockComplex block)
-	{
-		super(block.getGeoX(), block.getGeoY());
-		_cells = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT * GeoEngine.GEO_BLOCK_SHIFT];
 	}
 	
 	@Override
@@ -143,39 +135,29 @@ public final class GeoBlockComplex extends GeoBlock
 		_maxHeight = maxHeight;
 	}
 	
+	/**
+	 * @see g3deditor.geo.GeoBlock#writeTo(g3deditor.util.GeoWriter, boolean)
+	 */
 	@Override
-	public final GeoBlockComplex clone()
+	public final void writeTo(final GeoWriter writer, final boolean l2j)
 	{
-		final GeoBlockComplex clone = new GeoBlockComplex(this);
-		copyDataTo(clone);
-		return clone;
-	}
-	
-	public final void copyDataTo(final GeoBlockComplex block)
-	{
-		for (int x = GeoEngine.GEO_BLOCK_SHIFT, y, i; x-- > 0;)
-		{
-			for (y = GeoEngine.GEO_BLOCK_SHIFT; y-- > 0;)
-			{
-				i = indexOf(x, y);
-				block._cells[i].setHeightAndNSWE(_cells[i].getHeightAndNSWE());
-			}
-		}
-		block._maxHeight = _maxHeight;
-		block._minHeight = _minHeight;
-	}
-
-	@Override
-	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
-	{
-		Util.writeByte(GeoEngine.GEO_BLOCK_TYPE_COMPLEX, os);
+		GeoRegion.putType(writer, l2j, getType());
 		for (int x = 0, y; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
 		{
 			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
 			{
-				Util.writeShort(_cells[indexOf(x, y)].getHeightAndNSWE(), os);
+				writer.putShort(_cells[indexOf(x, y)].getHeightAndNSWE());
 			}
 		}
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getRequiredCapacity(boolean)
+	 */
+	@Override
+	public final int getRequiredCapacity(final boolean l2j)
+	{
+		return GeoEngine.GEO_BLOCK_SHIFT * GeoEngine.GEO_BLOCK_SHIFT * 2 + (l2j ? 1 : 2);
 	}
 	
 	@Override
@@ -247,5 +229,39 @@ public final class GeoBlockComplex extends GeoBlock
 		}
 		
 		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#unload()
+	 */
+	@Override
+	public final void unload()
+	{
+		for (int i = _cells.length; i-- > 0;)
+		{
+			_cells[i].unload();
+			_cells[i] = null;
+		}
+		_cells = null;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#dataEquals(g3deditor.util.GeoReader)
+	 */
+	@Override
+	public final boolean dataEquals(final GeoReader reader)
+	{
+		if (getType() != GeoRegion.getType(reader, true))
+			return false;
+		
+		for (int x = 0, y; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
+		{
+			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
+			{
+				if (_cells[indexOf(x, y)].getHeightAndNSWE() != reader.getShort())
+					return false;
+			}
+		}
+		return true;
 	}
 }

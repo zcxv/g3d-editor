@@ -15,6 +15,7 @@
 package g3deditor.swing;
 
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.GeoRegion;
 import g3deditor.jogl.GLCamera;
 import g3deditor.jogl.GLDisplay;
 import g3deditor.util.Util;
@@ -38,6 +39,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 /**
@@ -458,7 +460,59 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			
 			try
 			{
-				GeoEngine.getInstance().reloadGeo(GeoEngine.getRegionXY(geoX), GeoEngine.getRegionXY(geoY), _comboGeoFileType.getSelectedItem() == "L2j Geo File");
+				final int regionX = GeoEngine.getRegionXY(geoX);
+				final int regionY = GeoEngine.getRegionXY(geoY);
+				final boolean l2j = _comboGeoFileType.getSelectedItem() == "L2j Geo File";
+				final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+				if (region != null)
+				{
+					if (region.getRegionX() != regionX || region.getRegionY() != regionY)
+					{
+						if (!region.allDataEqual())
+						{
+							switch (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Region " + region.getName() + " was modified.\nWould u like to save it?", "Save...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE))
+							{
+								case JOptionPane.YES_OPTION:
+								{
+									new DialogSave(FrameMain.getInstance(), region, new Runnable()
+									{
+										@Override
+										public final void run()
+										{
+											try
+											{
+												GeoEngine.getInstance().unload();
+												GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
+												
+												if (GeoEngine.getInstance().getActiveRegion() != null)
+													GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+											}
+											catch (final Exception e1)
+											{
+												e1.printStackTrace();
+											}
+										}
+									}).setVisible(true);
+									setVisible(false);
+									return;
+								}
+								
+								case JOptionPane.NO_OPTION:
+									break;
+									
+								default:
+									return;
+							}
+						}
+						GeoEngine.getInstance().unload();
+						GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
+					}
+				}
+				else
+				{
+					GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
+				}
+				
 				if (GeoEngine.getInstance().getActiveRegion() != null)
 					GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
 			}

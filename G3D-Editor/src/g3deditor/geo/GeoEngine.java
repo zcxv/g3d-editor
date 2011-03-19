@@ -22,13 +22,13 @@ import g3deditor.exceptions.GeoFileNotFoundException;
 import g3deditor.geo.blocks.GeoBlockComplex;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.geo.blocks.GeoBlockMultiLevel;
+import g3deditor.util.GeoReader;
+import g3deditor.util.GeoStreamReader;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -308,59 +308,6 @@ public final class GeoEngine
 		return null;
 	}
 	
-	private static final ByteBuffer readFile(final File file, final boolean l2j) throws GeoFileLoadException
-	{
-		FileInputStream fis = null;
-		try
-		{
-			fis = new FileInputStream(file);
-			final FileChannel fc = fis.getChannel();
-			if (fc.size() >= GeoEngine.GEO_REGION_MIN_FILE_SIZE && fc.size() <= Integer.MAX_VALUE)
-			{
-				final ByteBuffer bb = ByteBuffer.allocate((int) (l2j ? fc.size() : fc.size() - 18)).order(ByteOrder.LITTLE_ENDIAN);
-				if (!l2j)
-					fc.position(18);
-				
-				while (bb.hasRemaining() && fc.read(bb) != -1);
-				if (bb.hasRemaining())
-					throw new GeoFileLoadException(file, l2j, "Could not read all data from file. Expected " + bb.remaining() + " more bytes.");
-				bb.flip();
-				return bb;
-			}
-			else
-			{
-				throw new GeoFileLoadException(file, l2j, "Illegal file size " + fc.size());
-			}
-		}
-		catch (final Exception e)
-		{
-			throw new GeoFileLoadException(file, l2j, e);
-		}
-		finally
-		{
-			if (fis != null)
-			{
-				try
-				{
-					fis.close();
-				}
-				catch (final Exception e)
-				{
-					
-				}
-			}
-		}
-	}
-	
-	private static final Object[] loadRegion(final int regionX, final int regionY, final boolean l2j) throws Exception
-	{
-		final File file = l2j ? new File(Config.PATH_TO_GEO_FILES, regionX + "_" + regionY + ".l2j") : searchL2OffGeoFile(regionX, regionY);
-		if (file == null || !file.isFile())
-			throw new GeoFileNotFoundException(file, l2j);
-		
-		return new Object[]{readFile(file, l2j), file};
-	}
-	
 	private static GeoEngine _instance;
 	
 	public static final void init()
@@ -380,16 +327,56 @@ public final class GeoEngine
 		
 	}
 	
-	public final GeoRegion reloadGeo(int regionX, int regionY, final boolean l2j) throws Exception
+	public final void unload()
 	{
-		final Object[] loaded = GeoEngine.loadRegion(regionX + 10, regionY + 10, l2j);
-		if (loaded == null)
-			throw new RuntimeException("Couldn`t find geo " + (regionX + 10) + ", " + (regionY + 10));
+		final GeoRegion region = _activeRegion;
+		if (region != null)
+			region.unload();
 		
-		System.out.println("Loaded");
-		final GeoRegion prevRegion = _activeRegion;
-		_activeRegion = new GeoRegion(regionX, regionY, (ByteBuffer) loaded[0], l2j, (File) loaded[1]);
-		return prevRegion;
+		_activeRegion = null;
+	}
+	
+	public final void reloadGeo(final int regionX, final int regionY, final boolean l2j) throws Exception
+	{
+		final File file = l2j ? new File(Config.PATH_TO_GEO_FILES, (regionX + 10) + "_" + (regionY + 10) + ".l2j") : searchL2OffGeoFile((regionX + 10), (regionY + 10));
+		if (file == null || !file.isFile())
+			throw new GeoFileNotFoundException(file, l2j);
+		
+		if (_activeRegion != null)
+			throw new RuntimeException("Geo must be unloaded first");
+		
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(file);
+			final GeoReader reader = GeoStreamReader.wrap(new BufferedInputStream(fis));
+			if (!l2j)
+			{
+				for (int i = 18; i-- > 0;)
+				{
+					reader.get();
+				}
+			}
+			
+			GeoBlockSelector.getInstance().unload();
+			_activeRegion = new GeoRegion(regionX, regionY, reader, l2j, file);
+		}
+		catch (final Exception e)
+		{
+			throw new GeoFileLoadException(file, l2j, e);
+		}
+		finally
+		{
+			try
+			{
+				if (fis != null)
+					fis.close();
+			}
+			catch (final Exception e)
+			{
+				
+			}
+		}
 	}
 	
 	public final GeoRegion getActiveRegion()

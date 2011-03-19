@@ -17,13 +17,11 @@ package g3deditor.geo.blocks;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.GeoRegion;
 import g3deditor.geo.cells.GeoCellFlat;
 import g3deditor.jogl.GLDisplay;
-import g3deditor.util.Util;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import g3deditor.util.GeoReader;
+import g3deditor.util.GeoWriter;
 
 /**
  * Flat block, 1 level, 1 height.<br>
@@ -34,27 +32,21 @@ import java.nio.ByteBuffer;
  */
 public final class GeoBlockFlat extends GeoBlock
 {
-	private final GeoCell[] _cells;
+	private GeoCell[] _cells;
 	
-	public GeoBlockFlat(final ByteBuffer bb, final int geoX, final int geoY, final boolean l2j)
+	public GeoBlockFlat(final GeoReader reader, final int geoX, final int geoY, final boolean l2j)
 	{
 		super(geoX, geoY);
-		_cells = new GeoCell[]{new GeoCellFlat(this, bb.getShort())};
+		_cells = new GeoCell[]{new GeoCellFlat(this, reader.getShort())};
 		
 		if (!l2j)
-			bb.getShort();
+			reader.getShort();
 	}
 	
 	public GeoBlockFlat(final GeoBlock block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		_cells = new GeoCell[]{new GeoCellFlat(this, block.getMinHeight())};
-	}
-	
-	private GeoBlockFlat(final GeoBlockFlat block)
-	{
-		super(block.getGeoX(), block.getGeoY());
-		_cells = new GeoCell[1];
 	}
 	
 	@Override
@@ -87,26 +79,25 @@ public final class GeoBlockFlat extends GeoBlock
 		return new GeoCell[]{_cells[0]};
 	}
 	
+	/**
+	 * @see g3deditor.geo.GeoBlock#writeTo(g3deditor.util.GeoWriter, boolean)
+	 */
 	@Override
-	public final GeoBlockFlat clone()
+	public final void writeTo(final GeoWriter writer, final boolean l2j)
 	{
-		final GeoBlockFlat clone = new GeoBlockFlat(this);
-		copyDataTo(clone);
-		return clone;
-	}
-	
-	public final void copyDataTo(final GeoBlockFlat block)
-	{
-		block._cells[0].setHeightAndNSWE(_cells[0].getHeightAndNSWE());
-	}
-	
-	@Override
-	public final void saveTo(final OutputStream os, final boolean l2j) throws IOException
-	{
-		Util.writeByte(GeoEngine.GEO_BLOCK_TYPE_FLAT, os);
-		Util.writeShort(_cells[0].getHeight(), os);
+		GeoRegion.putType(writer, l2j, getType());
+		writer.putShort(_cells[0].getHeight());
 		if (!l2j)
-			Util.writeShort(_cells[0].getHeight(), os);
+			writer.putShort(_cells[0].getHeight());
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#getRequiredCapacity(boolean)
+	 */
+	@Override
+	public final int getRequiredCapacity(final boolean l2j)
+	{
+		return l2j ? 3 : 5;
 	}
 	
 	@Override
@@ -161,5 +152,34 @@ public final class GeoBlockFlat extends GeoBlock
 	public final void updateMinMaxHeight(final short newHeight, final short oldHeight)
 	{
 		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#unload()
+	 */
+	@Override
+	public final void unload()
+	{
+		for (int i = _cells.length; i-- > 0;)
+		{
+			_cells[i].unload();
+			_cells[i] = null;
+		}
+		_cells = null;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#dataEquals(g3deditor.util.GeoReader)
+	 */
+	@Override
+	public final boolean dataEquals(final GeoReader reader)
+	{
+		if (getType() != GeoRegion.getType(reader, true))
+			return false;
+		
+		if (_cells[0].getHeight() != reader.getShort())
+			return false;
+		
+		return true;
 	}
 }

@@ -18,12 +18,15 @@ import g3deditor.geo.blocks.GeoBlockComplex;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.geo.blocks.GeoBlockMultiLevel;
 import g3deditor.swing.DialogSave;
+import g3deditor.util.GeoByteBuffer;
+import g3deditor.util.GeoReader;
+import g3deditor.util.GeoStreamWriter;
+import g3deditor.util.GeoWriter;
 import g3deditor.util.Util;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -32,12 +35,12 @@ import java.nio.ByteBuffer;
  */
 public final class GeoRegion
 {
-	private static final byte getType(final ByteBuffer bb, final boolean l2j)
+	public static final byte getType(final GeoReader reader, final boolean l2j)
 	{
 		if (l2j)
-			return bb.get();
+			return reader.get();
 		
-		switch (bb.getShort())
+		switch (reader.getShort())
 		{
 			case 0x0000:
 				return GeoEngine.GEO_BLOCK_TYPE_FLAT;
@@ -50,60 +53,89 @@ public final class GeoRegion
 		}
 	}
 	
+	public static final void putType(final GeoWriter writer, final boolean l2j, final byte type)
+	{
+		if (l2j)
+		{
+			writer.put(type);
+		}
+		else
+		{
+			switch (type)
+			{
+				case GeoEngine.GEO_BLOCK_TYPE_FLAT:
+					writer.putShort((short) 0x0000);
+					break;
+					
+				case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
+					writer.putShort((short) 0x0040);
+					break;
+					
+				case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
+					writer.putShort((short) 0x0080); // TODO check this
+					break;
+					
+				default:
+					throw new IllegalArgumentException("Unkown type: " + type);
+			}
+		}
+	}
+	
 	private final File _file;
 	private final int _regionX;
 	private final int _regionY;
-	private final GeoBlock[][] _geoBlocks;
+	private GeoBlock[][] _geoBlocks;
+	private GeoByteBuffer[][] _geoBlocksData;
 	
-	public GeoRegion(final int regionX, final int regionY, final ByteBuffer bb, final boolean l2j, final File file)
+	public GeoRegion(final int regionX, final int regionY, final GeoReader reader, final boolean l2j, final File file)
 	{
 		_file = file;
 		_regionX = regionX;
 		_regionY = regionY;
 		_geoBlocks = new GeoBlock[GeoEngine.GEO_REGION_SIZE][GeoEngine.GEO_REGION_SIZE];
+		_geoBlocksData = new GeoByteBuffer[GeoEngine.GEO_REGION_SIZE][GeoEngine.GEO_REGION_SIZE];
 		
-		bb.position(0);
-		
-		int type;
-		for (int x = 0; x < GeoEngine.GEO_REGION_SIZE; x++)
+		GeoBlock block;
+		GeoByteBuffer writer;
+		for (int blockX = 0, blockY; blockX < GeoEngine.GEO_REGION_SIZE; blockX++)
 		{
-			for (int y = 0; y < GeoEngine.GEO_REGION_SIZE; y++)
+			for (blockY = 0; blockY < GeoEngine.GEO_REGION_SIZE; blockY++)
 			{
-				switch ((type = getType(bb, l2j)))
-				{
-					case GeoEngine.GEO_BLOCK_TYPE_FLAT:
-					{
-						_geoBlocks[x][y] = new GeoBlockFlat(bb, GeoEngine.getGeoXY(regionX, x), GeoEngine.getGeoXY(regionY, y), l2j);
-						break;
-					}
-						
-					case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
-					{
-						_geoBlocks[x][y] = new GeoBlockComplex(bb, GeoEngine.getGeoXY(regionX, x), GeoEngine.getGeoXY(regionY, y), l2j);
-						break;
-					}
-						
-					case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
-					{
-						_geoBlocks[x][y] = new GeoBlockMultiLevel(bb, GeoEngine.getGeoXY(regionX, x), GeoEngine.getGeoXY(regionY, y), l2j);
-						break;
-					}
-						
-					default:
-					{
-						throw new RuntimeException("Unknown type: " + type);
-					}
-				}
+				block = readBlock(blockX, blockY, reader, l2j);
+				_geoBlocks[blockX][blockY] = block;
+				writer = GeoByteBuffer.allocate(block.getRequiredCapacity(true));
+				block.writeTo(writer, true);
+				_geoBlocksData[blockX][blockY] = writer;
 			}
 		}
-		
-		for (int x = 0; x < GeoEngine.GEO_REGION_SIZE; x++)
+	}
+	
+	private final GeoBlock readBlock(final int blockX, final int blockY, final GeoReader reader, final boolean l2j)
+	{
+		final int geoX = GeoEngine.getGeoXY(_regionX, blockX);
+		final int geoY = GeoEngine.getGeoXY(_regionY, blockY);
+		final int type = getType(reader, l2j);
+		switch (type)
 		{
-			for (int y = 0; y < GeoEngine.GEO_REGION_SIZE; y++)
-			{
-				_geoBlocks[x][y].setRegion(this);
-			}
+			case GeoEngine.GEO_BLOCK_TYPE_FLAT:
+				return new GeoBlockFlat(reader, geoX, geoY, l2j).setRegion(this);
+				
+			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
+				return new GeoBlockComplex(reader, geoX, geoY, l2j).setRegion(this);
+				
+			case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
+				return new GeoBlockMultiLevel(reader, geoX, geoY, l2j).setRegion(this);
+				
+			default:
+				throw new RuntimeException("Unknown type: " + type);
 		}
+	}
+	
+	public final void restoreBlock(final int blockX, final int blockY)
+	{
+		final GeoByteBuffer reader = _geoBlocksData[blockX][blockY];
+		reader.clear();
+		_geoBlocks[blockX][blockY] = readBlock(blockX, blockY, reader, true);
 	}
 	
 	public final File getFile()
@@ -199,23 +231,52 @@ public final class GeoRegion
 			Util.writeBytes(new byte[16], os);
 		}
 		
-		for (int x = 0; x < GeoEngine.GEO_REGION_SIZE; x++)
+		final GeoWriter writer = GeoStreamWriter.wrap(os);
+		for (int blockX = 0, blockY; blockX < GeoEngine.GEO_REGION_SIZE; blockX++)
 		{
-			for (int y = 0; y < GeoEngine.GEO_REGION_SIZE; y++)
+			for (blockY = 0; blockY < GeoEngine.GEO_REGION_SIZE; blockY++)
 			{
-				_geoBlocks[x][y].saveTo(os, l2j);
-				observ.updateProgressRegion(x * GeoEngine.GEO_REGION_SIZE + y, "[" + x + "-" + y + "]");
+				_geoBlocks[blockX][blockY].writeTo(writer, l2j);
+				observ.updateProgressRegion(blockX * GeoEngine.GEO_REGION_SIZE + blockY, "[" + blockX + "-" + blockY + "]");
 			}
 		}
 	}
 	
-	public final boolean equals(final GeoRegion geoRegion)
+	public final void unload()
 	{
-		for (int x = 0; x < GeoEngine.GEO_REGION_SIZE; x++)
+		GeoBlock[] block1D;
+		GeoByteBuffer[] geoBlocksData1D;
+		for (int blockX = GeoEngine.GEO_REGION_SIZE, blockY; blockX-- > 0;)
 		{
-			for (int y = 0; y < GeoEngine.GEO_REGION_SIZE; y++)
+			block1D = _geoBlocks[blockX];
+			geoBlocksData1D = _geoBlocksData[blockX];
+			for (blockY = GeoEngine.GEO_REGION_SIZE; blockY-- > 0;)
 			{
-				if (!_geoBlocks[x][y].equals(geoRegion._geoBlocks[x][y]))
+				block1D[blockY].unload();
+				block1D[blockY] = null;
+				geoBlocksData1D[blockY] = null;
+			}
+			_geoBlocks[blockX] = null;
+			_geoBlocksData[blockX] = null;
+		}
+		_geoBlocks = null;
+		_geoBlocksData = null;
+	}
+	
+	public final boolean allDataEqual()
+	{
+		GeoBlock[] block1D;
+		GeoByteBuffer[] geoBlocksData1D;
+		GeoByteBuffer geoBlockData;
+		for (int blockX = GeoEngine.GEO_REGION_SIZE, blockY; blockX-- > 0;)
+		{
+			block1D = _geoBlocks[blockX];
+			geoBlocksData1D = _geoBlocksData[blockX];
+			for (blockY = GeoEngine.GEO_REGION_SIZE; blockY-- > 0;)
+			{
+				geoBlockData = geoBlocksData1D[blockY];
+				geoBlockData.clear();
+				if (!block1D[blockY].dataEquals(geoBlockData))
 					return false;
 			}
 		}
