@@ -52,9 +52,6 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 {
 	private static final Font DEFAULT_FONT = new Font("Arial", Font.BOLD, 64);
 	
-	private final BufferedImage _worldMapImage;
-	private final BufferedImage _worldMapImageScaled;
-	
 	private final JLabel _labelWorldX;
 	private final JTextField _fieldWorldX;
 	private final JLabel _labelWorldY;
@@ -92,12 +89,12 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 	{
 		super(owner, "Jump to...", true);
 		
-		_worldMapImage = Util.loadImage("./data/icon/map.jpg");
-		_worldMapImageScaled = Util.scaleImage(_worldMapImage, 640, 480, 2);
-		final Graphics2D g = _worldMapImageScaled.createGraphics();
-		final int regionHeight = _worldMapImageScaled.getHeight() / 16;
-		final int regionWidth = _worldMapImageScaled.getWidth() / 17;
-		final Font font = new Font("Arial", Font.PLAIN, Math.min(regionWidth, regionHeight) / 4);
+		final int regionWH = 37;
+		final int width = regionWH * 17;
+		final int height = regionWH * 16;
+		final BufferedImage img = Util.scaleImage(Util.loadImage("./data/icon/map.jpg"), width, height, 2);
+		final Graphics2D g = img.createGraphics();
+		final Font font = new Font("Arial", Font.PLAIN, regionWH / 4);
 		
 		g.setColor(Color.WHITE);
 		g.setFont(font);
@@ -108,14 +105,16 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			for (y = 16; y-- > 0;)
 			{
 				name = (x + 10) + "_" + (y + 10);
-				g.drawString(name, x * regionWidth + regionWidth / 2 - g.getFontMetrics().stringWidth(name) / 2, y * regionHeight + regionHeight / 2 + g.getFontMetrics().getHeight() / 2);
+				g.drawString(name, x * regionWH + regionWH / 2 - g.getFontMetrics().stringWidth(name) / 2, y * regionWH + regionWH / 2 + g.getFontMetrics().getHeight() / 2);
 				if (y != 15)
-					g.drawLine(0, y * regionHeight + regionHeight, _worldMapImageScaled.getWidth(), y * regionHeight + regionHeight);
+					g.drawLine(0, y * regionWH + regionWH, img.getWidth(), y * regionWH + regionWH);
 				if (x != 16)
-					g.drawLine(x * regionWidth + regionWidth, 0, x * regionWidth + regionWidth, _worldMapImageScaled.getHeight());
+					g.drawLine(x * regionWH + regionWH, 0, x * regionWH + regionWH, img.getHeight());
 			}
 		}
 		g.dispose();
+		
+		_worldMap = new ImageIcon(img);
 		
 		_labelWorldX = new JLabel("World X:");
 		_fieldWorldX = new JTextField();
@@ -162,8 +161,6 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		
 		_labelRegionMap = new JLabel();
 		_labelRegionMap.addMouseListener(this);
-		
-		_worldMap = new ImageIcon(_worldMapImageScaled);
 		_labelRegionMap.setIcon(_worldMap);
 		
 		final GridBagConstraints gbc = new GridBagConstraints();
@@ -412,6 +409,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.ipady = 0;
 		add(_labelRegionMap, gbc);
 		
+		setResizable(false);
 		pack();
 	}
 	
@@ -607,7 +605,10 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 				_regionY = regionY;
 				_regionImage = Util.loadImage("./data/textures/region/" + (regionX + 10) + "_" + (regionY + 10) + ".jpg");
 				if (_regionImage != null)
-					_regionImage = Util.scaleImage(_regionImage, 512, 512, 2);
+				{
+					final int wh = Math.min(_worldMap.getIconWidth(), _worldMap.getIconHeight());
+					_regionImage = Util.scaleImage(_regionImage, wh, wh, 0);
+				}
 			}
 			
 			if (_regionImage != null)
