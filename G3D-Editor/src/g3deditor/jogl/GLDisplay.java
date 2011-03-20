@@ -82,6 +82,7 @@ public final class GLDisplay implements GLEventListener
 	private final GLCellRenderer _renderer;
 	private final GLGUIRenderer _guiRenderer;
 	private final GLCellRenderSelector _renderSelector;
+	private final GLSelectionBox _selectionBox;
 	private final GLCamera _camera;
 	private final GLTerrain _terrain;
 	private final AWTInput _input;
@@ -126,6 +127,7 @@ public final class GLDisplay implements GLEventListener
 		
 		_guiRenderer = new GLGUIRenderer();
 		_renderSelector = new GLCellRenderSelector();
+		_selectionBox = new GLSelectionBox();
 		_camera = new GLCamera();
 		_terrain = new GLTerrain();
 		_input = new AWTInput();
@@ -153,6 +155,11 @@ public final class GLDisplay implements GLEventListener
 	public final GLCellRenderSelector getRenderSelector()
 	{
 		return _renderSelector;
+	}
+	
+	public final GLSelectionBox getSelectionBox()
+	{
+		return _selectionBox;
 	}
 	
 	public final GLCamera getCamera()
@@ -303,9 +310,9 @@ public final class GLDisplay implements GLEventListener
 			final MouseEvent event = mouseEvents.getUnsafe(i);
 			if (event instanceof MouseWheelEvent)
 			{
+				final MouseWheelEvent scrollevent = (MouseWheelEvent) event;
 				if (event.isControlDown())
 				{
-					final MouseWheelEvent scrollevent = (MouseWheelEvent) event;
 					final short addHeight = (short) (scrollevent.getWheelRotation() * -8);
 					GeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
 					{
@@ -317,6 +324,10 @@ public final class GLDisplay implements GLEventListener
 						}
 					});
 					_renderSelector.forceUpdateFrustum();
+				}
+				else
+				{
+					_selectionBox.addHeight(scrollevent.getWheelRotation() * -8);
 				}
 			}
 			else
@@ -346,6 +357,17 @@ public final class GLDisplay implements GLEventListener
 			}
 		}
 		mouseEvents.clear();
+		
+		final float[] point = _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY());
+		if (point != null && GeoEngine.getInstance().getActiveRegion() != null)
+		{
+			final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
+			// check height difference from cell to picked point to eliminate ground/terrain picking
+			if (cell != null && Math.abs(cell.getHeight() - (int) (point[1] * 16f)) <= 4)
+			{
+				_selectionBox.render(gl, cell);
+			}
+		}
 		
 		_guiRenderer.render(gl);
 		

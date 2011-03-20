@@ -49,6 +49,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	private boolean _mouse2;
 	private boolean _mouse3;
 	
+	private int _mouseX;
+	private int _mouseY;
 	private int _mouse3DragX;
 	private int _mouse3DragY;
 	
@@ -143,6 +145,16 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	public final boolean getKeyFToggle()
 	{
 		return _keyFToggle;
+	}
+	
+	public final int getMouseX()
+	{
+		return _mouseX;
+	}
+	
+	public final int getMouseY()
+	{
+		return _mouseY;
 	}
 	
 	public final void setEnabled(final boolean enabled)
@@ -282,6 +294,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	{
 		if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0)
 			_mouseEvents.addLast(e);
+		
+		mouseMoved(e);
 	}
 	
 	/**
@@ -290,7 +304,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	@Override
 	public final void mouseMoved(final MouseEvent e)
 	{
-		
+		_mouseX = e.getX();
+		_mouseY = e.getY();
 	}
 	
 	/**
