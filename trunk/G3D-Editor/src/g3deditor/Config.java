@@ -33,13 +33,13 @@ public final class Config
 {
 	private static final LookAndFeelInfo[] LOOK_AND_FEEL_INFOS;
 
-	private static final File CONFIG_FILE					= new File("./g3d.ini");
+	private static final File CONFIG_FILE					= new File("./G3DEditor.ini");
 	private static final ConfigProperties PROPERTIES		= new ConfigProperties();
 	
 	public static String PATH_TO_GEO_FILES					= "./data/geodata/";
 	public static boolean TERRAIN_DEFAULT_ON				= false;
 	public static int VIS_GRID_RANGE						= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
-	public static String LOOK_AND_FEEL						= UIManager.getSystemLookAndFeelClassName();
+	public static String LOOK_AND_FEEL						= "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
 	
 	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
 	{
@@ -90,7 +90,7 @@ public final class Config
 				PATH_TO_GEO_FILES		= PROPERTIES.getProperty("GeodataPath", "./data/geodata/");
 				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainDefaultOn", "false"));
 				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
-				LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", UIManager.getSystemLookAndFeelClassName());
+				LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
 			}
 		}
 		catch (final Exception e)
