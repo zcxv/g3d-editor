@@ -16,14 +16,14 @@ package g3deditor.swing;
 
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.swing.defaults.DefaultLabel;
+import g3deditor.swing.defaults.DefaultTextField;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -33,56 +33,56 @@ import javax.swing.JTextField;
 @SuppressWarnings("serial")
 public final class PanelCellInfo extends JPanel
 {
-	private final JLabel _labelRegionXY;
-	private final JTextField _fieldRegionX;
-	private final JTextField _fieldRegionY;
-	private final JLabel _labelWorldXY;
-	private final JTextField _fieldWorldX;
-	private final JTextField _fieldWorldY;
-	private final JLabel _labelGeoXY;
-	private final JTextField _fieldGeoX;
-	private final JTextField _fieldGeoY;
-	private final JLabel _labelBlockXY;
-	private final JTextField _fieldBlockX;
-	private final JTextField _fieldBlockY;
-	private final JLabel _labelCellXY;
-	private final JTextField _fieldCellX;
-	private final JTextField _fieldCellY;
-	private final JLabel _labelTypeLayers;
-	private final JTextField _fieldType;
-	private final JTextField _fieldLayers;
+	private final DefaultLabel _labelRegionXY;
+	private final DefaultTextField _fieldRegionX;
+	private final DefaultTextField _fieldRegionY;
+	private final DefaultLabel _labelWorldXY;
+	private final DefaultTextField _fieldWorldX;
+	private final DefaultTextField _fieldWorldY;
+	private final DefaultLabel _labelGeoXY;
+	private final DefaultTextField _fieldGeoX;
+	private final DefaultTextField _fieldGeoY;
+	private final DefaultLabel _labelBlockXY;
+	private final DefaultTextField _fieldBlockX;
+	private final DefaultTextField _fieldBlockY;
+	private final DefaultLabel _labelCellXY;
+	private final DefaultTextField _fieldCellX;
+	private final DefaultTextField _fieldCellY;
+	private final DefaultLabel _labelTypeLayers;
+	private final DefaultTextField _fieldType;
+	private final DefaultTextField _fieldLayers;
 	
 	public PanelCellInfo()
 	{
-		_labelRegionXY = new JLabel("Region X/Y:");
-		_fieldRegionX = new AutoDisableJTextField();
+		_labelRegionXY = new DefaultLabel("Region X/Y:");
+		_fieldRegionX = new AutoDisableDefaultTextField();
 		_fieldRegionX.setEditable(false);
-		_fieldRegionY = new AutoDisableJTextField();
+		_fieldRegionY = new AutoDisableDefaultTextField();
 		_fieldRegionY.setEditable(false);
-		_labelWorldXY = new JLabel("World X/Y:");
-		_fieldWorldX = new AutoDisableJTextField();
+		_labelWorldXY = new DefaultLabel("World X/Y:");
+		_fieldWorldX = new AutoDisableDefaultTextField();
 		_fieldWorldX.setEditable(false);
-		_fieldWorldY = new AutoDisableJTextField();
+		_fieldWorldY = new AutoDisableDefaultTextField();
 		_fieldWorldY.setEditable(false);
-		_labelGeoXY = new JLabel("Geo X/Y:");
-		_fieldGeoX = new AutoDisableJTextField();
+		_labelGeoXY = new DefaultLabel("Geo X/Y:");
+		_fieldGeoX = new AutoDisableDefaultTextField();
 		_fieldGeoX.setEditable(false);
-		_fieldGeoY = new AutoDisableJTextField();
+		_fieldGeoY = new AutoDisableDefaultTextField();
 		_fieldGeoY.setEditable(false);
-		_labelBlockXY = new JLabel("Block X/Y:");
-		_fieldBlockX = new AutoDisableJTextField();
+		_labelBlockXY = new DefaultLabel("Block X/Y:");
+		_fieldBlockX = new AutoDisableDefaultTextField();
 		_fieldBlockX.setEditable(false);
-		_fieldBlockY = new AutoDisableJTextField();
+		_fieldBlockY = new AutoDisableDefaultTextField();
 		_fieldBlockY.setEditable(false);
-		_labelCellXY = new JLabel("Cell X/Y:");
-		_fieldCellX = new AutoDisableJTextField();
+		_labelCellXY = new DefaultLabel("Cell X/Y:");
+		_fieldCellX = new AutoDisableDefaultTextField();
 		_fieldCellX.setEditable(false);
-		_fieldCellY = new AutoDisableJTextField();
+		_fieldCellY = new AutoDisableDefaultTextField();
 		_fieldCellY.setEditable(false);
-		_labelTypeLayers = new JLabel("Type/Layers:");
-		_fieldType = new AutoDisableJTextField();
+		_labelTypeLayers = new DefaultLabel("Type/Layers:");
+		_fieldType = new AutoDisableDefaultTextField();
 		_fieldType.setEditable(false);
-		_fieldLayers = new AutoDisableJTextField();
+		_fieldLayers = new AutoDisableDefaultTextField();
 		_fieldLayers.setEditable(false);
 		
 		initLayout();
@@ -294,9 +294,9 @@ public final class PanelCellInfo extends JPanel
 		}
 	}
 	
-	private static final class AutoDisableJTextField extends JTextField
+	private static final class AutoDisableDefaultTextField extends DefaultTextField
 	{
-		public AutoDisableJTextField()
+		public AutoDisableDefaultTextField()
 		{
 			setEnabled(false);
 		}

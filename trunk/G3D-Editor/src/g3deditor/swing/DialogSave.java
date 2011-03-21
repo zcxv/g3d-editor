@@ -16,6 +16,9 @@ package g3deditor.swing;
 
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
+import g3deditor.swing.defaults.DefaultButton;
+import g3deditor.swing.defaults.DefaultLabel;
+import g3deditor.swing.defaults.DefaultTextField;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -31,15 +34,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -68,19 +68,19 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 	private final Runnable _toRunOnClose;
 	private final JFileChooser _fileChooser;
 	
-	private final JLabel _labelFile;
-	private final JTextField _fieldFile;
+	private final DefaultLabel _labelFile;
+	private final DefaultTextField _fieldFile;
 	
 	private final JProgressBar _progressRegion;
 	
 	private final JPanel _panelType;
-	private final JLabel _labelType;
+	private final DefaultLabel _labelType;
 	private final JCheckBox _checkL2j;
 	private final JCheckBox _checkL2Off;
 	
 	private final JPanel _panelButtons;
-	private final JButton _buttonOk;
-	private final JButton _buttonCancel;
+	private final DefaultButton _buttonOk;
+	private final DefaultButton _buttonCancel;
 	
 	public DialogSave(final Frame owner, final GeoRegion region)
 	{
@@ -101,8 +101,8 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 		_fileChooser.setSelectedFile(region.getFile());
 		_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		
-		_labelFile = new JLabel("File:");
-		_fieldFile = new JTextField(22);
+		_labelFile = new DefaultLabel("File:");
+		_fieldFile = new DefaultTextField(22);
 		_fieldFile.setEditable(false);
 		_fieldFile.setText(_region.getFile().toString());
 		_fieldFile.addMouseListener(this);
@@ -114,7 +114,7 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 		_progressRegion.setEnabled(false);
 		
 		_panelType = new JPanel();
-		_labelType = new JLabel("GeoType:");
+		_labelType = new DefaultLabel("GeoType:");
 		_checkL2j = new JCheckBox("L2j");
 		_checkL2j.addActionListener(this);
 		_checkL2Off = new JCheckBox("L2Off");
@@ -126,10 +126,10 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 		_checkL2Off.setEnabled(_checkL2Off.isSelected() || _checkL2j.isSelected());
 		
 		_panelButtons = new JPanel();
-		_buttonOk = new JButton("Ok");
+		_buttonOk = new DefaultButton("Ok");
 		_buttonOk.addActionListener(this);
 		_buttonOk.setEnabled(_checkL2Off.isSelected() || _checkL2j.isSelected());
-		_buttonCancel = new JButton("Cancel");
+		_buttonCancel = new DefaultButton("Cancel");
 		_buttonCancel.addActionListener(this);
 		
 		final GridBagConstraints gbc = new GridBagConstraints();
@@ -180,7 +180,7 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		_panelType.add(new JLabel(), gbc);
+		_panelType.add(new DefaultLabel(), gbc);
 		
 		setLayout(new GridBagLayout());
 		

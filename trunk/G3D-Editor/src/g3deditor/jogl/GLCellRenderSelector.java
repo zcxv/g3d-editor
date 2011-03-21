@@ -41,10 +41,10 @@ public final class GLCellRenderSelector
 		{
 			final GLCamera camera = GLDisplay.getInstance().getCamera();
 			final float dx1 = camera.getX() - o1.getGeoBlock().getGeoX();
-			final float dy1 = camera.getZ() - o1.getGeoBlock().getGeoY();
+			final float dz1 = camera.getZ() - o1.getGeoBlock().getGeoY();
 			final float dx2 = camera.getX() - o2.getGeoBlock().getGeoX();
-			final float dy2 = camera.getZ() - o2.getGeoBlock().getGeoY();
-			return dx1 * dx1 + dy1 * dy1 > dx2 * dx2 + dy2 * dy2;
+			final float dz2 = camera.getZ() - o2.getGeoBlock().getGeoY();
+			return dx1 * dx1 + dz1 * dz1 > dx2 * dx2 + dz2 * dz2;
 		}
 	};
 	
@@ -54,12 +54,12 @@ public final class GLCellRenderSelector
 		public final boolean compare(final GeoCell o1, final GeoCell o2)
 		{
 			final GLCamera camera = GLDisplay.getInstance().getCamera();
-			final float dx1 = camera.getX() - o1.getGeoX();
-			final float dy1 = camera.getZ() - o1.getGeoY();
-			final float dz1 = camera.getY() - o1.getHeight() / 16f;
-			final float dx2 = camera.getX() - o2.getGeoX();
-			final float dy2 = camera.getZ() - o2.getGeoY();
-			final float dz2 = camera.getY() - o2.getHeight() / 16f;
+			final float dx1 = camera.getX() - o1.getRenderX();
+			final float dy1 = camera.getY() - o1.getRenderY();
+			final float dz1 = camera.getZ() - o1.getRenderZ();
+			final float dx2 = camera.getX() - o2.getRenderX();
+			final float dy2 = camera.getY() - o2.getRenderY();
+			final float dz2 = camera.getZ() - o2.getRenderZ();
 			return dx1 * dx1 + dy1 * dy1 + dz1 * dz1 > dx2 * dx2 + dy2 * dy2 + dz2 * dz2;
 		}
 	};
@@ -234,9 +234,9 @@ public final class GLCellRenderSelector
 		
 		if (cell.isBig())
 		{
-			x = cell.getRenderX() + 3.5f;
+			x = cell.getRenderX() + 4f;
 			y = cell.getRenderY() - 0.1f;
-			z = cell.getRenderZ() + 3.5f;
+			z = cell.getRenderZ() + 4f;
 			rad = 5f;
 		}
 		else
@@ -301,10 +301,7 @@ public final class GLCellRenderSelector
 			
 			final GeoCell[] cells = _block.getCells();
 			if (_geoCells.length < cells.length)
-			{
 				_geoCells = new GeoCell[cells.length];
-				_geoCells = new GeoCell[cells.length];
-			}
 			
 			for (final GeoCell cell : cells)
 			{

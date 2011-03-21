@@ -84,6 +84,10 @@ public final class GeoRegion
 	private final File _file;
 	private final int _regionX;
 	private final int _regionY;
+	private final int _minGeoX;
+	private final int _maxGeoX;
+	private final int _minGeoY;
+	private final int _maxGeoY;
 	private GeoBlock[][] _geoBlocks;
 	private GeoByteBuffer[][] _geoBlocksData;
 	
@@ -92,6 +96,10 @@ public final class GeoRegion
 		_file = file;
 		_regionX = regionX;
 		_regionY = regionY;
+		_minGeoX = GeoEngine.getGeoXY(regionX, 0);
+		_maxGeoX = GeoEngine.getGeoXY(regionX, GeoEngine.GEO_REGION_SIZE - 1);
+		_minGeoY = GeoEngine.getGeoXY(regionY, 0);
+		_maxGeoY = GeoEngine.getGeoXY(regionY, GeoEngine.GEO_REGION_SIZE - 1);
 		_geoBlocks = new GeoBlock[GeoEngine.GEO_REGION_SIZE][GeoEngine.GEO_REGION_SIZE];
 		_geoBlocksData = new GeoByteBuffer[GeoEngine.GEO_REGION_SIZE][GeoEngine.GEO_REGION_SIZE];
 		
@@ -178,6 +186,14 @@ public final class GeoRegion
 		final int blockX = GeoEngine.getBlockXY(geoX);
 		final int blockY = GeoEngine.getBlockXY(geoY);
 		return _geoBlocks[blockX][blockY].getType();
+	}
+	
+	public final GeoCell nGetCellChecked(int geoX, int geoY, final int x)
+	{
+		if (geoX < _minGeoX || geoX > _maxGeoX || geoY < _minGeoY || geoY > _maxGeoY)
+			return null;
+		
+		return nGetCell(geoX, geoY, x);
 	}
 	
 	public final GeoCell nGetCell(final int geoX, final int geoY, final int x)

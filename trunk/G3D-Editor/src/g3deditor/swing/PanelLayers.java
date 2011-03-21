@@ -15,8 +15,8 @@
 package g3deditor.swing;
 
 import g3deditor.geo.GeoCell;
+import g3deditor.swing.defaults.DefaultButton;
 import g3deditor.swing.defaults.DefaultTable;
-import g3deditor.util.Util;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -28,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -39,8 +38,8 @@ public final class PanelLayers extends JPanel implements ActionListener
 {
 	private final CellLayerTable _tableLayers;
 	private final JScrollPane _paneLayers;
-	private final JButton _buttonLayerAdd;
-	private final JButton _buttonLayerRemove;
+	private final DefaultButton _buttonLayerAdd;
+	private final DefaultButton _buttonLayerRemove;
 	
 	public PanelLayers()
 	{
@@ -48,10 +47,10 @@ public final class PanelLayers extends JPanel implements ActionListener
 		_paneLayers = new JScrollPane(_tableLayers);
 		_paneLayers.setPreferredSize((Dimension) _tableLayers.getPreferredSize().clone());
 		
-		_buttonLayerAdd = new JButton("Add Layer(s)");
+		_buttonLayerAdd = new DefaultButton("Add Layer(s)");
 		_buttonLayerAdd.setEnabled(false);
 		_buttonLayerAdd.addActionListener(this);
-		_buttonLayerRemove = new JButton("Remove Layer(s)");
+		_buttonLayerRemove = new DefaultButton("Remove Layer(s)");
 		_buttonLayerRemove.setEnabled(false);
 		_buttonLayerRemove.addActionListener(this);
 		
@@ -104,13 +103,12 @@ public final class PanelLayers extends JPanel implements ActionListener
 		if (cell == null)
 		{
 			setFieldsEnabled(false);
-			_tableLayers.updateValues(null, -1);
+			_tableLayers.updateValues(null, null);
 		}
 		else
 		{
 			setFieldsEnabled(true);
-			final GeoCell[] layers = cell.getBlock().nGetLayers(cell.getGeoX(), cell.getGeoY());
-			_tableLayers.updateValues(layers, Util.arrayIndexOf(layers, cell));
+			_tableLayers.updateValues(cell.getBlock().nGetLayers(cell.getGeoX(), cell.getGeoY()), cell);
 		}
 	}
 	
@@ -143,29 +141,34 @@ public final class PanelLayers extends JPanel implements ActionListener
 				}
 			});
 			
-			super.setColumnIdentifiers("Layer", "Height");
-			super.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			super.setColumnSelectionAllowed(false);
-			super.setRowSelectionAllowed(true);
-			super.setColumnMinMaxWidth(0, 40, 40);
-			super.setColumnMinWidth(1, 50);
-			super.addMouseListener(this);
+			setColumnIdentifiers("Layer", "Height");
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			setColumnSelectionAllowed(false);
+			setRowSelectionAllowed(true);
+			setColumnMinMaxWidth(0, 40, 40);
+			setColumnMinWidth(1, 50);
+			addMouseListener(this);
 		}
 		
-		public final void updateValues(GeoCell[] layers, final int layer)
+		public final void updateValues(GeoCell[] layers, final GeoCell selected)
 		{
 			if (layers == null)
 				layers = GeoCell.EMPTY_ARRAY;
 			
-			super.setRowCount(layers.length);
-			for (int i = 0; i < layers.length; i++)
+			setRowCount(layers.length);
+			
+			int layer = -1, i;
+			for (i = 0; i < layers.length; i++)
 			{
-				super.setValueAt(i, i, 0);
-				super.setValueAt(layers[i].getHeight(), i, 1);
+				if (selected == layers[i])
+					layer = i;
+				
+				setValueAt(i, i, 0);
+				setValueAt(layers[i].getHeight(), i, 1);
 			}
 			
 			if (layers.length > 0 && layer < layers.length)
-				super.getSelectionModel().setSelectionInterval(layer, layer);
+				setSelectionInterval(layer);
 		}
 		
 		@Override

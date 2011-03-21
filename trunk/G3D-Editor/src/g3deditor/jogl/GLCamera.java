@@ -14,7 +14,9 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.geo.GeoRegion;
 import g3deditor.util.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -309,7 +311,7 @@ public final class GLCamera
 		}
 	}
 	
-	public final float[] pick(final GL2 gl, final GLU glu, final int mouseX, int mouseY)
+	public final GeoCell pick(final GL2 gl, final GLU glu, final int mouseX, int mouseY)
 	{
 		extractViewport(gl);
 		extractModelviewMatrix(gl);
@@ -322,15 +324,17 @@ public final class GLCamera
 		final float mouseZ = _pickZBuffer.get(0);
 		if (mouseZ < 1f && glu.gluUnProject(mouseX, mouseY, mouseZ, _modelviewMatrix, 0, _projectionMatrix, 0, _viewport, 0, _pickResult, 0))
 		{
-			return new float[]
+			final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+			if (region != null)
 			{
-				_pickResult[0], _pickResult[1], _pickResult[2]
-			};
+				final GeoCell cell = region.nGetCellChecked((int) _pickResult[0], (int) _pickResult[2], (int) (_pickResult[1] * 16f));
+				// check height difference from cell to picked point to eliminate ground/terrain picking
+				if (cell != null && Math.abs(cell.getHeight() - (int) (_pickResult[1] * 16f)) <= 4)
+					return cell;
+			}
 		}
-		else
-		{
-			return null;
-		}
+		
+		return null;
 	}
 	
 	public final float getX()
