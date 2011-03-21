@@ -2,6 +2,8 @@ package g3deditor.swing;
 
 import g3deditor.Config;
 import g3deditor.jogl.GLCellRenderSelector;
+import g3deditor.jogl.GLCellRenderer;
+import g3deditor.jogl.renderer.DLLoDRenderer;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -9,6 +11,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -51,6 +55,13 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	
 	private final JPanel _panelEditor;
 	private final JCheckBox _checkTerrainDefaultOn;
+	private final JCheckBox _checkVSync;
+	
+	private final JLabel _labelCellRenderer;
+	private final JComboBox _comboCellRenderer;
+	
+	private final JLabel _labelDLLoDRange;
+	private final JSlider _sliderDLLoDRange;
 	
 	private final JLabel _labelGridRange;
 	private final JSlider _sliderGridRange;
@@ -85,6 +96,37 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.setBorder(BorderFactory.createTitledBorder("Editor"));
 		_checkTerrainDefaultOn = new JCheckBox("Terrain default ON");
 		_checkTerrainDefaultOn.setSelected(Config.TERRAIN_DEFAULT_ON);
+		_checkVSync = new JCheckBox("VSync");
+		_checkVSync.setSelected(Config.V_SYNC);
+		
+		_labelCellRenderer = new JLabel("CellRenderer:");
+		_comboCellRenderer = new JComboBox(GLCellRenderer.RENDERER_NAMES);
+		_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
+		_comboCellRenderer.addItemListener(new ItemListener()
+		{
+			@SuppressWarnings("synthetic-access")
+			@Override
+			public final void itemStateChanged(final ItemEvent e)
+			{
+				checkDLLoDSliderEnabled();
+			}
+		});
+		
+		_labelDLLoDRange = new JLabel("DisplayList LoD - max detail range:");
+		_sliderDLLoDRange = new JSlider();
+		_sliderDLLoDRange.setMinimum(DLLoDRenderer.MIN_DISTANCE_SQ);
+		_sliderDLLoDRange.setMaximum(DLLoDRenderer.MAX_DISTANCE_SQ);
+		_sliderDLLoDRange.setMinorTickSpacing(256);
+		_sliderDLLoDRange.setMajorTickSpacing(1024);
+		_sliderDLLoDRange.setPaintTicks(true);
+		_sliderDLLoDRange.setValue(Config.DLLoDRANGE);
+		Hashtable<Integer, JLabel> rangeTable = new Hashtable<Integer, JLabel>();
+		for (int i = DLLoDRenderer.MIN_DISTANCE_SQ; i <= DLLoDRenderer.MAX_DISTANCE_SQ; i += 2048)
+		{
+			rangeTable.put(i, new JLabel(String.valueOf(i)));
+		}
+		_sliderDLLoDRange.setLabelTable(rangeTable);
+		_sliderDLLoDRange.setPaintLabels(true);
 		
 		_labelGridRange = new JLabel("Visible grid range:");
 		_sliderGridRange = new JSlider();
@@ -94,7 +136,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderGridRange.setMajorTickSpacing(8);
 		_sliderGridRange.setPaintTicks(true);
 		_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
-		final Hashtable<Integer, JLabel> rangeTable = new Hashtable<Integer, JLabel>();
+		rangeTable = new Hashtable<Integer, JLabel>();
 		for (int i = 8; i <= 96; i += 8)
 		{
 			rangeTable.put(i, new JLabel(String.valueOf(i)));
@@ -156,17 +198,67 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_checkTerrainDefaultOn, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.gridy = 1;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_checkVSync, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
 		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_labelCellRenderer, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_comboCellRenderer, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_labelDLLoDRange, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_sliderDLLoDRange, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 5;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
 		_panelEditor.add(_labelGridRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 3;
+		gbc.gridy = 6;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -201,7 +293,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelButtons.add(_buttonOk);
 		_panelButtons.add(_buttonCancel);
 		
-		super.setLayout(new GridBagLayout());
+		setLayout(new GridBagLayout());
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
@@ -211,7 +303,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_panelMisc, gbc);
+		add(_panelMisc, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 1;
@@ -221,7 +313,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_panelEditor, gbc);
+		add(_panelEditor, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 2;
@@ -231,7 +323,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_panelGeodata, gbc);
+		add(_panelGeodata, gbc);
 		
 		gbc.gridx = 0;
 		gbc.gridy = 3;
@@ -241,17 +333,34 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		super.add(_panelButtons, gbc);
+		add(_panelButtons, gbc);
 		
-		super.pack();
-		super.setResizable(false);
+		pack();
+		setResizable(false);
+	}
+	
+	private final void checkDLLoDSliderEnabled()
+	{
+		final boolean enabled = _comboCellRenderer.getSelectedItem() == DLLoDRenderer.NAME;
+		_labelDLLoDRange.setEnabled(enabled);
+		_sliderDLLoDRange.setEnabled(enabled);
 	}
 	
 	@Override
 	public final void setVisible(final boolean visible)
 	{
 		if (!isVisible() && visible)
+		{
 			setLocationRelativeTo(super.getOwner());
+			
+			_checkTerrainDefaultOn.setSelected(Config.TERRAIN_DEFAULT_ON);
+			_checkVSync.setSelected(Config.V_SYNC);
+			_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
+			_comboLookAndFeel.setSelectedItem(Config.getLookAndFeel(Config.LOOK_AND_FEEL, Config.getActiveLookAndFeel()));
+			_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
+			_sliderDLLoDRange.setValue(Config.DLLoDRANGE);
+			checkDLLoDSliderEnabled();
+		}
 		
 		super.setVisible(visible);
 	}
@@ -305,17 +414,17 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		if (e.getSource() == _buttonOk)
 		{
 			Config.TERRAIN_DEFAULT_ON = _checkTerrainDefaultOn.isSelected();
+			Config.V_SYNC = _checkVSync.isSelected();
 			Config.VIS_GRID_RANGE = _sliderGridRange.getValue();
 			Config.LOOK_AND_FEEL = ((LookAndFeelInfo) _comboLookAndFeel.getSelectedItem()).getClassName();
+			Config.CELL_RENDERER = GLCellRenderer.validateRenderer((String) _comboCellRenderer.getSelectedItem());
+			Config.DLLoDRANGE = _sliderDLLoDRange.getValue();
 			
 			Config.save();
 			setVisible(false);
 		}
 		else if (e.getSource() == _buttonCancel)
 		{
-			_checkTerrainDefaultOn.setSelected(Config.TERRAIN_DEFAULT_ON);
-			_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
-			_comboLookAndFeel.setSelectedItem(Config.getLookAndFeel(Config.LOOK_AND_FEEL, Config.getActiveLookAndFeel()));
 			setVisible(false);
 		}
 	}

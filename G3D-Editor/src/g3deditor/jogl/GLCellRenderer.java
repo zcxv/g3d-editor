@@ -17,6 +17,10 @@ package g3deditor.jogl;
 import java.io.File;
 
 import g3deditor.geo.GeoCell;
+import g3deditor.jogl.renderer.DLLoDRenderer;
+import g3deditor.jogl.renderer.DLRenderer;
+import g3deditor.jogl.renderer.IRenderer;
+import g3deditor.jogl.renderer.VBORenderer;
 
 import javax.media.opengl.GL2;
 
@@ -30,19 +34,96 @@ import com.jogamp.opengl.util.texture.TextureIO;
  */
 public abstract class GLCellRenderer
 {
+	public static final String[] RENDERER_NAMES =
+	{
+		IRenderer.NAME,
+		DLRenderer.NAME,
+		VBORenderer.NAME,
+		DLLoDRenderer.NAME
+	};
+	
+	public static final GLCellRenderer getRenderer(final String name)
+	{
+		if (IRenderer.NAME.equals(name))
+			return new IRenderer();
+		
+		if (DLRenderer.NAME.equals(name))
+			return new DLRenderer();
+		
+		if (VBORenderer.NAME.equals(name))
+			return new VBORenderer();
+		
+		return new DLLoDRenderer();
+	}
+	
+	public static final String validateRenderer(final String name)
+	{
+		for (final String temp : GLCellRenderer.RENDERER_NAMES)
+		{
+			if (temp.equals(name))
+				return temp;
+		}
+		return DLLoDRenderer.NAME;
+	}
+	
 	protected static final float COLOR_ALPHA = 0.7f;
 	protected static final int NSWE_COMBINATIONS = 16;
 	protected static final int NSWE_TEX_ROWS_COLS = 4;
 	protected static final float NSWE_TEX_BLOCK = 1f / NSWE_TEX_ROWS_COLS;
 	
-	protected final void renderCell(final GL2 gl, final boolean big, final int nswe)
+	private boolean _initialized;
+	private Texture _nsweTexture;
+	
+	public void init(final GL2 gl)
+	{
+		if (_initialized)
+			return;
+		
+		_initialized = true;
+		
+		try
+		{
+			_nsweTexture = TextureIO.newTexture(new File("./data/textures/nswe.png"), true);
+			_nsweTexture.enable();
+			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+		}
+		catch (final Exception e)
+		{
+			_nsweTexture = null;
+			e.printStackTrace();
+		}
+	}
+	
+	public void enableRender(final GL2 gl)
+	{
+		if (_nsweTexture != null)
+			_nsweTexture.bind();
+	}
+	
+	public abstract void render(final GL2 gl, final GeoCell cell);
+	
+	public void disableRender(final GL2 gl)
+	{
+		
+	}
+	
+	public void dispose(final GL2 gl)
+	{
+		if (!_initialized)
+			return;
+		
+		_initialized = false;
+		
+		if (_nsweTexture != null)
+			_nsweTexture.destroy(gl);
+	}
+	
+	public abstract String getName();
+	
+	protected final void renderCellFull(final GL2 gl, final boolean big, final int nswe)
 	{
 		final float size = big ? 7.9f : 0.9f;
-		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float u2 = u1 + NSWE_TEX_BLOCK;
-		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float v2 = v1 + NSWE_TEX_BLOCK;
-		
 		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
 		gl.glVertex3f(0.1f, -0.2f, 0.1f);
 		gl.glVertex3f(0.1f, 0.0f, 0.1f);
@@ -56,12 +137,18 @@ public abstract class GLCellRenderer
 		gl.glVertex3f(0.1f, 0.0f, 0.1f);
 		gl.glEnd();
 		
-		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-		gl.glVertex3f(0.1f, -0.2f, size);
-		gl.glVertex3f(0.1f, -0.2f, 0.1f);
-		gl.glVertex3f(size, -0.2f, size);
-		gl.glVertex3f(size, -0.2f, 0.1f);
-		gl.glEnd();
+		renderCellBottom(gl, big, -0.2f);
+		renderCellTop(gl, big, nswe);
+	}
+	
+	protected final void renderCellTop(final GL2 gl, final boolean big, final int nswe)
+	{
+		final float size = big ? 7.9f : 0.9f;
+		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float u2 = u1 + NSWE_TEX_BLOCK;
+		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float v2 = v1 + NSWE_TEX_BLOCK;
+		
 		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
 		gl.glTexCoord2f(u2, v2);
 		gl.glVertex3f(0.1f, 0.0f, 0.1f);
@@ -74,37 +161,15 @@ public abstract class GLCellRenderer
 		gl.glEnd();
 	}
 	
-	private Texture _nsweTexture;
-	
-	public void init(final GL2 gl)
+	protected final void renderCellBottom(final GL2 gl, final boolean big, final float height)
 	{
-		try
-		{
-			_nsweTexture = TextureIO.newTexture(new File("./data/textures/nswe.png"), true);
-			_nsweTexture.enable();
-			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
-			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	public void enableRender(final GL2 gl)
-	{
-		_nsweTexture.bind();
-	}
-	
-	public abstract void render(final GL2 gl, final GeoCell cell);
-	
-	public void disableRender(final GL2 gl)
-	{
+		final float size = big ? 7.9f : 0.9f;
 		
-	}
-	
-	public void dispose(final GL2 gl)
-	{
-		_nsweTexture.destroy(gl);
+		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+		gl.glVertex3f(0.1f, height, size);
+		gl.glVertex3f(0.1f, height, 0.1f);
+		gl.glVertex3f(size, height, size);
+		gl.glVertex3f(size, height, 0.1f);
+		gl.glEnd();
 	}
 }

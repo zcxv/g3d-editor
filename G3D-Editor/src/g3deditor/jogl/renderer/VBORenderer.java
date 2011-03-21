@@ -32,6 +32,9 @@ import javax.media.opengl.GL2;
  */
 public final class VBORenderer extends GLCellRenderer
 {
+	public static final String NAME = "VertexBufferObject";
+	public static final String NAME_SHORT = "VBO";
+	
 	private static final int TEX_COORDS = 24;
 	
 	private static final short[] GEOMETRY_INDICES_DATA =
@@ -226,9 +229,18 @@ public final class VBORenderer extends GLCellRenderer
 		gl.glDeleteBuffers(3, new int[]{_vboIndex, _vboVertex, _vboTexture}, 0);
 	}
 	
+	/**
+	 * @see g3deditor.jogl.GLCellRenderer#getName()
+	 */
+	@Override
+	public final String getName()
+	{
+		return NAME;
+	}
+	
 	@Override
 	public final String toString()
 	{
-		return "VBO";
+		return NAME_SHORT;
 	}
 }
