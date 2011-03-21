@@ -18,6 +18,8 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
 import g3deditor.jogl.GLDisplay;
+import g3deditor.swing.defaults.DefaultButton;
+import g3deditor.swing.defaults.DefaultLabel;
 import g3deditor.util.Util;
 
 import java.awt.Dimension;
@@ -28,9 +30,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -65,11 +65,11 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final DialogConfig _dialogConfig;
 	
 	private final JMenuBar _menuBar;
-	private final JButton _buttonConfig;
-	private final JButton _buttonJumpTo;
-	private final JButton _buttonSave;
-	private final JButton _buttonHelp;
-	private final JLabel _labelLogoL2j;
+	private final DefaultButton _buttonConfig;
+	private final DefaultButton _buttonJumpTo;
+	private final DefaultButton _buttonSave;
+	private final DefaultButton _buttonHelp;
+	private final DefaultLabel _labelLogoL2j;
 	
 	private GeoCell _selectedCell;
 	
@@ -87,16 +87,16 @@ public final class FrameMain extends JFrame implements ActionListener
 		_dialogConfig = new DialogConfig(this);
 		
 		_menuBar = new JMenuBar();
-		_buttonConfig = new JButton(new ImageIcon(Util.loadImage("./data/icon/config.png")));
+		_buttonConfig = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/config.png")));
 		_buttonConfig.addActionListener(this);
-		_buttonJumpTo = new JButton(new ImageIcon(Util.loadImage("./data/icon/search.png")));
+		_buttonJumpTo = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/search.png")));
 		_buttonJumpTo.addActionListener(this);
-		_buttonSave = new JButton(new ImageIcon(Util.loadImage("./data/icon/save.png")));
+		_buttonSave = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/save.png")));
 		_buttonSave.addActionListener(this);
-		_buttonHelp = new JButton(new ImageIcon(Util.loadImage("./data/icon/help.png")));
+		_buttonHelp = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/help.png")));
 		_buttonHelp.addActionListener(this);
 		final BufferedImage img = Util.loadImage("./data/icon/l2jserverlogo.png");
-		_labelLogoL2j = new JLabel(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
+		_labelLogoL2j = new DefaultLabel(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
 		
 		setJMenuBar(_menuBar);
 		
@@ -137,7 +137,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.ipadx = 50;
-		_menuBar.add(new JLabel(), gbc);
+		_menuBar.add(new DefaultLabel(), gbc);
 		
 		gbc.gridx = 3;
 		gbc.gridy = 0;
@@ -155,7 +155,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.ipadx = 50;
-		_menuBar.add(new JLabel(), gbc);
+		_menuBar.add(new DefaultLabel(), gbc);
 		
 		gbc.gridx = 5;
 		gbc.gridy = 0;

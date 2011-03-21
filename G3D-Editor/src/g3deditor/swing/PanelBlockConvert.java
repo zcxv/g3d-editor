@@ -15,6 +15,7 @@
 package g3deditor.swing;
 
 import g3deditor.geo.GeoCell;
+import g3deditor.swing.defaults.DefaultButton;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,7 +23,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
@@ -33,23 +33,23 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public final class PanelBlockConvert extends JPanel implements ActionListener
 {
-	private final JButton _buttonConvertFlat;
-	private final JButton _buttonConvertComplex;
-	private final JButton _buttonConvertMultiLayer;
-	private final JButton _buttonRestoreBlock;
+	private final DefaultButton _buttonConvertFlat;
+	private final DefaultButton _buttonConvertComplex;
+	private final DefaultButton _buttonConvertMultiLayer;
+	private final DefaultButton _buttonRestoreBlock;
 	
 	public PanelBlockConvert()
 	{
-		_buttonConvertFlat = new JButton("Flat");
+		_buttonConvertFlat = new DefaultButton("Flat");
 		_buttonConvertFlat.addActionListener(this);
 		_buttonConvertFlat.setEnabled(false);
-		_buttonConvertComplex = new JButton("Complex");
+		_buttonConvertComplex = new DefaultButton("Complex");
 		_buttonConvertComplex.addActionListener(this);
 		_buttonConvertComplex.setEnabled(false);
-		_buttonConvertMultiLayer = new JButton("Multi");
+		_buttonConvertMultiLayer = new DefaultButton("Multi");
 		_buttonConvertMultiLayer.addActionListener(this);
 		_buttonConvertMultiLayer.setEnabled(false);
-		_buttonRestoreBlock = new JButton("Restore from base");
+		_buttonRestoreBlock = new DefaultButton("Restore from base");
 		_buttonRestoreBlock.addActionListener(this);
 		_buttonRestoreBlock.setEnabled(false);
 		

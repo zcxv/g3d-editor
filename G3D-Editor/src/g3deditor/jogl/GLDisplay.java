@@ -340,47 +340,28 @@ public final class GLDisplay implements GLEventListener
 			}
 			else
 			{
-				final float[] point = _camera.pick(gl, _glu, event.getX(), event.getY());
-				if (point != null)
+				final GeoCell cell = _camera.pick(gl, _glu, event.getX(), event.getY());
+				if (cell != null)
 				{
-					final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
-					// check height difference from cell to picked point to eliminate ground/terrain picking
-					if (cell != null && Math.abs(cell.getHeight() - (int) (point[1] * 16f)) <= 4)
+					if (event.getID() == MouseEvent.MOUSE_DRAGGED)
 					{
-						if (event.getID() == MouseEvent.MOUSE_DRAGGED)
-						{
-							if (_prevPick == cell)
-								continue;
-							
-							final GeoBlock prevBlock = _prevPick != null ? _prevPick.getBlock() : null;
-							_prevPick = cell;
-							
-							if (event.isAltDown() && prevBlock == cell.getBlock())
-								continue;
-						}
+						if (_prevPick == cell)
+							continue;
 						
-						GeoBlockSelector.getInstance().selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
+						final GeoBlock prevBlock = _prevPick != null ? _prevPick.getBlock() : null;
+						_prevPick = cell;
+						
+						if (event.isAltDown() && prevBlock == cell.getBlock())
+							continue;
 					}
+					
+					GeoBlockSelector.getInstance().selectGeoCell(cell, event.isAltDown(), event.isShiftDown());
 				}
 			}
 		}
 		mouseEvents.clear();
 		
-		final float[] point = _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY());
-		if (point != null && GeoEngine.getInstance().getActiveRegion() != null)
-		{
-			final GeoCell cell = GeoEngine.getInstance().nGetCell((int) point[0], (int) point[2], (int) (point[1] * 16f));
-			// check height difference from cell to picked point to eliminate ground/terrain picking
-			if (cell != null && Math.abs(cell.getHeight() - (int) (point[1] * 16f)) <= 4)
-			{
-				_selectionBox.render(gl, cell);
-			}
-			else
-			{
-				_selectionBox.render(gl, null);
-			}
-		}
-		
+		_selectionBox.render(gl, _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY()));
 		_guiRenderer.render(gl);
 		
 		gl.glFlush();

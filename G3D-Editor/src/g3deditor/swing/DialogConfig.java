@@ -4,6 +4,9 @@ import g3deditor.Config;
 import g3deditor.jogl.GLCellRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.renderer.DLLoDRenderer;
+import g3deditor.swing.defaults.DefaultButton;
+import g3deditor.swing.defaults.DefaultLabel;
+import g3deditor.swing.defaults.DefaultTextField;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,16 +22,13 @@ import java.io.File;
 import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.filechooser.FileFilter;
 
@@ -50,29 +50,29 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	};
 	
 	private final JPanel _panelMisc;
-	private final JLabel _labelLookAndFeel;
+	private final DefaultLabel _labelLookAndFeel;
 	private final JComboBox _comboLookAndFeel;
 	
 	private final JPanel _panelEditor;
 	private final JCheckBox _checkTerrainDefaultOn;
 	private final JCheckBox _checkVSync;
 	
-	private final JLabel _labelCellRenderer;
+	private final DefaultLabel _labelCellRenderer;
 	private final JComboBox _comboCellRenderer;
 	
-	private final JLabel _labelDLLoDRange;
+	private final DefaultLabel _labelDLLoDRange;
 	private final JSlider _sliderDLLoDRange;
 	
-	private final JLabel _labelGridRange;
+	private final DefaultLabel _labelGridRange;
 	private final JSlider _sliderGridRange;
 	
 	private final JPanel _panelGeodata;
-	private final JLabel _labelGeodataPath;
-	private final JTextField _fieldGeodataPath;
+	private final DefaultLabel _labelGeodataPath;
+	private final DefaultTextField _fieldGeodataPath;
 	
 	private final JPanel _panelButtons;
-	private final JButton _buttonOk;
-	private final JButton _buttonCancel;
+	private final DefaultButton _buttonOk;
+	private final DefaultButton _buttonCancel;
 	
 	private final JFileChooser _fileChooser;
 	
@@ -88,7 +88,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		
 		_panelMisc = new JPanel();
 		_panelMisc.setBorder(BorderFactory.createTitledBorder("Misc"));
-		_labelLookAndFeel = new JLabel("LookAndFeel:");
+		_labelLookAndFeel = new DefaultLabel("LookAndFeel:");
 		_comboLookAndFeel = new JComboBox(Config.getInstalledLookAndFeels());
 		_comboLookAndFeel.setSelectedItem(Config.getActiveLookAndFeel());
 		
@@ -99,7 +99,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_checkVSync = new JCheckBox("VSync");
 		_checkVSync.setSelected(Config.V_SYNC);
 		
-		_labelCellRenderer = new JLabel("CellRenderer:");
+		_labelCellRenderer = new DefaultLabel("CellRenderer:");
 		_comboCellRenderer = new JComboBox(GLCellRenderer.RENDERER_NAMES);
 		_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
 		_comboCellRenderer.addItemListener(new ItemListener()
@@ -112,7 +112,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			}
 		});
 		
-		_labelDLLoDRange = new JLabel("DisplayList LoD - max detail range:");
+		_labelDLLoDRange = new DefaultLabel("DisplayList LoD - max detail range:");
 		_sliderDLLoDRange = new JSlider();
 		_sliderDLLoDRange.setMinimum(DLLoDRenderer.MIN_DISTANCE_SQ);
 		_sliderDLLoDRange.setMaximum(DLLoDRenderer.MAX_DISTANCE_SQ);
@@ -120,15 +120,15 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderDLLoDRange.setMajorTickSpacing(1024);
 		_sliderDLLoDRange.setPaintTicks(true);
 		_sliderDLLoDRange.setValue(Config.DLLoDRANGE);
-		Hashtable<Integer, JLabel> rangeTable = new Hashtable<Integer, JLabel>();
+		Hashtable<Integer, DefaultLabel> rangeTable = new Hashtable<Integer, DefaultLabel>();
 		for (int i = DLLoDRenderer.MIN_DISTANCE_SQ; i <= DLLoDRenderer.MAX_DISTANCE_SQ; i += 2048)
 		{
-			rangeTable.put(i, new JLabel(String.valueOf(i)));
+			rangeTable.put(i, new DefaultLabel(String.valueOf(i)));
 		}
 		_sliderDLLoDRange.setLabelTable(rangeTable);
 		_sliderDLLoDRange.setPaintLabels(true);
 		
-		_labelGridRange = new JLabel("Visible grid range:");
+		_labelGridRange = new DefaultLabel("Visible grid range:");
 		_sliderGridRange = new JSlider();
 		_sliderGridRange.setMinimum(GLCellRenderSelector.MIN_VIS_GRID_RANGE);
 		_sliderGridRange.setMaximum(GLCellRenderSelector.MAX_VIS_GRID_RANGE);
@@ -136,26 +136,26 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderGridRange.setMajorTickSpacing(8);
 		_sliderGridRange.setPaintTicks(true);
 		_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
-		rangeTable = new Hashtable<Integer, JLabel>();
+		rangeTable = new Hashtable<Integer, DefaultLabel>();
 		for (int i = 8; i <= 96; i += 8)
 		{
-			rangeTable.put(i, new JLabel(String.valueOf(i)));
+			rangeTable.put(i, new DefaultLabel(String.valueOf(i)));
 		}
 		_sliderGridRange.setLabelTable(rangeTable);
 		_sliderGridRange.setPaintLabels(true);
 		
 		_panelGeodata = new JPanel();
 		_panelGeodata.setBorder(BorderFactory.createTitledBorder("Geodata"));
-		_labelGeodataPath = new JLabel("Path to Geodata:");
-		_fieldGeodataPath = new JTextField(16);
+		_labelGeodataPath = new DefaultLabel("Path to Geodata:");
+		_fieldGeodataPath = new DefaultTextField(16);
 		_fieldGeodataPath.setEditable(false);
 		_fieldGeodataPath.setText(Config.PATH_TO_GEO_FILES);
 		_fieldGeodataPath.addMouseListener(this);
 		
 		_panelButtons = new JPanel();
-		_buttonOk = new JButton("Ok");
+		_buttonOk = new DefaultButton("Ok");
 		_buttonOk.addActionListener(this);
-		_buttonCancel = new JButton("Cancel");
+		_buttonCancel = new DefaultButton("Cancel");
 		_buttonCancel.addActionListener(this);
 		
 		final GridBagConstraints gbc = new GridBagConstraints();

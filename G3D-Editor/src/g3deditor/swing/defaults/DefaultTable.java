@@ -34,7 +34,6 @@ public class DefaultTable extends JTable
 	public DefaultTable(final DefaultTableModel model)
 	{
 		super(model);
-		super.setIgnoreRepaint(true);
 	}
 	
 	public final void setColumnIdentifiers(final Object... newIdentifiers)
@@ -55,7 +54,8 @@ public class DefaultTable extends JTable
 	
 	public final void setRowCount(final int rows)
 	{
-		getModel().setRowCount(rows);
+		if (getModel().getRowCount() != rows)
+			getModel().setRowCount(rows);
 	}
 	
 	public final void setColumnMinMaxWidth(final int columnIndex, final int minWidth, final int maxWidth)
@@ -67,7 +67,34 @@ public class DefaultTable extends JTable
 	
 	public final void setColumnMinWidth(final int columnIndex, final int minWidth)
 	{
-		super.getColumnModel().getColumn(columnIndex).setMinWidth(minWidth);
+		getColumnModel().getColumn(columnIndex).setMinWidth(minWidth);
+	}
+	
+	public final void setSelectionInterval(final int index)
+	{
+		if (getSelectionModel().getMaxSelectionIndex() != index)
+			getSelectionModel().setSelectionInterval(index, index);
+	}
+	
+	@Override
+	public final void setValueAt(final Object val, final int row, final int column)
+	{
+		if (getValueAt(row, column) != val)
+			super.setValueAt(val, row, column);
+	}
+	
+	@Override
+	public final void setEnabled(final boolean enabled)
+	{
+		if (isEnabled() != enabled)
+			super.setEnabled(enabled);
+	}
+	
+	@Override
+	public final void setVisible(final boolean visible)
+	{
+		if (isVisible() != visible)
+			super.setVisible(visible);
 	}
 	
 	public static final class ComponentCellRendererEditor extends AbstractCellEditor implements TableCellEditor, TableCellRenderer

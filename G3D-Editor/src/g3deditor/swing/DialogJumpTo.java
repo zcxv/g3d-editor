@@ -18,6 +18,9 @@ import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
 import g3deditor.jogl.GLCamera;
 import g3deditor.jogl.GLDisplay;
+import g3deditor.swing.defaults.DefaultButton;
+import g3deditor.swing.defaults.DefaultLabel;
+import g3deditor.swing.defaults.DefaultTextField;
 import g3deditor.util.Util;
 
 import java.awt.Color;
@@ -35,12 +38,9 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -52,32 +52,32 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 {
 	private static final Font DEFAULT_FONT = new Font("Arial", Font.BOLD, 64);
 	
-	private final JLabel _labelWorldX;
-	private final JTextField _fieldWorldX;
-	private final JLabel _labelWorldY;
-	private final JTextField _fieldWorldY;
-	private final JLabel _labelWorldZ;
-	private final JTextField _fieldWorldZ;
+	private final DefaultLabel _labelWorldX;
+	private final DefaultTextField _fieldWorldX;
+	private final DefaultLabel _labelWorldY;
+	private final DefaultTextField _fieldWorldY;
+	private final DefaultLabel _labelWorldZ;
+	private final DefaultTextField _fieldWorldZ;
 	
-	private final JLabel _labelRegionX;
-	private final JTextField _fieldRegionX;
-	private final JLabel _labelRegionY;
-	private final JTextField _fieldRegionY;
-	private final JLabel _labelGeoX;
-	private final JTextField _fieldGeoX;
-	private final JLabel _labelGeoY;
-	private final JTextField _fieldGeoY;
-	private final JLabel _labelGeoL2jFound;
-	private final JTextField _fieldGeoL2jFound;
-	private final JLabel _labelGeoL2OffFound;
-	private final JTextField _fieldGeoL2OffFound;
-	private final JLabel _labelGeoFileType;
+	private final DefaultLabel _labelRegionX;
+	private final DefaultTextField _fieldRegionX;
+	private final DefaultLabel _labelRegionY;
+	private final DefaultTextField _fieldRegionY;
+	private final DefaultLabel _labelGeoX;
+	private final DefaultTextField _fieldGeoX;
+	private final DefaultLabel _labelGeoY;
+	private final DefaultTextField _fieldGeoY;
+	private final DefaultLabel _labelGeoL2jFound;
+	private final DefaultTextField _fieldGeoL2jFound;
+	private final DefaultLabel _labelGeoL2OffFound;
+	private final DefaultTextField _fieldGeoL2OffFound;
+	private final DefaultLabel _labelGeoFileType;
 	private final JComboBox _comboGeoFileType;
 	
-	private final JButton _buttonOk;
-	private final JButton _buttonCancel;
+	private final DefaultButton _buttonOk;
+	private final DefaultButton _buttonCancel;
 	
-	private final JLabel _labelRegionMap;
+	private final DefaultLabel _labelRegionMap;
 	private final ImageIcon _worldMap;
 	
 	private int _regionX;
@@ -116,50 +116,50 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		
 		_worldMap = new ImageIcon(img);
 		
-		_labelWorldX = new JLabel("World X:");
-		_fieldWorldX = new JTextField();
+		_labelWorldX = new DefaultLabel("World X:");
+		_fieldWorldX = new DefaultTextField();
 		_fieldWorldX.addKeyListener(this);
-		_labelWorldY = new JLabel("World Y:");
-		_fieldWorldY = new JTextField();
+		_labelWorldY = new DefaultLabel("World Y:");
+		_fieldWorldY = new DefaultTextField();
 		_fieldWorldY.addKeyListener(this);
-		_labelWorldZ = new JLabel("World Z:");
-		_fieldWorldZ = new JTextField();
+		_labelWorldZ = new DefaultLabel("World Z:");
+		_fieldWorldZ = new DefaultTextField();
 		
-		_labelRegionX = new JLabel("RegionX");
-		_fieldRegionX = new JTextField();
+		_labelRegionX = new DefaultLabel("RegionX");
+		_fieldRegionX = new DefaultTextField();
 		_fieldRegionX.addKeyListener(this);
-		_labelRegionY = new JLabel("RegionY");
-		_fieldRegionY = new JTextField();
+		_labelRegionY = new DefaultLabel("RegionY");
+		_fieldRegionY = new DefaultTextField();
 		_fieldRegionY.addKeyListener(this);
 		
-		_labelGeoX = new JLabel("GeoX");
-		_fieldGeoX = new JTextField();
+		_labelGeoX = new DefaultLabel("GeoX");
+		_fieldGeoX = new DefaultTextField();
 		_fieldGeoX.setEnabled(false);
-		_labelGeoY = new JLabel("GeoY");
-		_fieldGeoY = new JTextField();
+		_labelGeoY = new DefaultLabel("GeoY");
+		_fieldGeoY = new DefaultTextField();
 		_fieldGeoY.setEnabled(false);
 		
-		_labelGeoL2jFound = new JLabel("Geo L2j:");
-		_fieldGeoL2jFound = new JTextField();
+		_labelGeoL2jFound = new DefaultLabel("Geo L2j:");
+		_fieldGeoL2jFound = new DefaultTextField();
 		_fieldGeoL2jFound.setEditable(false);
 		_fieldGeoL2jFound.setEnabled(false);
-		_labelGeoL2OffFound = new JLabel("Geo L2Off:");
-		_fieldGeoL2OffFound = new JTextField();
+		_labelGeoL2OffFound = new DefaultLabel("Geo L2Off:");
+		_fieldGeoL2OffFound = new DefaultTextField();
 		_fieldGeoL2OffFound.setEditable(false);
 		_fieldGeoL2OffFound.setEnabled(false);
 		
-		_labelGeoFileType = new JLabel("Select:");
+		_labelGeoFileType = new DefaultLabel("Select:");
 		_comboGeoFileType = new JComboBox();
 		_comboGeoFileType.setEditable(false);
 		_comboGeoFileType.setEnabled(false);
 		
-		_buttonOk = new JButton("Ok");
+		_buttonOk = new DefaultButton("Ok");
 		_buttonOk.addActionListener(this);
 		_buttonOk.setEnabled(false);
-		_buttonCancel = new JButton("Cancel");
+		_buttonCancel = new DefaultButton("Cancel");
 		_buttonCancel.addActionListener(this);
 		
-		_labelRegionMap = new JLabel();
+		_labelRegionMap = new DefaultLabel();
 		_labelRegionMap.addMouseListener(this);
 		_labelRegionMap.setIcon(_worldMap);
 		
@@ -397,7 +397,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		gbc.weighty = 0;
 		gbc.ipadx = 150;
 		gbc.ipady = 0;
-		add(new JLabel(), gbc);
+		add(new DefaultLabel(), gbc);
 		
 		gbc.gridx = 2;
 		gbc.gridy = 0;
