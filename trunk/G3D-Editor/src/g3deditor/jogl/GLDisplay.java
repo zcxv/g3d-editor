@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.Config;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
@@ -21,9 +22,6 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLGUIRenderer.GLText;
-import g3deditor.jogl.renderer.DLRenderer;
-import g3deditor.jogl.renderer.IRenderer;
-import g3deditor.jogl.renderer.VBORenderer;
 import g3deditor.util.FastArrayList;
 
 import java.awt.event.MouseEvent;
@@ -79,7 +77,6 @@ public final class GLDisplay implements GLEventListener
 	private static final float VIEW_Z_FAR = 2000f;
 	
 	private final GLCanvas _canvas;
-	private final GLCellRenderer _renderer;
 	private final GLGUIRenderer _guiRenderer;
 	private final GLCellRenderSelector _renderSelector;
 	private final GLSelectionBox _selectionBox;
@@ -94,6 +91,8 @@ public final class GLDisplay implements GLEventListener
 	private final GLText _worldPositionText;
 	private final GLText _geoPositionText;
 	
+	private GLCellRenderer _renderer;
+	private boolean _vsync;
 	private GeoCell _prevPick;
 	
 	private GLU _glu;
@@ -107,24 +106,6 @@ public final class GLDisplay implements GLEventListener
 	private GLDisplay(final GLCanvas canvas)
 	{
 		_canvas = canvas;
-		
-		final int renderer = 2;
-		switch (renderer)
-		{
-			// Old G3D 11 fps - 18092
-			case 0: // 15 fps - 18171 - 136%(OLD)
-				_renderer = new IRenderer();
-				break;
-				
-			case 1: // 28 fps - 18171 - 254%(OLD) - 186% (I)
-				_renderer = new DLRenderer();
-				break;
-				
-			default: // 40 fps - 18171 - 363%(OLD) - 124%(DL) - 266%(I)
-				_renderer = new VBORenderer();
-				break;
-		}
-		
 		_guiRenderer = new GLGUIRenderer();
 		_renderSelector = new GLCellRenderSelector();
 		_selectionBox = new GLSelectionBox();
@@ -139,7 +120,7 @@ public final class GLDisplay implements GLEventListener
 		_glInfoText = _guiRenderer.newText(10, _renderInfoText.getY() + GLGUIRenderer.TEXT_HEIGHT);
 		_geoPositionText = _guiRenderer.newText(10, _glInfoText.getY() + GLGUIRenderer.TEXT_HEIGHT);
 		_worldPositionText = _guiRenderer.newText(10, _geoPositionText.getY() + GLGUIRenderer.TEXT_HEIGHT);
-		
+		_vsync = true;
 	}
 	
 	public final GLCanvas getCanvas()
@@ -214,7 +195,6 @@ public final class GLDisplay implements GLEventListener
 		_glu.gluPerspective(VIEW_ANGLE, 1.0f, VIEW_Z_NEAR, VIEW_Z_FAR);
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		
-		_renderer.init(gl);
 		_guiRenderer.init(gl);
 		_renderSelector.init();
 		_terrain.init(gl);
@@ -224,7 +204,6 @@ public final class GLDisplay implements GLEventListener
 		_timeFPS = 0L;
 		_loopsFPS = 0;
 		
-		_renderInfoText.setText("Renderer: " + _renderer);
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
 	}
 	
@@ -235,7 +214,8 @@ public final class GLDisplay implements GLEventListener
 	public final void dispose(final GLAutoDrawable glautodrawable)
 	{
 		final GL2 gl = glautodrawable.getGL().getGL2();
-		_renderer.dispose(gl);
+		if (_renderer != null)
+			_renderer.dispose(gl);
 		_guiRenderer.dispose(gl);
 		_renderSelector.dispose();
 		_terrain.dispose(gl);
@@ -272,6 +252,12 @@ public final class GLDisplay implements GLEventListener
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		gl.glLoadIdentity();
 		
+		if (_vsync != Config.V_SYNC)
+		{
+			_vsync = Config.V_SYNC;
+			gl.setSwapInterval(_vsync ? GL.GL_ONE : GL.GL_ZERO);
+		}
+		
 		_input.update(gl, tpf);
 		_camera.checkPositionOrRotationChanged();
 		
@@ -286,8 +272,29 @@ public final class GLDisplay implements GLEventListener
 		
 		_renderSelector.select(gl, _camera, _input.getKeyFToggle());
 		
+		if (_renderer == null)
+		{
+			_renderer = GLCellRenderer.getRenderer(Config.CELL_RENDERER);
+			_renderInfoText.setText("Renderer: " + _renderer);
+		}
+		else if (!_renderer.getName().equals(Config.CELL_RENDERER))
+		{
+			final GLCellRenderer newRenderer = GLCellRenderer.getRenderer(Config.CELL_RENDERER);
+			if (!newRenderer.getName().equals(_renderer.getName()))
+			{
+				_renderer.dispose(gl);
+				_renderer = newRenderer;
+				_renderInfoText.setText("Renderer: " + _renderer);
+			}
+			else
+			{
+				Config.CELL_RENDERER = _renderer.getName();
+			}
+		}
+		
 		if (_input.getKeyGToggle())
 		{
+			_renderer.init(gl);
 			_renderer.enableRender(gl);
 			
 			GLSubRenderSelector selector;
@@ -366,6 +373,10 @@ public final class GLDisplay implements GLEventListener
 			if (cell != null && Math.abs(cell.getHeight() - (int) (point[1] * 16f)) <= 4)
 			{
 				_selectionBox.render(gl, cell);
+			}
+			else
+			{
+				_selectionBox.render(gl, null);
 			}
 		}
 		

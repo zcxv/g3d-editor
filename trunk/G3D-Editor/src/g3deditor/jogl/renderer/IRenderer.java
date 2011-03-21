@@ -27,6 +27,9 @@ import javax.media.opengl.GL2;
  */
 public final class IRenderer extends GLCellRenderer
 {
+	public static final String NAME = "Immediate";
+	public static final String NAME_SHORT = NAME;
+	
 	/**
 	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.geo.GeoCell)
 	 */
@@ -36,13 +39,22 @@ public final class IRenderer extends GLCellRenderer
 		gl.glPushMatrix();
 		gl.glColor4f(color.getR(), color.getG(), color.getB(), COLOR_ALPHA);
 		gl.glTranslatef(cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-		renderCell(gl, cell.isBig(), cell.getNSWE());
+		renderCellFull(gl, cell.isBig(), cell.getNSWE());
 		gl.glPopMatrix();
+	}
+	
+	/**
+	 * @see g3deditor.jogl.GLCellRenderer#getName()
+	 */
+	@Override
+	public final String getName()
+	{
+		return NAME;
 	}
 	
 	@Override
 	public final String toString()
 	{
-		return "Immediate";
+		return NAME_SHORT;
 	}
 }

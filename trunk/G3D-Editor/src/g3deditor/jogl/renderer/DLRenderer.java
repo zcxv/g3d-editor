@@ -28,6 +28,9 @@ import javax.media.opengl.GL2;
  */
 public final class DLRenderer extends GLCellRenderer
 {
+	public static final String NAME = "DisplayList";
+	public static final String NAME_SHORT = "DL";
+	
 	private int _listId;
 	
 	/**
@@ -40,13 +43,13 @@ public final class DLRenderer extends GLCellRenderer
 		_listId = gl.glGenLists(NSWE_COMBINATIONS + 1);
 		
 		gl.glNewList(_listId, GL2.GL_COMPILE);
-		renderCell(gl, true, GeoEngine.NSWE_ALL);
+		renderCellFull(gl, true, GeoEngine.NSWE_ALL);
 		gl.glEndList();
 		
 		for (int i = 0; i < NSWE_COMBINATIONS; i++)
 		{
 			gl.glNewList(_listId + 1 + i, GL2.GL_COMPILE);
-			renderCell(gl, false, i);
+			renderCellFull(gl, false, i);
 			gl.glEndList();
 		}
 	}
@@ -74,9 +77,18 @@ public final class DLRenderer extends GLCellRenderer
 		gl.glDeleteLists(_listId, NSWE_COMBINATIONS + 1);
 	}
 	
+	/**
+	 * @see g3deditor.jogl.GLCellRenderer#getName()
+	 */
+	@Override
+	public final String getName()
+	{
+		return NAME;
+	}
+	
 	@Override
 	public final String toString()
 	{
-		return "DL";
+		return NAME_SHORT;
 	}
 }

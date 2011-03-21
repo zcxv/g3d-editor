@@ -15,6 +15,8 @@
 package g3deditor;
 
 import g3deditor.jogl.GLCellRenderSelector;
+import g3deditor.jogl.GLCellRenderer;
+import g3deditor.jogl.renderer.DLLoDRenderer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,6 +42,9 @@ public final class Config
 	public static boolean TERRAIN_DEFAULT_ON				= false;
 	public static int VIS_GRID_RANGE						= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
 	public static String LOOK_AND_FEEL						= "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+	public static String CELL_RENDERER						= GLCellRenderer.validateRenderer(null);
+	public static int DLLoDRANGE							= DLLoDRenderer.MAX_DISTANCE_SQ;
+	public static boolean V_SYNC							= true;
 	
 	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
 	{
@@ -91,6 +96,9 @@ public final class Config
 				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainDefaultOn", "false"));
 				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
 				LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+				CELL_RENDERER			= PROPERTIES.getProperty("CellRenderer", GLCellRenderer.validateRenderer(null));
+				DLLoDRANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoDRange", String.valueOf(DLLoDRenderer.MAX_DISTANCE_SQ)));
+				V_SYNC					= Boolean.parseBoolean(PROPERTIES.getProperty("V_SYNC", "true"));
 			}
 		}
 		catch (final Exception e)
@@ -129,6 +137,17 @@ public final class Config
 		{
 			VIS_GRID_RANGE = GLCellRenderSelector.MAX_VIS_GRID_RANGE;
 		}
+		
+		CELL_RENDERER = GLCellRenderer.validateRenderer(CELL_RENDERER);
+		
+		if (DLLoDRANGE < DLLoDRenderer.MIN_DISTANCE_SQ)
+		{
+			DLLoDRANGE = DLLoDRenderer.MIN_DISTANCE_SQ;
+		}
+		else if (DLLoDRANGE > DLLoDRenderer.MAX_DISTANCE_SQ)
+		{
+			DLLoDRANGE = DLLoDRenderer.MAX_DISTANCE_SQ;
+		}
 	}
 	
 	public static final void save()
@@ -138,6 +157,9 @@ public final class Config
 		PROPERTIES.put("TerrainDefaultOn", String.valueOf(TERRAIN_DEFAULT_ON));
 		PROPERTIES.put("VisibleGridRange", String.valueOf(VIS_GRID_RANGE));
 		PROPERTIES.put("LookAndFeel", LOOK_AND_FEEL);
+		PROPERTIES.put("CellRenderer", CELL_RENDERER);
+		PROPERTIES.put("DLLoDRange", String.valueOf(DLLoDRANGE));
+		PROPERTIES.put("V_SYNC", String.valueOf(V_SYNC));
 		PROPERTIES.save(CONFIG_FILE);
 	}
 	
