@@ -31,6 +31,11 @@ import javax.imageio.ImageIO;
  */
 public final class Util
 {
+	public static interface FastComparator<T>
+	{
+		public boolean compare(final T o1, final T o2);
+	}
+	
 	public static final int arrayIndexOf(final Object[] array, final Object value)
 	{
 		for (int i = array.length; i-- > 0;)
@@ -39,6 +44,69 @@ public final class Util
 				return i;
 		}
 		return -1;
+	}
+	
+	public static final <T> void quickSort(final T[] values, final FastComparator<T> comparator)
+	{
+		quickSort(values, values.length, comparator);
+	}
+	
+	public static final <T> void quickSort(final T[] values, final int length, final FastComparator<T> comparator)
+	{
+		final int high = length - 1;
+		quickSortImpl(values, 0, high, comparator);
+		insertionSort(values, 0, high, comparator);
+	}
+	
+	private static final <T> void quickSortImpl(final T[] values, final int low, final int high, final FastComparator<T> comparator)
+	{
+		int i;
+		int j;
+		T v;
+		
+		if (high - low > 4)
+		{
+			i = (high + low) / 2;
+			if (comparator.compare(values[low], values[i]))
+				swap(values, low, i);
+			if (comparator.compare(values[low], values[high]))
+				swap(values, low, high);
+			if (comparator.compare(values[i], values[high]))
+				swap(values, i, high);
+			
+			j = high - 1;
+			swap(values, i, j);
+			i = low;
+			v = values[j];
+			while (true)
+			{
+				while (comparator.compare(v, values[++i]));
+				while (comparator.compare(values[--j], v));
+				if (j < i)
+					break;
+				swap(values, i, j);
+			}
+			swap(values, i, high - 1);
+			quickSortImpl(values, low, j, comparator);
+			quickSortImpl(values, i + 1, high, comparator);
+		}
+	}
+	
+	private static final <T> void insertionSort(final T[] values, final int low, final int high, final FastComparator<T> comparator)
+	{
+		T v;
+		for (int i = low + 1, j; i <= high; i++)
+		{
+			v = values[i];
+			j = i;
+			
+			while ((j > low) && comparator.compare(values[j - 1], v))
+			{
+				values[j] = values[j - 1];
+				j--;
+			}
+			values[j] = v;
+		}
 	}
 	
 	/**

@@ -23,8 +23,7 @@ import g3deditor.geo.GeoRegion;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.util.TaskExecutor;
 import g3deditor.util.Util;
-
-import java.util.Comparator;
+import g3deditor.util.Util.FastComparator;
 
 import javax.media.opengl.GL2;
 
@@ -35,17 +34,44 @@ import javax.media.opengl.GL2;
  */
 public final class GLCellRenderSelector
 {
+	public static final FastComparator<GLSubRenderSelector> GEO_BLOCK_COMPARATOR = new FastComparator<GLSubRenderSelector>()
+	{
+		@Override
+		public final boolean compare(final GLSubRenderSelector o1, final GLSubRenderSelector o2)
+		{
+			final GLCamera camera = GLDisplay.getInstance().getCamera();
+			final float dx1 = camera.getX() - o1.getGeoBlock().getGeoX();
+			final float dy1 = camera.getZ() - o1.getGeoBlock().getGeoY();
+			final float dx2 = camera.getX() - o2.getGeoBlock().getGeoX();
+			final float dy2 = camera.getZ() - o2.getGeoBlock().getGeoY();
+			return dx1 * dx1 + dy1 * dy1 > dx2 * dx2 + dy2 * dy2;
+		}
+	};
+	
+	public static final FastComparator<GeoCell> GEO_CELL_COMPARATOR = new FastComparator<GeoCell>()
+	{
+		@Override
+		public final boolean compare(final GeoCell o1, final GeoCell o2)
+		{
+			final GLCamera camera = GLDisplay.getInstance().getCamera();
+			final float dx1 = camera.getX() - o1.getGeoX();
+			final float dy1 = camera.getZ() - o1.getGeoY();
+			final float dz1 = camera.getY() - o1.getHeight() / 16f;
+			final float dx2 = camera.getX() - o2.getGeoX();
+			final float dy2 = camera.getZ() - o2.getGeoY();
+			final float dz2 = camera.getY() - o2.getHeight() / 16f;
+			return dx1 * dx1 + dy1 * dy1 + dz1 * dz1 > dx2 * dx2 + dy2 * dy2 + dz2 * dz2;
+		}
+	};
+	
 	public static final int MIN_VIS_GRID_RANGE = 8;
 	public static final int MAX_VIS_GRID_RANGE = 96;
 	
-	private final GLSubRenderSelectorComparator _glSubRenderSelectorComparator;
-	private final GeoCellComparator _cellComparator;
 	private final TaskExecutor _taskExecutor;
 	
 	private float[][] _frustum;
 	
 	private GLSubRenderSelector[] _geoBlocks;
-	private GLSubRenderSelector[] _geoBlocksSorted;
 	private int _geoBlocksSize;
 	
 	private int _camBlockX;
@@ -56,10 +82,7 @@ public final class GLCellRenderSelector
 	
 	public GLCellRenderSelector()
 	{
-		_glSubRenderSelectorComparator = new GLSubRenderSelectorComparator();
-		_cellComparator = new GeoCellComparator();
 		_geoBlocks = new GLSubRenderSelector[0];
-		_geoBlocksSorted = new GLSubRenderSelector[0];
 		_taskExecutor = new TaskExecutor(Runtime.getRuntime().availableProcessors());
 	}
 	
@@ -71,11 +94,6 @@ public final class GLCellRenderSelector
 	public final void dispose()
 	{
 		_taskExecutor.dispose();
-	}
-	
-	public final GeoCellComparator getGeoCellComparator()
-	{
-		return _cellComparator;
 	}
 	
 	public final void forceUpdateFrustum()
@@ -110,7 +128,6 @@ public final class GLCellRenderSelector
 				if (_geoBlocks.length != requiredSize)
 				{
 					_geoBlocks = new GLSubRenderSelector[requiredSize];
-					_geoBlocksSorted = new GLSubRenderSelector[requiredSize];
 					for (int i = requiredSize; i-- > 0;)
 					{
 						_geoBlocks[i] = new GLSubRenderSelector();
@@ -153,8 +170,7 @@ public final class GLCellRenderSelector
 			_forceUpdateFrustum = false;
 			_frustum = camera.getFrustum(gl);
 			_taskExecutor.execute(_geoBlocks, _geoBlocksSize);
-			System.arraycopy(_geoBlocks, 0, _geoBlocksSorted, 0, _geoBlocksSize);
-			Util.mergeSort(_geoBlocks, _geoBlocksSorted, _geoBlocksSize, _glSubRenderSelectorComparator);
+			Util.quickSort(_geoBlocks, _geoBlocksSize, GEO_BLOCK_COMPARATOR);
 		}
 	}
 	
@@ -165,7 +181,7 @@ public final class GLCellRenderSelector
 	
 	public final GLSubRenderSelector getElementToRender(final int index)
 	{
-		return _geoBlocksSorted[index];
+		return _geoBlocks[index];
 	}
 	
 	public final boolean isVisible(final GeoBlock block)
@@ -248,15 +264,12 @@ public final class GLCellRenderSelector
 	public final class GLSubRenderSelector implements Runnable
 	{
 		private GeoBlock _block;
-		
-		private GeoCell[] _culledCells;
-		private GeoCell[] _sortedCells;
+		private GeoCell[] _geoCells;
 		private int _count;
 		
 		public GLSubRenderSelector()
 		{
-			_culledCells = new GeoCell[0];
-			_sortedCells = new GeoCell[0];
+			_geoCells = new GeoCell[0];
 		}
 		
 		public final void setGeoBlock(final GeoBlock block)
@@ -276,7 +289,7 @@ public final class GLCellRenderSelector
 		
 		public final GeoCell getElementToRender(final int index)
 		{
-			return _sortedCells[index];
+			return _geoCells[index];
 		}
 		
 		@Override
@@ -287,66 +300,19 @@ public final class GLCellRenderSelector
 				return;
 			
 			final GeoCell[] cells = _block.getCells();
-			if (_culledCells.length < cells.length)
+			if (_geoCells.length < cells.length)
 			{
-				_culledCells = new GeoCell[cells.length];
-				_sortedCells = new GeoCell[cells.length];
+				_geoCells = new GeoCell[cells.length];
+				_geoCells = new GeoCell[cells.length];
 			}
 			
 			for (final GeoCell cell : cells)
 			{
 				if (GLCellRenderSelector.this.isVisible(cell))
-					_culledCells[_count++] = cell;
+					_geoCells[_count++] = cell;
 			}
 			
-			System.arraycopy(_culledCells, 0, _sortedCells, 0, _count);
-			Util.mergeSort(_culledCells, _sortedCells, _count, GLCellRenderSelector.this.getGeoCellComparator());
-		}
-	}
-	
-	private final class GLSubRenderSelectorComparator implements Comparator<GLSubRenderSelector>
-	{
-		public GLSubRenderSelectorComparator()
-		{
-			
-		}
-		
-		/**
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public final int compare(final GLSubRenderSelector o1, final GLSubRenderSelector o2)
-		{
-			final GLCamera camera = GLDisplay.getInstance().getCamera();
-			final double dx1 = camera.getX() - o1.getGeoBlock().getGeoX();
-			final double dy1 = camera.getZ() - o1.getGeoBlock().getGeoY();
-			final double dx2 = camera.getX() - o2.getGeoBlock().getGeoX();
-			final double dy2 = camera.getZ() - o2.getGeoBlock().getGeoY();
-			return (int) ((dx1 * dx1 + dy1 * dy1) - (dx2 * dx2 + dy2 * dy2));
-		}
-	}
-	
-	private final class GeoCellComparator implements Comparator<GeoCell>
-	{
-		public GeoCellComparator()
-		{
-			
-		}
-		
-		/**
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public final int compare(final GeoCell o1, final GeoCell o2)
-		{
-			final GLCamera camera = GLDisplay.getInstance().getCamera();
-			final double dx1 = camera.getX() - o1.getGeoX();
-			final double dy1 = camera.getZ() - o1.getGeoY();
-			final double dz1 = camera.getY() - o1.getHeight() / 16f;
-			final double dx2 = camera.getX() - o2.getGeoX();
-			final double dy2 = camera.getZ() - o2.getGeoY();
-			final double dz2 = camera.getY() - o2.getHeight() / 16f;
-			return (int) ((dx1 * dx1 + dy1 * dy1 + dz1 * dz1) - (dx2 * dx2 + dy2 * dy2 + dz2 * dz2));
+			Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
 		}
 	}
 }
