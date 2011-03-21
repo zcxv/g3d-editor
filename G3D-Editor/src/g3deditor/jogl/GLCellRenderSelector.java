@@ -16,6 +16,7 @@ package g3deditor.jogl;
 
 import g3deditor.Config;
 import g3deditor.geo.GeoBlock;
+import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
@@ -127,6 +128,8 @@ public final class GLCellRenderSelector
 					final int maxBlockX = Math.min(diffBlockXPos + (diffBlockXNeg < 0 ? -diffBlockXNeg : 0), GeoEngine.GEO_REGION_SIZE - 1);
 					final int minBlockY = Math.max(diffBlockYNeg + (diffBlockYPos > GeoEngine.GEO_REGION_SIZE - 1 ? GeoEngine.GEO_REGION_SIZE - 1 - diffBlockYPos : 0), 0);
 					final int maxBlockY = Math.min(diffBlockYPos + (diffBlockYNeg < 0 ? -diffBlockYNeg : 0), GeoEngine.GEO_REGION_SIZE - 1);
+					
+					GeoBlockSelector.getInstance().checkDeselection(minBlockX, maxBlockX, minBlockY, maxBlockY);
 					
 					_geoBlocksSize = 0;
 					for (int x = minBlockX, y; x < maxBlockX; x++)

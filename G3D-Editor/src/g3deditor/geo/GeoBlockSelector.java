@@ -18,7 +18,6 @@ import g3deditor.entity.SelectionState;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.swing.FrameMain;
 import g3deditor.util.FastArrayList;
-import javolution.util.FastMap;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -27,6 +26,22 @@ import javolution.util.FastMap;
  */
 public final class GeoBlockSelector
 {
+	private static final void setStateOf(final FastArrayList<GeoCell> cells, final SelectionState state)
+	{
+		for (int i = cells.size(); i-- > 0;)
+		{
+			cells.getUnsafe(i).setSelectionState(state);
+		}
+	}
+	
+	private static final void setStateOf(final GeoCell[] cells, final SelectionState state)
+	{
+		for (int i = cells.length; i-- > 0;)
+		{
+			cells[i].setSelectionState(state);
+		}
+	}
+	
 	private static GeoBlockSelector _instance;
 	
 	public static final void init()
@@ -39,68 +54,62 @@ public final class GeoBlockSelector
 		return _instance;
 	}
 	
-	private final FastMap<GeoBlock, FastArrayList<GeoCell>> _selected;
+	private final GeoBlockEntry[] _selected;
+	private final GeoBlockEntry _head;
+	private final GeoBlockEntry _tail;
 	
 	public GeoBlockSelector()
 	{
-		_selected = new FastMap<GeoBlock, FastArrayList<GeoCell>>();
+		_selected = new GeoBlockEntry[GeoEngine.GEO_REGION_SIZE * GeoEngine.GEO_REGION_SIZE];
+		for (int i = _selected.length; i-- > 0;)
+		{
+			_selected[i] = new GeoBlockEntry();
+		}
+		_head = new GeoBlockEntry();
+		_tail = new GeoBlockEntry();
+		getHead().setPrev(getHead());
+		getHead().setNext(getTail());
+		getTail().setPrev(getHead());
+		getTail().setNext(getTail());
 	}
 	
-	private final void setStateOf(final FastArrayList<GeoCell> cells, final SelectionState state)
+	private final GeoBlockEntry getEntry(final GeoBlock block)
 	{
-		for (int i = cells.size(); i-- > 0;)
-		{
-			cells.getUnsafe(i).setSelectionState(state);
-		}
+		return _selected[block.getBlockX() * GeoEngine.GEO_REGION_SIZE + block.getBlockY()];
 	}
 	
-	private final void setStateOf(final GeoCell[] cells, final SelectionState state)
+	public final GeoBlockEntry getHead()
 	{
-		for (int i = cells.length; i-- > 0;)
-		{
-			cells[i].setSelectionState(state);
-		}
+		return _head;
 	}
 	
-	public final boolean forEachGeoCell(final ForEachGeoCellProcedure proc)
+	public final GeoBlockEntry getTail()
 	{
-		FastArrayList<GeoCell> selected;
-		for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
-		{
-			selected = e.getValue();
-			for (int i = selected.size(); i-- > 0;)
-			{
-				if (!proc.execute(selected.getUnsafe(i)))
-					return false;
-			}
-		}
-		return true;
+		return _tail;
 	}
 	
-	public final boolean forEachGeoBlock(final ForEachGeoBlockProcedure proc)
+	public final boolean hasSelected()
 	{
-		for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
-		{
-			if (!proc.execute(e.getKey()))
-				return false;
-		}
-		return true;
+		return getHead().getNext() != getTail();
 	}
 	
 	public final boolean isGeoCellSelected(final GeoCell cell)
 	{
-		return false;
+		return getEntry(cell.getBlock()).getValue() != null;
 	}
 	
 	public final void selectGeoCell(final GeoCell cell, boolean fullBlock, final boolean append)
 	{
 		final GeoBlock block = cell.getBlock();
 		final GeoCell[] cells = block.getCells();
+		final GeoBlockEntry entry = getEntry(block);
+		FastArrayList<GeoCell> selected;
+		
 		fullBlock |= block instanceof GeoBlockFlat;
 		
 		if (append)
 		{
-			FastArrayList<GeoCell> selected = _selected.get(block);
+			selected = entry.getValue();
 			if (selected != null)
 			{
 				if (selected.size() == cells.length)
@@ -108,7 +117,7 @@ public final class GeoBlockSelector
 					if (fullBlock || selected.size() == 1)
 					{
 						setStateOf(selected, SelectionState.NORMAL);
-						_selected.remove(block);
+						entry.remove();
 					}
 					else
 					{
@@ -131,7 +140,7 @@ public final class GeoBlockSelector
 							if (selected.isEmpty())
 							{
 								setStateOf(cells, SelectionState.NORMAL);
-								_selected.remove(block);
+								entry.remove();
 							}
 							else
 							{
@@ -160,18 +169,21 @@ public final class GeoBlockSelector
 				}
 				
 				setStateOf(selected, SelectionState.SELECTED);
-				_selected.put(block, selected);
+				entry.setKey(block);
+				entry.setValue(selected);
+				entry.addBefore(getTail());
 			}
 		}
 		else
 		{
-			for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
+			for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
 			{
 				setStateOf(e.getKey().getCells(), SelectionState.NORMAL);
+				p = e.getPrev();
+				e.remove();
+				e = p;
 			}
-			_selected.clear();
 			
-			final FastArrayList<GeoCell> selected;
 			if (fullBlock)
 			{
 				selected = new FastArrayList<GeoCell>(cells, true);
@@ -184,39 +196,131 @@ public final class GeoBlockSelector
 			}
 			
 			setStateOf(selected, SelectionState.SELECTED);
-			_selected.put(block, selected);
+			entry.setKey(block);
+			entry.setValue(selected);
+			entry.addBefore(getTail());
 		}
 		
-		if (_selected.isEmpty())
+		if (!hasSelected())
 		{
 			FrameMain.getInstance().setSelectedGeoCell(null);
 		}
 		else
 		{
-			FastArrayList<GeoCell> temp = _selected.get(block);
-			if (temp == null)
-				temp = _selected.tail().getPrevious().getValue();
+			selected = entry.getValue();
+			if (selected == null)
+				selected = getTail().getPrev().getValue();
 			
-			FrameMain.getInstance().setSelectedGeoCell(temp.getUnsafe(temp.size() - 1));
+			FrameMain.getInstance().setSelectedGeoCell(selected.getLastUnsafe());
 		}
+	}
+	
+	public final void checkDeselection(final int minBlockX, final int maxBlockX, final int minBlockY, final int maxBlockY)
+	{
+		GeoCell cell = FrameMain.getInstance().getSelectedGeoCell();
+		
+		GeoBlock block;
+		for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
+		{
+			block = e.getKey();
+			if (block.getBlockX() < minBlockX || block.getBlockX() >= maxBlockX || block.getBlockY() < minBlockY || block.getBlockY() >= maxBlockY)
+			{
+				if (cell != null && cell.getBlock() == block)
+				{
+					cell = null;
+					FrameMain.getInstance().setSelectedGeoCell(null);
+				}
+					
+				setStateOf(block.getCells(), SelectionState.NORMAL);
+				p = e.getPrev();
+				e.remove();
+				e = p;
+			}
+		}
+		
+		if (cell == null && hasSelected())
+			FrameMain.getInstance().setSelectedGeoCell(getTail().getPrev().getValue().getLastUnsafe());
 	}
 	
 	public final void unload()
 	{
-		for (FastMap.Entry<GeoBlock, FastArrayList<GeoCell>> e = _selected.head(), tail = _selected.tail(); (e = e.getNext()) != tail;)
+		for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
 		{
-			e.getValue().clear();
+			p = e.getPrev();
+			e.remove();
+			e = p;
 		}
-		_selected.clear();
+		
+		FrameMain.getInstance().setSelectedGeoCell(null);
 	}
 	
-	public static interface ForEachGeoCellProcedure
+	public static final class GeoBlockEntry
 	{
-		public boolean execute(final GeoCell cell);
-	}
-	
-	public static interface ForEachGeoBlockProcedure
-	{
-		public boolean execute(final GeoBlock cell);
+		private GeoBlockEntry _next;
+		private GeoBlockEntry _prev;
+		private GeoBlock _key;
+		private FastArrayList<GeoCell> _value;
+		
+		public GeoBlockEntry()
+		{
+			
+		}
+		
+		public final GeoBlockEntry getNext()
+		{
+			return _next;
+		}
+		
+		public final void setNext(final GeoBlockEntry entry)
+		{
+			_next = entry;
+		}
+		
+		public final GeoBlockEntry getPrev()
+		{
+			return _prev;
+		}
+		
+		public final void setPrev(final GeoBlockEntry entry)
+		{
+			_prev = entry;
+		}
+		
+		public final void remove()
+		{
+			getPrev().setNext(getNext());
+			getNext().setPrev(getPrev());
+			setKey(null);
+			setValue(null);
+		}
+		
+		public final void addBefore(final GeoBlockEntry entry)
+		{
+			setPrev(entry.getPrev());
+			setNext(entry);
+			
+			entry.getPrev().setNext(this);
+			entry.setPrev(this);
+		}
+		
+		public final GeoBlock getKey()
+		{
+			return _key;
+		}
+		
+		public final void setKey(final GeoBlock key)
+		{
+			_key = key;
+		}
+		
+		public final FastArrayList<GeoCell> getValue()
+		{
+			return _value;
+		}
+		
+		public final void setValue(final FastArrayList<GeoCell> value)
+		{
+			_value = value;
+		}
 	}
 }

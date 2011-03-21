@@ -331,6 +331,11 @@ public final class FastArrayList<E> implements List<E>
 		return _values[index];
 	}
 	
+	public final E getLastUnsafe()
+	{
+		return _values[_size - 1];
+	}
+	
 	/**
 	 * @see java.util.List#indexOf(java.lang.Object)
 	 */

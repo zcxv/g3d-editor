@@ -15,9 +15,10 @@
 package g3deditor.swing;
 
 import g3deditor.geo.GeoBlockSelector;
-import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
+import g3deditor.geo.GeoBlockSelector.GeoBlockEntry;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.util.FastArrayList;
 import g3deditor.util.Util;
 
 import java.awt.Dimension;
@@ -102,15 +103,18 @@ public final class PanelNswe extends JPanel implements ActionListener
 	{
 		final NsweButton nsweButton = (NsweButton) e.getSource();
 		setButtonSelected(nsweButton);
-		GeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
+		
+		final GeoBlockSelector selector = GeoBlockSelector.getInstance();
+		FastArrayList<GeoCell> cells;
+		int i;
+		for (GeoBlockEntry entry = selector.getHead(), tail = selector.getTail(); (entry = entry.getNext()) != tail;)
 		{
-			@Override
-			public final boolean execute(final GeoCell cell)
+			cells = entry.getValue();
+			for (i = cells.size(); i-- > 0;)
 			{
-				cell.setNswe(nsweButton.getNswe());
-				return true;
+				cells.getUnsafe(i).setNswe(nsweButton.getNswe());
 			}
-		});
+		}
 	}
 	
 	private static final class NsweButton extends JToggleButton

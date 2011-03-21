@@ -17,7 +17,7 @@ package g3deditor.jogl;
 import g3deditor.Config;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoBlockSelector;
-import g3deditor.geo.GeoBlockSelector.ForEachGeoCellProcedure;
+import g3deditor.geo.GeoBlockSelector.GeoBlockEntry;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
@@ -312,7 +312,7 @@ public final class GLDisplay implements GLEventListener
 		}
 		
 		final FastArrayList<MouseEvent> mouseEvents = _input.getMouseEvents();
-		for (int i = 0; i < mouseEvents.size(); i++)
+		for (int i = 0, j; i < mouseEvents.size(); i++)
 		{
 			final MouseEvent event = mouseEvents.getUnsafe(i);
 			if (event instanceof MouseWheelEvent)
@@ -321,15 +321,16 @@ public final class GLDisplay implements GLEventListener
 				if (event.isControlDown())
 				{
 					final short addHeight = (short) (scrollevent.getWheelRotation() * -8);
-					GeoBlockSelector.getInstance().forEachGeoCell(new ForEachGeoCellProcedure()
+					final GeoBlockSelector selector = GeoBlockSelector.getInstance();
+					FastArrayList<GeoCell> cells;
+					for (GeoBlockEntry entry = selector.getHead(), tail = selector.getTail(); (entry = entry.getNext()) != tail;)
 					{
-						@Override
-						public final boolean execute(final GeoCell cell)
+						cells = entry.getValue();
+						for (j = cells.size(); j-- > 0;)
 						{
-							cell.addHeight(addHeight);
-							return true;
+							cells.getUnsafe(j).addHeight(addHeight);
 						}
-					});
+					}
 					_renderSelector.forceUpdateFrustum();
 				}
 				else
