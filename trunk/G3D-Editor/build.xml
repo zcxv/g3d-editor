@@ -14,7 +14,6 @@
 	<path id="classpath">
 		<fileset dir="${lib}">
 			<include name="gluegen-rt.jar" />
-			<include name="javolution.jar" />
 			<include name="jogl.all.jar" />
 			<include name="nativewindow.all.jar" />
 		</fileset>
