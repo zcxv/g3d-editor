@@ -154,6 +154,17 @@ public final class FastArrayList<E> implements List<E>
 		return true;
 	}
 	
+	public final void addAllIfAbsent(final FastArrayList<? extends E> list)
+	{
+		E value;
+		for (int i = list.size(); i-- > 0;)
+		{
+			value = list.getUnsafe(i);
+			if (!contains(value))
+				addLast(value);
+		}
+	}
+	
 	/**
 	 * @see java.util.List#addAll(int, java.util.Collection)
 	 */
@@ -675,6 +686,16 @@ public final class FastArrayList<E> implements List<E>
 	public final boolean isEmpty()
 	{
 		return _size == 0;
+	}
+	
+	public final boolean containsAll(final FastArrayList<? extends E> list)
+	{
+		for (int i = list.size(); i-- > 0;)
+		{
+			if (!contains(list.getUnsafe(i)))
+				return false;
+		}
+		return true;
 	}
 	
 	/**
