@@ -91,6 +91,104 @@ public final class GeoBlockSelector
 		return _tail;
 	}
 	
+	public final boolean[] getSelectedTypes()
+	{
+		final boolean[] selectedTypes = new boolean[3];
+		for (GeoBlockEntry e = getHead(); (e = e.getNext()) != getTail();)
+		{
+			selectedTypes[e.getKey().getType()] = true;
+			if (selectedTypes[0] && selectedTypes[1] && selectedTypes[2])
+				break;
+		}
+		return selectedTypes;
+	}
+	
+	public final int getSelectedTypesNotEqual(final byte type)
+	{
+		int count = 0;
+		for (GeoBlockEntry e = getHead(); (e = e.getNext()) != getTail();)
+		{
+			if (e.getKey().getType() != type)
+				count++;
+		}
+		return count;
+	}
+	
+	public final void convertSelectedToType(final byte type)
+	{
+		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+		if (region == null)
+			return;
+		
+		boolean convertedAny = false;
+		for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
+		{
+			if (e.getKey().getType() != type)
+			{
+				region.convertBlock(e.getKey(), type);
+				convertedAny = true;
+				p = e.getPrev();
+				e.remove();
+				e = p;
+			}
+		}
+		
+		if (convertedAny)
+			GLDisplay.getInstance().getRenderSelector().forceUpdateGeoBlocks();
+	}
+	
+	public final boolean getSelectedDataEqual()
+	{
+		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+		if (region == null)
+			return false;
+		
+		for (GeoBlockEntry e = getHead(); (e = e.getNext()) != getTail();)
+		{
+			if (!region.dataEqualFor(e.getKey()))
+				return false;
+		}
+		return true;
+	}
+	
+	public final int getSelectedDataNotEqualCount()
+	{
+		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+		if (region == null)
+			return 0;
+		
+		int count = 0;
+		for (GeoBlockEntry e = getHead(); (e = e.getNext()) != getTail();)
+		{
+			if (!region.dataEqualFor(e.getKey()))
+				count++;
+		}
+		return count;
+	}
+	
+	public final void restoreSelectedData()
+	{
+		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+		if (region == null)
+			return;
+		
+		boolean restoredAny = false;
+		for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
+		{
+			if (!region.dataEqualFor(e.getKey()))
+			{
+				region.restoreBlock(e.getKey());
+				restoredAny = true;
+				p = e.getPrev();
+				e.remove();
+				e = p;
+			}
+		}
+		
+		if (restoredAny)
+			GLDisplay.getInstance().getRenderSelector().forceUpdateGeoBlocks();
+	}
+	
 	public final boolean hasSelected()
 	{
 		return getHead().getNext() != getTail();
@@ -239,7 +337,7 @@ public final class GeoBlockSelector
 		}
 	}
 	
-	private final void selectGeoCellMultiLevel(final GeoCell cell, final boolean fullBlock, final boolean append)
+	private final void selectGeoCellMultiLayer(final GeoCell cell, final boolean fullBlock, final boolean append)
 	{
 		final GeoBlock block = cell.getBlock();
 		final GeoBlockEntry entry = getEntry(block);
@@ -388,8 +486,8 @@ public final class GeoBlockSelector
 				selectGeoCellComplex(cell, fullBlock, append);
 				break;
 				
-			case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
-				selectGeoCellMultiLevel(cell, fullBlock, append);
+			case GeoEngine.GEO_BLOCK_TYPE_MULTILAYER:
+				selectGeoCellMultiLayer(cell, fullBlock, append);
 				break;
 		}
 		

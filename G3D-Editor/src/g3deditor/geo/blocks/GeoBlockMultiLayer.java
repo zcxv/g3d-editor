@@ -26,14 +26,25 @@ import g3deditor.util.GeoWriter;
 import java.util.Arrays;
 
 /**
- * MultiLevel block, x levels, 64 heights + y (each cell can have multiple heights).<br>
+ * MultiLayer block, x levels, 64 heights + y (each cell can have multiple heights).<br>
  * 
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class GeoBlockMultiLevel extends GeoBlock
+public final class GeoBlockMultiLayer extends GeoBlock
 {
+	public static final GeoBlockMultiLayer convertFrom(final GeoBlock block)
+	{
+		if (block instanceof GeoBlockFlat)
+			return new GeoBlockMultiLayer((GeoBlockFlat) block);
+		
+		if (block instanceof GeoBlockComplex)
+			return new GeoBlockMultiLayer((GeoBlockComplex) block);
+		
+		return new GeoBlockMultiLayer((GeoBlockMultiLayer) block);
+	}
+	
 	private GeoCell[][][] _cells3D;
 	private GeoCell[] _cells;
 	private short _minHeight;
@@ -54,7 +65,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		}
 	}
 	
-	public GeoBlockMultiLevel(final GeoReader reader, final int geoX, final int geoY, final boolean l2j)
+	public GeoBlockMultiLayer(final GeoReader reader, final int geoX, final int geoY, final boolean l2j)
 	{
 		super(geoX, geoY);
 		_cells3D = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT][GeoEngine.GEO_BLOCK_SHIFT][];
@@ -81,7 +92,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		calcMaxMinHeight();
 	}
 	
-	public GeoBlockMultiLevel(final GeoBlockFlat block)
+	private GeoBlockMultiLayer(final GeoBlockFlat block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		
@@ -99,7 +110,7 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		calcMaxMinHeight();
 	}
 	
-	public GeoBlockMultiLevel(final GeoBlockComplex block)
+	private GeoBlockMultiLayer(final GeoBlockComplex block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		
@@ -117,10 +128,36 @@ public final class GeoBlockMultiLevel extends GeoBlock
 		calcMaxMinHeight();
 	}
 	
+	private GeoBlockMultiLayer(final GeoBlockMultiLayer block)
+	{
+		super(block.getGeoX(), block.getGeoY());
+		
+		_cells3D = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT][GeoEngine.GEO_BLOCK_SHIFT][];
+		
+		int layers, count = 0;
+		for (int x = 0; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
+		{
+			for (int y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
+			{
+				layers = block.nGetLayerCount(x, y);
+				count += layers;
+				_cells3D[x][y] = new GeoCell[layers];
+				while (layers-- > 0)
+				{
+					final GeoCell cell = new GeoCellCM(this, block.nGetCellByLayer(x, y, layers).getHeightAndNSWE(), x, y);
+					_cells3D[x][y][layers] = cell;
+				}
+			}
+		}
+		
+		copyCells(count);
+		calcMaxMinHeight();
+	}
+	
 	@Override
 	public final byte getType()
 	{
-		return GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL;
+		return GeoEngine.GEO_BLOCK_TYPE_MULTILAYER;
 	}
 	
 	@Override

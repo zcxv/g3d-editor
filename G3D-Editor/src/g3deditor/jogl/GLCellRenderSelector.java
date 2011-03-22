@@ -77,6 +77,7 @@ public final class GLCellRenderSelector
 	private int _camBlockX;
 	private int _camBlockY;
 	private boolean _forceUpdateFrustum;
+	private boolean _forceUpdateGeoBlocks;
 	private boolean _freezeGrid;
 	private int _gridRange;
 	
@@ -101,6 +102,11 @@ public final class GLCellRenderSelector
 		_forceUpdateFrustum = true;
 	}
 	
+	public final void forceUpdateGeoBlocks()
+	{
+		_forceUpdateGeoBlocks = true;
+	}
+	
 	public final void select(final GL2 gl, final GLCamera camera, final boolean freezeGrid)
 	{
 		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
@@ -110,21 +116,21 @@ public final class GLCellRenderSelector
 			return;
 		}
 		
-		if (camera.positionXZChanged() || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE)
+		if (camera.positionXZChanged() || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE || _forceUpdateGeoBlocks)
 		{
 			final int geoX = Math.max(Math.min(camera.getGeoX(), region.getGeoX(GeoEngine.GEO_REGION_SIZE - 1)), region.getGeoX(0));
 			final int geoY = Math.max(Math.min(camera.getGeoY(), region.getGeoY(GeoEngine.GEO_REGION_SIZE - 1)), region.getGeoY(0));
 			final int camBlockX = GeoEngine.getBlockXY(geoX);
 			final int camBlockY = GeoEngine.getBlockXY(geoY);
 			
-			if (camBlockX != _camBlockX || camBlockY != _camBlockY || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE)
+			if (camBlockX != _camBlockX || camBlockY != _camBlockY || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE || _forceUpdateGeoBlocks)
 			{
 				_camBlockX = camBlockX;
 				_camBlockY = camBlockY;
 				
 				final int range = Config.VIS_GRID_RANGE;
 				final int requiredSize = (range * 2 + 1) * (range * 2 + 1);
-				final boolean needUpdate = _geoBlocks.length != requiredSize;
+				final boolean needUpdate = _geoBlocks.length != requiredSize || _forceUpdateGeoBlocks;
 				if (_geoBlocks.length != requiredSize)
 				{
 					_geoBlocks = new GLSubRenderSelector[requiredSize];
@@ -157,6 +163,7 @@ public final class GLCellRenderSelector
 						}
 					}
 					
+					_forceUpdateGeoBlocks = false;
 					_forceUpdateFrustum = true;
 				}
 			}

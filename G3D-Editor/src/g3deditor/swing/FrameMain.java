@@ -34,6 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -72,6 +73,7 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final DefaultLabel _labelLogoL2j;
 	
 	private GeoCell _selectedCell;
+	private boolean _waitForUpdate;
 	
 	private FrameMain()
 	{
@@ -232,6 +234,24 @@ public final class FrameMain extends JFrame implements ActionListener
 	public final void setSelectedGeoCell(final GeoCell cell)
 	{
 		_selectedCell = cell;
+		
+		if (!_waitForUpdate)
+		{
+			_waitForUpdate = true;
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public final void run()
+				{
+					onSelectedCellUpdated();
+				}
+			});
+		}
+	}
+	
+	final void onSelectedCellUpdated()
+	{
+		_waitForUpdate = false;
 		_panelNswe.onSelectedCellUpdated();
 		_panelCellInfo.onSelectedCellUpdated();
 		_panelBlockConvert.onSelectedCellUpdated();
@@ -264,7 +284,7 @@ public final class FrameMain extends JFrame implements ActionListener
 			}
 			else
 			{
-				JOptionPane.showMessageDialog(FrameMain.this, "I am sure you want to load a region first ;)", "Save Region UNKOWN?!?", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, "I am sure you want to load a region first ;)", "Save Region UNKOWN?!?", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 		else if (e.getSource() == _buttonConfig)
@@ -273,7 +293,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		}
 		else if (e.getSource() == _buttonHelp)
 		{
-			JOptionPane.showMessageDialog(FrameMain.this, "<html>G3D-Editor<br>By Forsaiken<br>If you like this programm please donate!<br>PayPal: patrickbiesenbach@yahoo.de</html>", "About", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this, "<html>G3D-Editor<br>By Forsaiken<br>If you like this programm please donate!<br>PayPal: patrickbiesenbach@yahoo.de</html>", "About", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 }

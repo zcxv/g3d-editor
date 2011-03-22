@@ -19,9 +19,6 @@ import g3deditor.exceptions.GeoDataNotFoundException;
 import g3deditor.exceptions.GeoDataNotLoadedException;
 import g3deditor.exceptions.GeoFileLoadException;
 import g3deditor.exceptions.GeoFileNotFoundException;
-import g3deditor.geo.blocks.GeoBlockComplex;
-import g3deditor.geo.blocks.GeoBlockFlat;
-import g3deditor.geo.blocks.GeoBlockMultiLevel;
 import g3deditor.util.GeoReader;
 import g3deditor.util.GeoStreamReader;
 
@@ -54,7 +51,7 @@ public final class GeoEngine
 	
 	public static final byte GEO_BLOCK_TYPE_FLAT = 0;
 	public static final byte GEO_BLOCK_TYPE_COMPLEX = 1;
-	public static final byte GEO_BLOCK_TYPE_MULTILEVEL = 2;
+	public static final byte GEO_BLOCK_TYPE_MULTILAYER = 2;
 	
 	public static final int NSWE_MASK = 0x0000000F;
 	public static final int HEIGHT_MASK = 0x0000FFF0;
@@ -454,72 +451,4 @@ public final class GeoEngine
 			return 1;
 		}
 	}
-	
-	public final boolean convertBlock(final int geoX, final int geoY, final byte blockType)
-	{
-		final GeoRegion region = getGeoRegion(geoX, geoY);
-		final GeoBlock block = region.getBlock(geoX, geoY);
-		
-		if (block.getType() == blockType)
-			return false;
-		
-		final GeoBlock newBlock;
-		
-		switch (blockType)
-		{
-			case GeoEngine.GEO_BLOCK_TYPE_FLAT:
-				newBlock = block.getType() == GeoEngine.GEO_BLOCK_TYPE_COMPLEX ? new GeoBlockFlat(block) : new GeoBlockFlat(block);
-				break;
-			
-			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
-				newBlock = block.getType() == GeoEngine.GEO_BLOCK_TYPE_FLAT ? new GeoBlockComplex((GeoBlockFlat) block) : new GeoBlockComplex((GeoBlockMultiLevel) block);
-				break;
-			
-			case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
-				newBlock = block.getType() == GeoEngine.GEO_BLOCK_TYPE_FLAT ? new GeoBlockMultiLevel((GeoBlockFlat) block) : new GeoBlockMultiLevel((GeoBlockComplex) block);
-				break;
-			
-			default:
-				throw new RuntimeException();
-		}
-		
-		region.setBlock(geoX, geoY, newBlock);
-		return true;
-	}
-	
-	/**
-	 * 
-	 * @param geoX
-	 * @param geoY
-	 * @return True when the block was converted.
-	 */
-	/*public final boolean restoreBlock(final int geoX, final int geoY)
-	{
-		final GeoRegion org = getGeoRegion(geoX, geoY, true);
-		final GeoRegion modified = getGeoRegion(geoX, geoY, false);
-		
-		final GeoBlock orgBlock = org.getBlock(geoX, geoY);
-		final GeoBlock modifiedBlock = modified.getBlock(geoX, geoY);
-		
-		if (orgBlock instanceof GeoBlockFlat && modifiedBlock instanceof GeoBlockFlat)
-		{
-			((GeoBlockFlat) orgBlock).copyDataTo((GeoBlockFlat) modifiedBlock);
-			return false;
-		}
-		
-		if (orgBlock instanceof GeoBlockComplex && modifiedBlock instanceof GeoBlockComplex)
-		{
-			((GeoBlockComplex) orgBlock).copyDataTo((GeoBlockComplex) modifiedBlock);
-			return false;
-		}
-		
-		if (orgBlock instanceof GeoBlockMultiLevel && modifiedBlock instanceof GeoBlockMultiLevel)
-		{
-			((GeoBlockMultiLevel) orgBlock).copyDataTo((GeoBlockMultiLevel) modifiedBlock);
-			return false;
-		}
-		
-		modified.setBlock(geoX, geoY, orgBlock.clone());
-		return true;
-	}*/
 }

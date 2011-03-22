@@ -16,7 +16,7 @@ package g3deditor.geo;
 
 import g3deditor.geo.blocks.GeoBlockComplex;
 import g3deditor.geo.blocks.GeoBlockFlat;
-import g3deditor.geo.blocks.GeoBlockMultiLevel;
+import g3deditor.geo.blocks.GeoBlockMultiLayer;
 import g3deditor.swing.DialogSave;
 import g3deditor.util.GeoByteBuffer;
 import g3deditor.util.GeoReader;
@@ -49,7 +49,7 @@ public final class GeoRegion
 				return GeoEngine.GEO_BLOCK_TYPE_COMPLEX;
 				
 			default:
-				return GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL;
+				return GeoEngine.GEO_BLOCK_TYPE_MULTILAYER;
 		}
 	}
 	
@@ -71,7 +71,7 @@ public final class GeoRegion
 					writer.putShort((short) 0x0040);
 					break;
 					
-				case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
+				case GeoEngine.GEO_BLOCK_TYPE_MULTILAYER:
 					writer.putShort((short) 0x0080); // TODO check this
 					break;
 					
@@ -131,19 +131,60 @@ public final class GeoRegion
 			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
 				return new GeoBlockComplex(reader, geoX, geoY, l2j).setRegion(this);
 				
-			case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
-				return new GeoBlockMultiLevel(reader, geoX, geoY, l2j).setRegion(this);
+			case GeoEngine.GEO_BLOCK_TYPE_MULTILAYER:
+				return new GeoBlockMultiLayer(reader, geoX, geoY, l2j).setRegion(this);
 				
 			default:
 				throw new RuntimeException("Unknown type: " + type);
 		}
 	}
 	
-	public final void restoreBlock(final int blockX, final int blockY)
+	public final void convertBlock(final GeoBlock block, final byte type)
 	{
+		final int blockX = block.getBlockX();
+		final int blockY = block.getBlockY();
+		final GeoBlock convertedBlock;
+		
+		switch (type)
+		{
+			case GeoEngine.GEO_BLOCK_TYPE_FLAT:
+				convertedBlock = GeoBlockFlat.convertFrom(block).setRegion(this);
+				break;
+				
+			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
+				convertedBlock = GeoBlockComplex.convertFrom(block).setRegion(this);
+				break;
+				
+			case GeoEngine.GEO_BLOCK_TYPE_MULTILAYER:
+				convertedBlock = GeoBlockMultiLayer.convertFrom(block).setRegion(this);
+				break;
+				
+			default:
+				throw new IllegalArgumentException("Unkown type: " + type);
+		}
+		
+		block.unload();
+		_geoBlocks[blockX][blockY] = convertedBlock;
+	}
+	
+	public final void convertBlock(final int blockX, final int blockY, final byte type)
+	{
+		convertBlock(_geoBlocks[blockX][blockY], type);
+	}
+	
+	public final void restoreBlock(final GeoBlock block)
+	{
+		final int blockX = block.getBlockX();
+		final int blockY = block.getBlockY();
 		final GeoByteBuffer reader = _geoBlocksData[blockX][blockY];
 		reader.clear();
+		block.unload();
 		_geoBlocks[blockX][blockY] = readBlock(blockX, blockY, reader, true);
+	}
+	
+	public final void restoreBlock(final int blockX, final int blockY)
+	{
+		restoreBlock(_geoBlocks[blockX][blockY]);
 	}
 	
 	public final File getFile()
@@ -277,6 +318,13 @@ public final class GeoRegion
 		}
 		_geoBlocks = null;
 		_geoBlocksData = null;
+	}
+	
+	public final boolean dataEqualFor(final GeoBlock block)
+	{
+		final GeoByteBuffer geoBlockData = _geoBlocksData[block.getBlockX()][block.getBlockY()];
+		geoBlockData.clear();
+		return block.dataEquals(geoBlockData);
 	}
 	
 	public final boolean allDataEqual()
