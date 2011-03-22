@@ -32,6 +32,17 @@ import g3deditor.util.GeoWriter;
  */
 public final class GeoBlockComplex extends GeoBlock
 {
+	public static final GeoBlockComplex convertFrom(final GeoBlock block)
+	{
+		if (block instanceof GeoBlockFlat)
+			return new GeoBlockComplex((GeoBlockFlat) block);
+		
+		if (block instanceof GeoBlockComplex)
+			return new GeoBlockComplex((GeoBlockComplex) block);
+		
+		return new GeoBlockComplex((GeoBlockMultiLayer) block);
+	}
+	
 	private static final int indexOf(final int x, final int y)
 	{
 		return x * GeoEngine.GEO_BLOCK_SHIFT + y;
@@ -55,7 +66,7 @@ public final class GeoBlockComplex extends GeoBlock
 		calcMaxMinHeight();
 	}
 	
-	public GeoBlockComplex(final GeoBlockFlat block)
+	private GeoBlockComplex(final GeoBlockFlat block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		
@@ -70,7 +81,22 @@ public final class GeoBlockComplex extends GeoBlock
 		calcMaxMinHeight();
 	}
 	
-	public GeoBlockComplex(final GeoBlockMultiLevel block)
+	private GeoBlockComplex(final GeoBlockComplex block)
+	{
+		super(block.getGeoX(), block.getGeoY());
+		
+		_cells = new GeoCell[GeoEngine.GEO_BLOCK_SHIFT * GeoEngine.GEO_BLOCK_SHIFT];
+		for (int x = 0, y; x < GeoEngine.GEO_BLOCK_SHIFT; x++)
+		{
+			for (y = 0; y < GeoEngine.GEO_BLOCK_SHIFT; y++)
+			{
+				_cells[indexOf(x, y)] = new GeoCellCM(this, block.nGetCellByLayer(x, y, 0).getHeightAndNSWE(), x, y);
+			}
+		}
+		calcMaxMinHeight();
+	}
+	
+	private GeoBlockComplex(final GeoBlockMultiLayer block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		

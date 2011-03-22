@@ -17,6 +17,7 @@ package g3deditor.geo.cells;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.blocks.GeoBlockFlat;
+import g3deditor.swing.FrameMain;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -81,6 +82,9 @@ public final class GeoCellFlat extends GeoCell
 		final short oldHeight = getHeight();
 		_height = GeoEngine.getGeoHeightOfHeight((short) (_height + height));
 		getBlock().updateMinMaxHeight(_height, oldHeight);
+		
+		if (FrameMain.getInstance().isSelectedGeoCell(this))
+			FrameMain.getInstance().setSelectedGeoCell(this);
 	}
 	
 	/**
@@ -128,6 +132,9 @@ public final class GeoCellFlat extends GeoCell
 		final short oldHeight = getHeight();
 		_height = GeoEngine.getHeight(heightAndNSWE);
 		getBlock().updateMinMaxHeight(_height, oldHeight);
+		
+		if (FrameMain.getInstance().isSelectedGeoCell(this))
+			FrameMain.getInstance().setSelectedGeoCell(this);
 	}
 	
 	/**
@@ -136,6 +143,7 @@ public final class GeoCellFlat extends GeoCell
 	@Override
 	public final void setNswe(final short nswe)
 	{
-		
+		if (FrameMain.getInstance().isSelectedGeoCell(this))
+			FrameMain.getInstance().setSelectedGeoCell(this);
 	}
 }

@@ -32,6 +32,11 @@ import g3deditor.util.GeoWriter;
  */
 public final class GeoBlockFlat extends GeoBlock
 {
+	public static final GeoBlockFlat convertFrom(final GeoBlock block)
+	{
+		return new GeoBlockFlat(block);
+	}
+	
 	private GeoCell[] _cells;
 	
 	public GeoBlockFlat(final GeoReader reader, final int geoX, final int geoY, final boolean l2j)
@@ -43,7 +48,7 @@ public final class GeoBlockFlat extends GeoBlock
 			reader.getShort();
 	}
 	
-	public GeoBlockFlat(final GeoBlock block)
+	private GeoBlockFlat(final GeoBlock block)
 	{
 		super(block.getGeoX(), block.getGeoY());
 		_cells = new GeoCell[]{new GeoCellFlat(this, block.getMinHeight())};

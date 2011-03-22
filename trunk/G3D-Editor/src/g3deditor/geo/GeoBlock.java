@@ -93,8 +93,8 @@ public abstract class GeoBlock implements Cloneable
 			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
 				return "Complex";
 				
-			case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
-				return "MultiLevel";
+			case GeoEngine.GEO_BLOCK_TYPE_MULTILAYER:
+				return "MultiLayer";
 		}
 		
 		throw new RuntimeException();
