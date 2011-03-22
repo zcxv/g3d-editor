@@ -15,7 +15,8 @@
 package g3deditor.geo;
 
 import g3deditor.entity.SelectionState;
-import g3deditor.geo.blocks.GeoBlockFlat;
+import g3deditor.jogl.GLDisplay;
+import g3deditor.jogl.GLSelectionBox;
 import g3deditor.swing.FrameMain;
 import g3deditor.util.FastArrayList;
 
@@ -57,6 +58,7 @@ public final class GeoBlockSelector
 	private final GeoBlockEntry[] _selected;
 	private final GeoBlockEntry _head;
 	private final GeoBlockEntry _tail;
+	private final FastArrayList<GeoCell> _temp;
 	
 	public GeoBlockSelector()
 	{
@@ -71,6 +73,7 @@ public final class GeoBlockSelector
 		getHead().setNext(getTail());
 		getTail().setPrev(getHead());
 		getTail().setNext(getTail());
+		_temp = new FastArrayList<GeoCell>();
 	}
 	
 	private final GeoBlockEntry getEntry(final GeoBlock block)
@@ -95,28 +98,68 @@ public final class GeoBlockSelector
 	
 	public final boolean isGeoCellSelected(final GeoCell cell)
 	{
-		return getEntry(cell.getBlock()).getValue() != null;
+		final FastArrayList<GeoCell> selected = getEntry(cell.getBlock()).getValue();
+		return selected != null && selected.contains(cell);
 	}
 	
-	public final void selectGeoCell(final GeoCell cell, boolean fullBlock, final boolean append)
+	private final void unselectAll()
+	{
+		for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
+		{
+			setStateOf(e.getKey().getCells(), SelectionState.NORMAL);
+			p = e.getPrev();
+			e.remove();
+			e = p;
+		}
+	}
+	
+	private final void selectGeoCellFlat(final GeoCell cell, final boolean append)
 	{
 		final GeoBlock block = cell.getBlock();
-		final GeoCell[] cells = block.getCells();
 		final GeoBlockEntry entry = getEntry(block);
-		FastArrayList<GeoCell> selected;
-		
-		fullBlock |= block instanceof GeoBlockFlat;
+		FastArrayList<GeoCell> selected = entry.getValue();
 		
 		if (append)
 		{
-			selected = entry.getValue();
+			if (selected != null)
+			{
+				cell.setSelectionState(SelectionState.NORMAL);
+				entry.remove();
+				return;
+			}
+		}
+		else
+		{
+			unselectAll();
+			selected = null;
+		}
+		
+		if (selected == null)
+		{
+			cell.setSelectionState(SelectionState.SELECTED);
+			selected = new FastArrayList<GeoCell>(block.getCells(), true);
+			entry.setKey(block);
+			entry.setValue(selected);
+			entry.addBefore(getTail());
+		}
+	}
+	
+	private final void selectGeoCellComplex(final GeoCell cell, final boolean fullBlock, final boolean append)
+	{
+		final GeoBlock block = cell.getBlock();
+		final GeoBlockEntry entry = getEntry(block);
+		final GeoCell[] cells = block.getCells();
+		FastArrayList<GeoCell> selected = entry.getValue();
+		
+		if (append)
+		{
 			if (selected != null)
 			{
 				if (selected.size() == cells.length)
 				{
-					if (fullBlock || selected.size() == 1)
+					if (fullBlock)
 					{
-						setStateOf(selected, SelectionState.NORMAL);
+						setStateOf(cells, SelectionState.NORMAL);
 						entry.remove();
 					}
 					else
@@ -131,7 +174,7 @@ public final class GeoBlockSelector
 					{
 						selected.clear();
 						selected.addAll(cells);
-						setStateOf(selected, SelectionState.SELECTED);
+						setStateOf(cells, SelectionState.SELECTED);
 					}
 					else
 					{
@@ -176,13 +219,7 @@ public final class GeoBlockSelector
 		}
 		else
 		{
-			for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
-			{
-				setStateOf(e.getKey().getCells(), SelectionState.NORMAL);
-				p = e.getPrev();
-				e.remove();
-				e = p;
-			}
+			unselectAll();
 			
 			if (fullBlock)
 			{
@@ -200,6 +237,161 @@ public final class GeoBlockSelector
 			entry.setValue(selected);
 			entry.addBefore(getTail());
 		}
+	}
+	
+	private final void selectGeoCellMultiLevel(final GeoCell cell, final boolean fullBlock, final boolean append)
+	{
+		final GeoBlock block = cell.getBlock();
+		final GeoBlockEntry entry = getEntry(block);
+		final GeoCell[] cells = block.getCells();
+		final GLSelectionBox selectionBox = GLDisplay.getInstance().getSelectionBox();
+		FastArrayList<GeoCell> selected = entry.getValue();
+		
+		if (append)
+		{
+			if (selected != null)
+			{
+				if (fullBlock)
+				{
+					if (selectionBox.isInfHeight())
+					{
+						if (selected.size() == cells.length)
+						{
+							setStateOf(cells, SelectionState.NORMAL);
+							entry.remove();
+						}
+						else
+						{
+							selected.clear();
+							selected.addAll(cells);
+							setStateOf(cells, SelectionState.SELECTED);
+						}
+					}
+					else
+					{
+						_temp.clear();
+						selectionBox.getAllCellsInside(cells, _temp);
+						
+						if (selected.containsAll(_temp))
+						{
+							if (selected.size() == _temp.size())
+							{
+								setStateOf(cells, SelectionState.NORMAL);
+								entry.remove();
+							}
+							else
+							{
+								setStateOf(_temp, SelectionState.NORMAL);
+								selected.removeAll(_temp);
+							}
+						}
+						else
+						{
+							setStateOf(_temp, SelectionState.SELECTED);
+							selected.addAllIfAbsent(_temp);
+						}
+					}
+				}
+				else
+				{
+					if (selected.remove(cell))
+					{
+						if (selected.isEmpty())
+						{
+							setStateOf(cells, SelectionState.NORMAL);
+							entry.remove();
+						}
+						else
+						{
+							cell.setSelectionState(SelectionState.HIGHLIGHTED);
+						}
+					}
+					else
+					{
+						selected.addLast(cell);
+						cell.setSelectionState(SelectionState.SELECTED);
+					}
+				}
+			}
+			else
+			{
+				if (fullBlock)
+				{
+					if (selectionBox.isInfHeight())
+					{
+						selected = new FastArrayList<GeoCell>(cells, true);
+					}
+					else
+					{
+						selected = new FastArrayList<GeoCell>();
+						selectionBox.getAllCellsInside(cells, selected);
+					}
+				}
+				else
+				{
+					selected = new FastArrayList<GeoCell>(8);
+					selected.addLastUnsafe(cell);
+					setStateOf(cells, SelectionState.HIGHLIGHTED);
+				}
+				
+				if (!selected.isEmpty())
+				{
+					setStateOf(selected, SelectionState.SELECTED);
+					entry.setKey(block);
+					entry.setValue(selected);
+					entry.addBefore(getTail());
+				}
+			}
+		}
+		else
+		{
+			unselectAll();
+			
+			if (fullBlock)
+			{
+				if (selectionBox.isInfHeight())
+				{
+					selected = new FastArrayList<GeoCell>(cells, true);
+				}
+				else
+				{
+					selected = new FastArrayList<GeoCell>();
+					selectionBox.getAllCellsInside(cells, selected);
+				}
+			}
+			else
+			{
+				selected = new FastArrayList<GeoCell>(8);
+				selected.addLastUnsafe(cell);
+				setStateOf(cells, SelectionState.HIGHLIGHTED);
+			}
+			
+			if (!selected.isEmpty())
+			{
+				setStateOf(selected, SelectionState.SELECTED);
+				entry.setKey(block);
+				entry.setValue(selected);
+				entry.addBefore(getTail());
+			}
+		}
+	}
+	
+	public final void selectGeoCell(final GeoCell cell, boolean fullBlock, final boolean append)
+	{
+		switch (cell.getBlock().getType())
+		{
+			case GeoEngine.GEO_BLOCK_TYPE_FLAT:
+				selectGeoCellFlat(cell, append);
+				break;
+				
+			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
+				selectGeoCellComplex(cell, fullBlock, append);
+				break;
+				
+			case GeoEngine.GEO_BLOCK_TYPE_MULTILEVEL:
+				selectGeoCellMultiLevel(cell, fullBlock, append);
+				break;
+		}
 		
 		if (!hasSelected())
 		{
@@ -207,11 +399,18 @@ public final class GeoBlockSelector
 		}
 		else
 		{
-			selected = entry.getValue();
+			FastArrayList<GeoCell> selected = getEntry(cell.getBlock()).getValue();
 			if (selected == null)
 				selected = getTail().getPrev().getValue();
 			
-			FrameMain.getInstance().setSelectedGeoCell(selected.getLastUnsafe());
+			if (selected.contains(cell))
+			{
+				FrameMain.getInstance().setSelectedGeoCell(cell);
+			}
+			else
+			{
+				FrameMain.getInstance().setSelectedGeoCell(selected.getLastUnsafe());
+			}
 		}
 	}
 	

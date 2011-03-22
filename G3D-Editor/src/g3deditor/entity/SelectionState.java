@@ -21,6 +21,7 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.blocks.GeoBlockComplex;
 import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.jogl.GLDisplay;
+import g3deditor.swing.FrameMain;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -33,6 +34,7 @@ public enum SelectionState
 	HIGHLIGHTED	(new CellColor(Color.CYAN), new CellColor(Color.CYAN), new CellColor(Color.CYAN)),
 	SELECTED	(new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA));
 	
+	private final CellColor _colorGuiSelected;
 	private final CellColor _colorFlat;
 	private final CellColor _colorComplex1;
 	private final CellColor _colorComplex2;
@@ -43,6 +45,7 @@ public enum SelectionState
 	
 	private SelectionState(final CellColor colorFlat, final CellColor colorComplex, final CellColor colorMutliLayer)
 	{
+		_colorGuiSelected = new CellColor(Color.YELLOW);
 		_colorFlat = colorFlat;
 		_colorComplex1 = colorComplex;
 		_colorComplex2 = new CellColor(colorComplex.getR() * 0.85f, colorComplex.getG() * 0.85f, colorComplex.getB() * 0.85f);
@@ -54,6 +57,9 @@ public enum SelectionState
 	
 	public final CellColor getColor(final GeoCell cell)
 	{
+		if (FrameMain.getInstance().isSelectedGeoCell(cell))
+			return _colorGuiSelected;
+		
 		return getColor(cell.getBlock(), GLDisplay.getInstance().getSelectionBox().isInside(cell));
 	}
 	

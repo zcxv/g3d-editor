@@ -231,13 +231,11 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	public final void setSelectedGeoCell(final GeoCell cell)
 	{
-		if (_selectedCell != cell)
-		{
-			_selectedCell = cell;
-			_panelNswe.onSelectedCellUpdated();
-			_panelCellInfo.onSelectedCellUpdated();
-			_panelLayers.onSelectedCellUpdated();
-		}
+		_selectedCell = cell;
+		_panelNswe.onSelectedCellUpdated();
+		_panelCellInfo.onSelectedCellUpdated();
+		_panelBlockConvert.onSelectedCellUpdated();
+		_panelLayers.onSelectedCellUpdated();
 	}
 	
 	public final GeoCell getSelectedGeoCell()

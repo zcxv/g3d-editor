@@ -225,6 +225,8 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	{
 		if ((mouseevent.getModifiers() & MouseEvent.BUTTON1_MASK) != 0)
 			_mouseEvents.addLast(mouseevent);
+		else if ((mouseevent.getModifiers() & MouseEvent.BUTTON2_MASK) != 0)
+			GLDisplay.getInstance().getSelectionBox().toggleInfHeight();
 	}
 	
 	/**
