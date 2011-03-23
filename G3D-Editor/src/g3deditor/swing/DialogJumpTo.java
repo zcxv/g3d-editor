@@ -604,6 +604,9 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 				_regionX = regionX;
 				_regionY = regionY;
 				_regionImage = Util.loadImage("./data/textures/region/" + (regionX + 10) + "_" + (regionY + 10) + ".jpg");
+				if (_regionImage == null)
+					_regionImage = Util.loadImage("./data/textures/region/water.jpg");
+				
 				if (_regionImage != null)
 				{
 					final int wh = Math.min(_worldMap.getIconWidth(), _worldMap.getIconHeight());

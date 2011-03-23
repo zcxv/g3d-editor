@@ -15,10 +15,10 @@
 package g3deditor.jogl.renderer;
 
 import g3deditor.Config;
-import g3deditor.entity.CellColor;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCamera;
+import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.GLDisplay;
 
@@ -85,54 +85,79 @@ public final class DLLoDRenderer extends GLCellRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.geo.GeoCell)
+	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector)
 	 */
-	public final void render(final GL2 gl, final GeoCell cell)
+	public final void render(final GL2 gl, final GLSubRenderSelector selector)
 	{
-		final CellColor color = cell.getSelectionState().getColor(cell);
-		gl.glPushMatrix();
-		gl.glColor4f(color.getR(), color.getG(), color.getB(), COLOR_ALPHA);
-		gl.glTranslatef(cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-		
 		final GLCamera camera = GLDisplay.getInstance().getCamera();
-		final float distSq;
+		GeoCell cell;
 		
 		if (Config.DLLoDRANGE > 0)
 		{
-			final float dx = cell.getRenderX() - camera.getX();
-			final float dy = cell.getRenderY() - camera.getY();
-			final float dz = cell.getRenderZ() - camera.getZ();
-			distSq =  dx * dx + dy * dy + dz * dz;
+			float distSq, dx, dy, dz;
+			for (int i = selector.getElementsToRender(); i-- > 0;)
+			{
+				cell = selector.getElementToRender(i);
+				dx = cell.getRenderX() - camera.getX();
+				dy = cell.getRenderY() - camera.getY();
+				dz = cell.getRenderZ() - camera.getZ();
+				distSq =  dx * dx + dy * dy + dz * dz;
+				
+				if (distSq > Config.DLLoDRANGE)
+				{
+					setColor(gl, cell.getSelectionState().getColor(cell));
+					translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+					
+					if (cell.isBig())
+					{
+						gl.glCallList(_listId + (camera.getY() > cell.getRenderY() ? ID_BIG_TOP : ID_BIG_BOTTOM));
+					}
+					else
+					{
+						gl.glCallList(_listId + (camera.getY() > cell.getRenderY() ? ID_SMALL_TOP_OFFSET + cell.getNSWE() : ID_SMALL_BOTTOM));
+					}
+				}
+				else
+				{
+					// Any other cell is close enough, so save cpu time for checking it
+					++i;
+					while (i-- > 0)
+					{
+						cell = selector.getElementToRender(i);
+						setColor(gl, cell.getSelectionState().getColor(cell));
+						translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+						
+						if (cell.isBig())
+						{
+							gl.glCallList(_listId + ID_BIG_FULL);
+						}
+						else
+						{
+							gl.glCallList(_listId + ID_SMALL_FULL_OFFSET + cell.getNSWE());
+						}
+					}
+					break;
+				}
+			}
 		}
 		else
 		{
-			distSq = Float.POSITIVE_INFINITY;
-		}
-		
-		if (distSq > Config.DLLoDRANGE)
-		{
-			if (cell.isBig())
+			for (int i = selector.getElementsToRender(); i-- > 0;)
 			{
-				gl.glCallList(_listId + (camera.getY() > cell.getRenderY() ? ID_BIG_TOP : ID_BIG_BOTTOM));
-			}
-			else
-			{
-				gl.glCallList(_listId + (camera.getY() > cell.getRenderY() ? ID_SMALL_TOP_OFFSET + cell.getNSWE() : ID_SMALL_BOTTOM));
-			}
-		}
-		else
-		{
-			if (cell.isBig())
-			{
-				gl.glCallList(_listId + ID_BIG_FULL);
-			}
-			else
-			{
-				gl.glCallList(_listId + ID_SMALL_FULL_OFFSET + cell.getNSWE());
+				cell = selector.getElementToRender(i);
+				setColor(gl, cell.getSelectionState().getColor(cell));
+				translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+				
+				if (cell.isBig())
+				{
+					gl.glCallList(_listId + (camera.getY() > cell.getRenderY() ? ID_BIG_TOP : ID_BIG_BOTTOM));
+				}
+				else
+				{
+					gl.glCallList(_listId + (camera.getY() > cell.getRenderY() ? ID_SMALL_TOP_OFFSET + cell.getNSWE() : ID_SMALL_BOTTOM));
+				}
 			}
 		}
-		
-		gl.glPopMatrix();
 	}
 	
 	/**

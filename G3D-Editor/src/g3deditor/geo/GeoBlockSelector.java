@@ -368,7 +368,7 @@ public final class GeoBlockSelector
 					else
 					{
 						_temp.clear();
-						selectionBox.getAllCellsInside(cells, _temp);
+						selectionBox.getAllCellsInside(cell, cells, _temp);
 						
 						if (selected.containsAll(_temp))
 						{
@@ -422,7 +422,9 @@ public final class GeoBlockSelector
 					else
 					{
 						selected = new FastArrayList<GeoCell>();
-						selectionBox.getAllCellsInside(cells, selected);
+						selectionBox.getAllCellsInside(cell, cells, selected);
+						if (!selected.isEmpty())
+							setStateOf(cells, SelectionState.HIGHLIGHTED);
 					}
 				}
 				else
@@ -454,7 +456,7 @@ public final class GeoBlockSelector
 				else
 				{
 					selected = new FastArrayList<GeoCell>();
-					selectionBox.getAllCellsInside(cells, selected);
+					selectionBox.getAllCellsInside(cell, cells, selected);
 				}
 			}
 			else

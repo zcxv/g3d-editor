@@ -298,14 +298,11 @@ public final class GLDisplay implements GLEventListener
 			_renderer.enableRender(gl);
 			
 			GLSubRenderSelector selector;
-			for (int i = _renderSelector.getElementsToRender(), y; i-- > 0;)
+			for (int i = _renderSelector.getElementsToRender(); i-- > 0;)
 			{
 				selector = _renderSelector.getElementToRender(i);
-				for (y = selector.getElementsToRender(); y-- > 0;)
-				{
-					_elementsFPS++;
-					_renderer.render(gl, selector.getElementToRender(y));
-				}
+				_elementsFPS += selector.getElementsToRender();
+				_renderer.render(gl, selector);
 			}
 			
 			_renderer.disableRender(gl);

@@ -39,12 +39,10 @@ import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
  */
 public final class GLTerrain
 {
+	private TerrainBuilder _builder;
 	private int _vboIndex;
 	private int _vboVertex;
 	private int _vboTexture;
-	
-	private int _indexBufferLen;
-	private FloatBuffer _vertexBuffer;
 	
 	private GeoRegion _region;
 	private Texture _texture;
@@ -92,9 +90,10 @@ public final class GLTerrain
 		_wireframe = wireframe;
 	}
 	
-	public final void setNeedUpdateVBO()
+	public final void checkNeedUpdateVBO(final boolean blockMinHeightChanged, final boolean blockMaxHeightChanged)
 	{
-		_needUpdateVBO = true;
+		if (blockMinHeightChanged || blockMaxHeightChanged)
+			_needUpdateVBO = true;
 	}
 	
 	public final void init(final GL2 gl)
@@ -108,45 +107,8 @@ public final class GLTerrain
 		_vboVertex = temp[1];
 		_vboTexture = temp[2];
 		
-		final int xUnit = GeoEngine.GEO_REGION_SIZE - 1;
-		final int zUnit = GeoEngine.GEO_REGION_SIZE - 1;
-		
-		final IntBuffer indexBuffer = BufferUtils.createIntBuffer(xUnit * zUnit * 6);
-		for (int i = 0, j; i < zUnit; i++)
-		{
-			for (j = 0; j < xUnit; j++)
-			{
-				indexBuffer.put(i * GeoEngine.GEO_REGION_SIZE + j);
-				indexBuffer.put(i * GeoEngine.GEO_REGION_SIZE + GeoEngine.GEO_REGION_SIZE + j);
-				indexBuffer.put(i * GeoEngine.GEO_REGION_SIZE + GeoEngine.GEO_REGION_SIZE + j + 1);
-				indexBuffer.put(i * GeoEngine.GEO_REGION_SIZE + j);
-				indexBuffer.put(i * GeoEngine.GEO_REGION_SIZE + GeoEngine.GEO_REGION_SIZE + j + 1);
-				indexBuffer.put(i * GeoEngine.GEO_REGION_SIZE + j + 1);
-			}
-		}
-		indexBuffer.flip();
-		
-		final FloatBuffer textureBuffer = BufferUtils.createFloatBuffer(GeoEngine.GEO_REGION_SIZE * GeoEngine.GEO_REGION_SIZE * 2);
-		final float xStep = 1F / (xUnit);
-		final float zStep = 1F / (zUnit);
-		for (int i = 0, j; i < GeoEngine.GEO_REGION_SIZE; i++)
-		{
-			for (j = 0; j < GeoEngine.GEO_REGION_SIZE; j++)
-			{
-				textureBuffer.put(j * xStep);
-				textureBuffer.put(1F - i * zStep);
-			}
-		}
-		textureBuffer.flip();
-		
-		_vertexBuffer = BufferUtils.createFloatBuffer(GeoEngine.GEO_REGION_SIZE * GeoEngine.GEO_REGION_SIZE * 3);
-		_indexBufferLen = indexBuffer.remaining();
-		
-		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
-		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.remaining() * BufferUtils.INTEGER_SIZE, indexBuffer, GL2.GL_STATIC_DRAW);
-		
-		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * BufferUtils.FLOAT_SIZE, textureBuffer, GL2.GL_STATIC_DRAW);
+		_builder = TerrainDetailLevel.LOW.newBuilder();
+		_builder.init(gl, _vboIndex, _vboTexture);
 	}
 	
 	public final void render(final GL2 gl)
@@ -163,7 +125,10 @@ public final class GLTerrain
 			
 			try
 			{
-				final File file = new File("./data/textures/region/" + (_region.getRegionX() + 10) + "_" + (_region.getRegionY() + 10) + ".jpg");
+				File file = new File("./data/textures/region/" + (_region.getRegionX() + 10) + "_" + (_region.getRegionY() + 10) + ".jpg");
+				if (!file.isFile())
+					file = new File("./data/textures/region/water.jpg");
+				
 				if (file.isFile())
 				{
 					final BufferedImage img = Util.loadImage(file);
@@ -184,23 +149,7 @@ public final class GLTerrain
 		if (_needUpdateVBO)
 		{
 			_needUpdateVBO = false;
-			
-			_vertexBuffer.clear();
-			for (int blockY = 0, blockX; blockY < GeoEngine.GEO_REGION_SIZE; blockY++)
-			{
-				for (blockX = 0; blockX < GeoEngine.GEO_REGION_SIZE; blockX++)
-				{
-					_vertexBuffer.put(blockX);
-					_vertexBuffer.put(getNeighboursMinHeight(_region.getGeoBlocks(), blockX, blockY) / 16f);
-					_vertexBuffer.put(blockY);
-				}
-			}
-			_vertexBuffer.flip();
-			
-			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
-			// call with null buffer first to tell VGA-driver that we give a shit about the old content 
-			gl.glBufferData(GL2.GL_ARRAY_BUFFER, 0, null, GL2.GL_DYNAMIC_DRAW);
-			gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.remaining() * BufferUtils.FLOAT_SIZE, _vertexBuffer, GL2.GL_DYNAMIC_DRAW);
+			_builder.update(gl, _vboVertex, _region.getGeoBlocks(), false);
 		}
 		
 		if (_texture != null)
@@ -223,8 +172,9 @@ public final class GLTerrain
 		gl.glPushMatrix();
 		gl.glColor4f(1f, 1f, 1f, 1f);
 		gl.glTranslatef(GeoEngine.getGeoXY(_region.getRegionX(), 0), -0.3f, GeoEngine.getGeoXY(_region.getRegionY(), 0));
-		gl.glScalef(8f, 1f, 8f);
-		gl.glDrawElements(GL2.GL_TRIANGLES, _indexBufferLen, GL2.GL_UNSIGNED_INT, 0);
+		final int scale = _builder.getDetailLevel().getScaleXZ();
+		gl.glScalef(scale, 1f, scale);
+		gl.glDrawElements(GL2.GL_TRIANGLES, _builder.getIndexBufferLen(), GL2.GL_UNSIGNED_INT, 0);
 		gl.glPopMatrix();
 		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -250,29 +200,301 @@ public final class GLTerrain
 		_vboTexture = -1;
 	}
 	
-	private static final int getNeighboursMinHeight(final GeoBlock[][] blocks, final int blockX, final int blockY)
+	public static enum TerrainDetailLevel
 	{
-		if (blockX > 0)
+		LOW(TerrainBuilderLowDetail.class),
+		MEDIUM(TerrainBuilderXDetail.class),
+		HIGH(TerrainBuilderXDetail.class),
+		ULTRA(TerrainBuilderXDetail.class);
+		
+		private final Class<?> _builder;
+		
+		private TerrainDetailLevel(final Class<?> builder)
 		{
-			if (blockY > 0)
+			_builder = builder;
+		}
+		
+		public final int getScaleXZ()
+		{
+			return ULTRA.getFactor() / getFactor();
+		}
+		
+		public final int getFactor()
+		{
+			return 1 << ordinal();
+		}
+		
+		public final TerrainBuilder newBuilder()
+		{
+			try
 			{
-				return Math.min(Math.min(Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight()), blocks[blockX][blockY - 1].getMinHeight()), blocks[blockX - 1][blockY - 1].getMinHeight());
+				return (TerrainBuilder) _builder.getConstructor(TerrainDetailLevel.class).newInstance(this);
 			}
-			else
+			catch (final Exception e)
 			{
-				return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight());
+				throw new RuntimeException(e);
 			}
 		}
-		else
+	}
+	
+	public static abstract class TerrainBuilder
+	{
+		private final TerrainDetailLevel _detailLevel;
+		private FloatBuffer _vertexBuffer;
+		private boolean _initialized;
+		private int _indexBufferLen;
+		
+		public TerrainBuilder(final TerrainDetailLevel detailLevel)
 		{
-			if (blockY > 0)
+			_detailLevel = detailLevel;
+		}
+		
+		public final TerrainDetailLevel getDetailLevel()
+		{
+			return _detailLevel;
+		}
+		
+		public final int getIndexBufferLen()
+		{
+			return _indexBufferLen;
+		}
+		
+		public final void init(final GL2 gl, final int vboIndex, final int vboTexture)
+		{
+			if (_initialized)
+				return;
+			
+			_initialized = true;
+			
+			final int factor = getDetailLevel().getFactor();
+			final int xUp = GeoEngine.GEO_REGION_SIZE * factor;
+			final int zUp = GeoEngine.GEO_REGION_SIZE * factor;
+			
+			final int xUnit = xUp - 1;
+			final int zUnit = zUp - 1;
+			final IntBuffer indexBuffer = BufferUtils.createIntBuffer(xUnit * zUnit * 6);
+			for (int i = 0, j; i < zUnit; i++)
 			{
-				return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX][blockY - 1].getMinHeight());
+				for (j = 0; j < xUnit; j++)
+				{
+					indexBuffer.put(i * xUp + j);
+					indexBuffer.put(i * xUp + xUp + j);
+					indexBuffer.put(i * xUp + xUp + j + 1);
+					indexBuffer.put(i * xUp + j);
+					indexBuffer.put(i * xUp + xUp + j + 1);
+					indexBuffer.put(i * xUp + j + 1);
+				}
+			}
+			
+			indexBuffer.flip();
+			
+			final FloatBuffer textureBuffer = BufferUtils.createFloatBuffer(xUp * zUp * 2);
+			final float xStep = 1F / (xUp);
+			final float zStep = 1F / (zUp);
+			for (int i = 0, j; i < zUp; i++)
+			{
+				for (j = 0; j < xUp; j++)
+				{
+					textureBuffer.put(j * xStep);
+					textureBuffer.put(1F - i * zStep);
+				}
+			}
+			textureBuffer.flip();
+			
+			_vertexBuffer = BufferUtils.createFloatBuffer(xUp * zUp * 3);
+			_indexBufferLen = indexBuffer.remaining();
+			
+			gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, vboIndex);
+			gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.remaining() * BufferUtils.INTEGER_SIZE, indexBuffer, GL2.GL_STATIC_DRAW);
+			
+			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboTexture);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * BufferUtils.FLOAT_SIZE, textureBuffer, GL2.GL_STATIC_DRAW);
+		}
+		
+		public final void update(final GL2 gl, final int vboVertex, final GeoBlock[][] blocks, final boolean flipped)
+		{
+			_vertexBuffer.clear();
+			updateImpl(_vertexBuffer, blocks, flipped);
+			_vertexBuffer.flip();
+			
+			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboVertex);
+			// call with null buffer first to tell VGA-driver that we give a shit about the old content
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, 0, null, GL2.GL_DYNAMIC_DRAW);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.remaining() * BufferUtils.FLOAT_SIZE, _vertexBuffer, GL2.GL_DYNAMIC_DRAW);
+		}
+		
+		public abstract void updateImpl(final FloatBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped);
+	}
+	
+	public static final class TerrainBuilderLowDetail extends TerrainBuilder
+	{
+		public TerrainBuilderLowDetail(final TerrainDetailLevel detailLevel)
+		{
+			super(detailLevel);
+		}
+		
+		/**
+		 * @see g3deditor.jogl.GLTerrain.TerrainBuilder#updateImpl(java.nio.FloatBuffer, g3deditor.geo.GeoBlock[][], boolean)
+		 */
+		@Override
+		public final void updateImpl(final FloatBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped)
+		{
+			for (int blockY = 0, blockX; blockY < GeoEngine.GEO_REGION_SIZE; blockY++)
+			{
+				for (blockX = 0; blockX < GeoEngine.GEO_REGION_SIZE; blockX++)
+				{
+					vertexBuffer.put(blockX);
+					vertexBuffer.put(getNeighboursHeight(blocks, blockX, blockY, flipped) / 16f);
+					vertexBuffer.put(blockY);
+				}
+			}
+		}
+		
+		private final int getNeighboursHeight(final GeoBlock[][] blocks, final int blockX, final int blockY, final boolean flipped)
+		{
+			if (flipped)
+			{
+				if (blockX > 0)
+				{
+					if (blockY > 0)
+					{
+						return Math.min(Math.min(Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX - 1][blockY].getMaxHeight()), blocks[blockX][blockY - 1].getMaxHeight()), blocks[blockX - 1][blockY - 1].getMaxHeight());
+					}
+					else
+					{
+						return Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX - 1][blockY].getMaxHeight());
+					}
+				}
+				else
+				{
+					if (blockY > 0)
+					{
+						return Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX][blockY - 1].getMaxHeight());
+					}
+					else
+					{
+						return blocks[blockX][blockY].getMaxHeight();
+					}
+				}
 			}
 			else
 			{
-				return blocks[blockX][blockY].getMinHeight();
+				if (blockX > 0)
+				{
+					if (blockY > 0)
+					{
+						return Math.min(Math.min(Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight()), blocks[blockX][blockY - 1].getMinHeight()), blocks[blockX - 1][blockY - 1].getMinHeight());
+					}
+					else
+					{
+						return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight());
+					}
+				}
+				else
+				{
+					if (blockY > 0)
+					{
+						return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX][blockY - 1].getMinHeight());
+					}
+					else
+					{
+						return blocks[blockX][blockY].getMinHeight();
+					}
+				}
 			}
+		}
+	}
+	
+	public static final class TerrainBuilderXDetail extends TerrainBuilder
+	{
+		public TerrainBuilderXDetail(final TerrainDetailLevel detailLevel)
+		{
+			super(detailLevel);
+		}
+		
+		/**
+		 * @see g3deditor.jogl.GLTerrain.TerrainBuilder#updateImpl(java.nio.FloatBuffer, g3deditor.geo.GeoBlock[][], boolean)
+		 */
+		@Override
+		public final void updateImpl(final FloatBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped)
+		{
+			final int factor = getDetailLevel().getFactor();
+			final int cells = GeoEngine.GEO_BLOCK_SHIFT / factor;
+			final int xzUp = GeoEngine.GEO_REGION_SIZE * factor;
+			
+			for (int blockX = GeoEngine.GEO_REGION_SIZE, blockY, vertexX, vertexY, factorX, factorY; blockX-- > 0;)
+			{
+				for (blockY = GeoEngine.GEO_REGION_SIZE; blockY-- > 0;)
+				{
+					for (factorX = factor; factorX-- > 0;)
+					{
+						vertexX = blockX * factor + factorX;
+						for (factorY = factor; factorY-- > 0;)
+						{
+							vertexY = blockY * factor + factorY;
+							vertexBuffer.position((vertexY * xzUp + vertexX) * 3);
+							vertexBuffer.put(vertexX);
+							vertexBuffer.put(getHeight(blocks, blockX, blockY, factorX * cells, factorY * cells, cells, flipped) / 16f);
+							vertexBuffer.put(vertexY);
+						}
+					}
+				}
+			}
+			
+			vertexBuffer.position(vertexBuffer.capacity());
+		}
+		
+		private final int getHeight(final GeoBlock[][] blocks, final int blockX, final int blockY, final int cellX, final int cellY, final int cells, final boolean flipped)
+		{
+			int height = Integer.MAX_VALUE;
+			height = Math.min(height, getBlockHeightOfGroup(blocks, blockX, blockY, cellX - cells, cellY - cells, cells, flipped));
+			height = Math.min(height, getBlockHeightOfGroup(blocks, blockX, blockY, cellX - cells, cellY, cells, flipped));
+			height = Math.min(height, getBlockHeightOfGroup(blocks, blockX, blockY, cellX, cellY - cells, cells, flipped));
+			height = Math.min(height, getBlockHeightOfGroup(blocks, blockX, blockY, cellX, cellY, cells, flipped));
+			return height;
+		}
+		
+		private final int getBlockHeightOfGroup(final GeoBlock[][] blocks, int blockX, int blockY, int cellX, int cellY, final int cells, final boolean flipped)
+		{
+			if (cellX < 0)
+			{
+				blockX -= 1;
+				cellX = GeoEngine.GEO_BLOCK_SHIFT - cells;
+			}
+			else if (cellX >= GeoEngine.GEO_BLOCK_SHIFT)
+			{
+				blockX += 1;
+				cellX = 0;
+			}
+			
+			if (cellY < 0)
+			{
+				blockY -= 1;
+				cellY = GeoEngine.GEO_BLOCK_SHIFT - cells;
+			}
+			else if (cellY >= GeoEngine.GEO_BLOCK_SHIFT)
+			{
+				blockY += 1;
+				cellY = 0;
+			}
+			
+			if (blockX < 0 || blockY < 0 || blockX >= GeoEngine.GEO_REGION_SIZE || blockY >= GeoEngine.GEO_REGION_SIZE)
+				return Short.MAX_VALUE;
+			
+			return getBlockHeightOfGroup(blocks[blockX][blockY], cellX, cellY, cells, flipped);
+		}
+		
+		private final int getBlockHeightOfGroup(final GeoBlock block, final int cellX, final int cellY, final int cells, final boolean flipped)
+		{
+			int height = Integer.MAX_VALUE, x, y;
+			for (x = cells; x-- > 0;)
+			{
+				for (y = cells; y-- > 0;)
+				{
+					height = Math.min(height, (flipped ? block.nGetCellByLayer(cellX + x, cellY + y, block.nGetLayerCount(cellX + x, cellY + y) - 1) : block.nGetCellByLayer(cellX + x, cellY + y, 0)).getHeight());
+				}
+			}
+			return height;
 		}
 	}
 }

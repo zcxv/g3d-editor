@@ -120,7 +120,7 @@ public final class PanelLayers extends JPanel implements ActionListener
 	{
 		if (e.getSource() == _buttonLayerAdd)
 		{
-			
+			new DialogAddLayers(FrameMain.getInstance()).setVisible(true);
 		}
 		else if (e.getSource() == _buttonLayerRemove)
 		{

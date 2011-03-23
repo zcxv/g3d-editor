@@ -156,7 +156,8 @@ public final class GeoBlockFlat extends GeoBlock
 	@Override
 	public final void updateMinMaxHeight(final short newHeight, final short oldHeight)
 	{
-		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
+		if (newHeight != oldHeight)
+			GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(true, true);
 	}
 	
 	/**

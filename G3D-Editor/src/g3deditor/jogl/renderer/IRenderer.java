@@ -14,8 +14,8 @@
  */
 package g3deditor.jogl.renderer;
 
-import g3deditor.entity.CellColor;
 import g3deditor.geo.GeoCell;
+import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 
 import javax.media.opengl.GL2;
@@ -31,16 +31,18 @@ public final class IRenderer extends GLCellRenderer
 	public static final String NAME_SHORT = NAME;
 	
 	/**
-	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.geo.GeoCell)
+	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector)
 	 */
-	public final void render(final GL2 gl, final GeoCell cell)
+	public final void render(final GL2 gl, final GLSubRenderSelector selector)
 	{
-		final CellColor color = cell.getSelectionState().getColor(cell);
-		gl.glPushMatrix();
-		gl.glColor4f(color.getR(), color.getG(), color.getB(), COLOR_ALPHA);
-		gl.glTranslatef(cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-		renderCellFull(gl, cell.isBig(), cell.getNSWE());
-		gl.glPopMatrix();
+		GeoCell cell;
+		for (int i = selector.getElementsToRender(); i-- > 0;)
+		{
+			cell = selector.getElementToRender(i);
+			setColor(gl, cell.getSelectionState().getColor(cell));
+			translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+			renderCellFull(gl, cell.isBig(), cell.getNSWE());
+		}
 	}
 	
 	/**
