@@ -53,6 +53,9 @@ public final class GeoEngine
 	public static final byte GEO_BLOCK_TYPE_COMPLEX = 1;
 	public static final byte GEO_BLOCK_TYPE_MULTILAYER = 2;
 	
+	public static final short HEIGHT_MAX_VALUE = 16376;
+	public static final short HEIGHT_MIN_VALUE = -16384;
+	
 	public static final int NSWE_MASK = 0x0000000F;
 	public static final int HEIGHT_MASK = 0x0000FFF0;
 	
@@ -181,9 +184,16 @@ public final class GeoEngine
 	
 	public static final short getGeoHeightOfHeight(short height)
 	{
+		if (height <= HEIGHT_MIN_VALUE)
+			return HEIGHT_MIN_VALUE;
+		
+		if (height >= HEIGHT_MAX_VALUE)
+			return HEIGHT_MAX_VALUE;
+		
 		height <<= 1;
 		height &= GeoEngine.HEIGHT_MASK;
-		return (short) (height >> 1);
+		height >>= 1;
+		return height;
 	}
 	
 	public static final boolean layersValid(final int layers)

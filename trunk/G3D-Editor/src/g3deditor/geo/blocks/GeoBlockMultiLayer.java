@@ -371,21 +371,20 @@ public final class GeoBlockMultiLayer extends GeoBlock
 		if (newHeight > _maxHeight)
 		{
 			_maxHeight = newHeight;
+			GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(false, true);
 		}
 		else if (newHeight < _minHeight)
 		{
 			_minHeight = newHeight;
+			GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(true, false);
 		}
 		else if (oldHeight == _maxHeight || oldHeight == _minHeight)
 		{
+			final int oldMinHeight = _minHeight;
+			final int oldMaxHeight = _maxHeight;
 			calcMaxMinHeight();
+			GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(_minHeight != oldMinHeight, _maxHeight != oldMaxHeight);
 		}
-		else
-		{
-			return;
-		}
-		
-		GLDisplay.getInstance().getTerrain().setNeedUpdateVBO();
 	}
 	
 	/**

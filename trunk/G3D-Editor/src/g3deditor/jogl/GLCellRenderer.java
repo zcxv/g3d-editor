@@ -14,13 +14,14 @@
  */
 package g3deditor.jogl;
 
-import java.io.File;
-
-import g3deditor.geo.GeoCell;
+import g3deditor.entity.CellColor;
+import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.renderer.DLLoDRenderer;
 import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
+
+import java.io.File;
 
 import javax.media.opengl.GL2;
 
@@ -73,6 +74,10 @@ public abstract class GLCellRenderer
 	
 	private boolean _initialized;
 	private Texture _nsweTexture;
+	private CellColor _color;
+	private float _translateX;
+	private float _translateY;
+	private float _translateZ;
 	
 	public void init(final GL2 gl)
 	{
@@ -95,17 +100,47 @@ public abstract class GLCellRenderer
 		}
 	}
 	
+	protected final void setColor(final GL2 gl, final CellColor color)
+	{
+		if (_color != color)
+		{
+			_color = color;
+			gl.glColor4f(color.getR(), color.getG(), color.getB(), COLOR_ALPHA);
+		}
+	}
+	
+	public final void translatef(final GL2 gl, final float x, final float y, final float z)
+	{
+		if (_translateX != x || _translateY != y || _translateZ != z)
+		{
+			final float dx = x - _translateX;
+			final float dy = y - _translateY;
+			final float dz = z - _translateZ;
+			_translateX = x;
+			_translateY = y;
+			_translateZ = z;
+			gl.glTranslatef(dx, dy, dz);
+		}
+	}
+	
 	public void enableRender(final GL2 gl)
 	{
 		if (_nsweTexture != null)
 			_nsweTexture.bind();
+		
+		_color = null;
+		_translateX = 0f;
+		_translateY = 0f;
+		_translateZ = 0f;
+		
+		gl.glPushMatrix();
 	}
 	
-	public abstract void render(final GL2 gl, final GeoCell cell);
+	public abstract void render(final GL2 gl, final GLSubRenderSelector selector);
 	
 	public void disableRender(final GL2 gl)
 	{
-		
+		gl.glPopMatrix();
 	}
 	
 	public void dispose(final GL2 gl)

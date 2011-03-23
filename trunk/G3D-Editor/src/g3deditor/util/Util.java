@@ -165,9 +165,10 @@ public final class Util
 		x[b] = t;
 	}
 	
-	public static final BufferedImage loadImage(final String file)
+	public static final BufferedImage loadImage(final String fileName)
 	{
-		return loadImage(new File(file));
+		final File file = new File(fileName);
+		return file.isFile() ? loadImage(file) : null;
 	}
 	
 	public static final BufferedImage loadImage(final File file)
@@ -183,6 +184,18 @@ public final class Util
 		}
 	}
 	
+	public static final void saveImage(final File file, final BufferedImage img, final String format)
+	{
+		try
+		{
+			ImageIO.write(img, format, file);
+		}
+		catch (final IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Scales the source image to the given width/height.<br>
 	 * Faster then BufferedImage.getScaledInstance(width, height, hints) and returning an BufferedImage instead of an ToolkitImage.
@@ -195,6 +208,9 @@ public final class Util
 	 */
 	public static final BufferedImage scaleImage(final BufferedImage img, final int width, final int height, final int quality)
 	{
+		if (img.getWidth() == width && img.getHeight() == height)
+			return img;
+		
 		final BufferedImage scaled = new BufferedImage(width, height, img.getType() == 0 ? BufferedImage.TYPE_4BYTE_ABGR : img.getType());
 		final Graphics2D g = scaled.createGraphics();
 		

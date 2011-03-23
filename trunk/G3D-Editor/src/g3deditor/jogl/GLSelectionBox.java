@@ -14,7 +14,6 @@
  */
 package g3deditor.jogl;
 
-import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.blocks.GeoBlockMultiLayer;
 import g3deditor.util.FastArrayList;
@@ -78,26 +77,20 @@ public final class GLSelectionBox
 		return true;
 	}
 	
-	public final void getAllCellsInside(final GeoCell[] cells, final FastArrayList<GeoCell> store)
+	public final void getAllCellsInside(final GeoCell reference, final GeoCell[] cells, final FastArrayList<GeoCell> store)
 	{
-		if (_geoX == Integer.MIN_VALUE)
-			return;
-		
-		final GeoBlock block = cells[0].getBlock();
-		if (block.getGeoX() != _geoX || block.getGeoY() != _geoY)
-			return;
-		
 		if (_infHeight)
 		{
 			store.addAll(cells);
 		}
 		else
 		{
+			final int geoZ = reference.getHeight();
 			int height;
 			for (final GeoCell cell : cells)
 			{
 				height = cell.getHeight();
-				if (height >= _geoZ - _height && height <= _geoZ + _height)
+				if (height >= geoZ - _height && height <= geoZ + _height)
 					store.add(cell);
 			}
 		}

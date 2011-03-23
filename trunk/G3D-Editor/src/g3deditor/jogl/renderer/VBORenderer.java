@@ -14,9 +14,9 @@
  */
 package g3deditor.jogl.renderer;
 
-import g3deditor.entity.CellColor;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.util.BufferUtils;
 
@@ -34,8 +34,6 @@ public final class VBORenderer extends GLCellRenderer
 {
 	public static final String NAME = "VertexBufferObject";
 	public static final String NAME_SHORT = "VBO";
-	
-	private static final int TEX_COORDS = 24;
 	
 	private static final short[] GEOMETRY_INDICES_DATA =
 	{
@@ -108,7 +106,7 @@ public final class VBORenderer extends GLCellRenderer
 		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
 		final float v2 = v1 + NSWE_TEX_BLOCK;
 		
-		textureBuffer.position(textureBuffer.position() + TEX_COORDS - 8);
+		textureBuffer.position(textureBuffer.position() + GEOMETRY_TEXTURE_DATA_LENGTH - 8);
 		textureBuffer.put(u1);
 		textureBuffer.put(v2);
 		textureBuffer.put(u1);
@@ -184,25 +182,26 @@ public final class VBORenderer extends GLCellRenderer
 	}
 	
 	/**
-	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.geo.GeoCell)
+	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector)
 	 */
-	public final void render(final GL2 gl, final GeoCell cell)
+	public final void render(final GL2 gl, final GLSubRenderSelector selector)
 	{
-		final CellColor color = cell.getSelectionState().getColor(cell);
-		gl.glPushMatrix();
-		gl.glColor4f(color.getR(), color.getG(), color.getB(), COLOR_ALPHA);
-		gl.glTranslatef(cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-		
-		if (cell.isBig())
+		GeoCell cell;
+		for (int i = selector.getElementsToRender(); i-- > 0;)
 		{
-			gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, 0);
+			cell = selector.getElementToRender(i);
+			setColor(gl, cell.getSelectionState().getColor(cell));
+			translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+			
+			if (cell.isBig())
+			{
+				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, 0);
+			}
+			else
+			{
+				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH) * BufferUtils.SHORT_SIZE);
+			}
 		}
-		else
-		{
-			gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH) * BufferUtils.SHORT_SIZE);
-		}
-		
-		gl.glPopMatrix();
 	}
 	
 	/**
