@@ -14,7 +14,6 @@
  */
 package g3deditor.jogl;
 
-import g3deditor.entity.CellColor;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.renderer.DLLoDRenderer;
 import g3deditor.jogl.renderer.DLRenderer;
@@ -67,17 +66,64 @@ public abstract class GLCellRenderer
 		return DLLoDRenderer.NAME;
 	}
 	
-	protected static final float COLOR_ALPHA = 0.7f;
 	protected static final int NSWE_COMBINATIONS = 16;
 	protected static final int NSWE_TEX_ROWS_COLS = 4;
 	protected static final float NSWE_TEX_BLOCK = 1f / NSWE_TEX_ROWS_COLS;
 	
+	protected static final void renderCellFull(final GL2 gl, final boolean big, final int nswe)
+	{
+		final float size = big ? 7.9f : 0.9f;
+		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+		gl.glVertex3f(0.1f, -0.2f, 0.1f);
+		gl.glVertex3f(0.1f, 0.0f, 0.1f);
+		gl.glVertex3f(size, -0.2f, 0.1f);
+		gl.glVertex3f(size, 0.0f, 0.1f);
+		gl.glVertex3f(size, -0.2f, size);
+		gl.glVertex3f(size, 0.0f, size);
+		gl.glVertex3f(0.1f, -0.2f, size);
+		gl.glVertex3f(0.1f, 0.0f, size);
+		gl.glVertex3f(0.1f, -0.2f, 0.1f);
+		gl.glVertex3f(0.1f, 0.0f, 0.1f);
+		gl.glEnd();
+		
+		renderCellBottom(gl, big, -0.2f);
+		renderCellTop(gl, big, nswe);
+	}
+	
+	protected static final void renderCellTop(final GL2 gl, final boolean big, final int nswe)
+	{
+		final float size = big ? 7.9f : 0.9f;
+		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float u2 = u1 + NSWE_TEX_BLOCK;
+		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float v2 = v1 + NSWE_TEX_BLOCK;
+		
+		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+		gl.glTexCoord2f(u2, v2);
+		gl.glVertex3f(0.1f, 0.0f, 0.1f);
+		gl.glTexCoord2f(u1, v2);
+		gl.glVertex3f(0.1f, 0.0f, size);
+		gl.glTexCoord2f(u2, v1);
+		gl.glVertex3f(size, 0.0f, 0.1f);
+		gl.glTexCoord2f(u1, v1);
+		gl.glVertex3f(size, 0.0f, size);
+		gl.glEnd();
+	}
+	
+	protected static final void renderCellBottom(final GL2 gl, final boolean big, final float height)
+	{
+		final float size = big ? 7.9f : 0.9f;
+		
+		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
+		gl.glVertex3f(0.1f, height, size);
+		gl.glVertex3f(0.1f, height, 0.1f);
+		gl.glVertex3f(size, height, size);
+		gl.glVertex3f(size, height, 0.1f);
+		gl.glEnd();
+	}
+	
 	private boolean _initialized;
 	private Texture _nsweTexture;
-	private CellColor _color;
-	private float _translateX;
-	private float _translateY;
-	private float _translateZ;
 	
 	public void init(final GL2 gl)
 	{
@@ -100,40 +146,13 @@ public abstract class GLCellRenderer
 		}
 	}
 	
-	protected final void setColor(final GL2 gl, final CellColor color)
-	{
-		if (_color != color)
-		{
-			_color = color;
-			gl.glColor4f(color.getR(), color.getG(), color.getB(), COLOR_ALPHA);
-		}
-	}
-	
-	public final void translatef(final GL2 gl, final float x, final float y, final float z)
-	{
-		if (_translateX != x || _translateY != y || _translateZ != z)
-		{
-			final float dx = x - _translateX;
-			final float dy = y - _translateY;
-			final float dz = z - _translateZ;
-			_translateX = x;
-			_translateY = y;
-			_translateZ = z;
-			gl.glTranslatef(dx, dy, dz);
-		}
-	}
-	
 	public void enableRender(final GL2 gl)
 	{
 		if (_nsweTexture != null)
 			_nsweTexture.bind();
 		
-		_color = null;
-		_translateX = 0f;
-		_translateY = 0f;
-		_translateZ = 0f;
-		
 		gl.glPushMatrix();
+		GLState.resetTranslate();
 	}
 	
 	public abstract void render(final GL2 gl, final GLSubRenderSelector selector);
@@ -155,56 +174,4 @@ public abstract class GLCellRenderer
 	}
 	
 	public abstract String getName();
-	
-	protected final void renderCellFull(final GL2 gl, final boolean big, final int nswe)
-	{
-		final float size = big ? 7.9f : 0.9f;
-		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-		gl.glVertex3f(0.1f, -0.2f, 0.1f);
-		gl.glVertex3f(0.1f, 0.0f, 0.1f);
-		gl.glVertex3f(size, -0.2f, 0.1f);
-		gl.glVertex3f(size, 0.0f, 0.1f);
-		gl.glVertex3f(size, -0.2f, size);
-		gl.glVertex3f(size, 0.0f, size);
-		gl.glVertex3f(0.1f, -0.2f, size);
-		gl.glVertex3f(0.1f, 0.0f, size);
-		gl.glVertex3f(0.1f, -0.2f, 0.1f);
-		gl.glVertex3f(0.1f, 0.0f, 0.1f);
-		gl.glEnd();
-		
-		renderCellBottom(gl, big, -0.2f);
-		renderCellTop(gl, big, nswe);
-	}
-	
-	protected final void renderCellTop(final GL2 gl, final boolean big, final int nswe)
-	{
-		final float size = big ? 7.9f : 0.9f;
-		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float u2 = u1 + NSWE_TEX_BLOCK;
-		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float v2 = v1 + NSWE_TEX_BLOCK;
-		
-		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-		gl.glTexCoord2f(u2, v2);
-		gl.glVertex3f(0.1f, 0.0f, 0.1f);
-		gl.glTexCoord2f(u1, v2);
-		gl.glVertex3f(0.1f, 0.0f, size);
-		gl.glTexCoord2f(u2, v1);
-		gl.glVertex3f(size, 0.0f, 0.1f);
-		gl.glTexCoord2f(u1, v1);
-		gl.glVertex3f(size, 0.0f, size);
-		gl.glEnd();
-	}
-	
-	protected final void renderCellBottom(final GL2 gl, final boolean big, final float height)
-	{
-		final float size = big ? 7.9f : 0.9f;
-		
-		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-		gl.glVertex3f(0.1f, height, size);
-		gl.glVertex3f(0.1f, height, 0.1f);
-		gl.glVertex3f(size, height, size);
-		gl.glVertex3f(size, height, 0.1f);
-		gl.glEnd();
-	}
 }

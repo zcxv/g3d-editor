@@ -14,7 +14,9 @@
  */
 package g3deditor.swing;
 
+import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
+import g3deditor.geo.GeoEngine;
 import g3deditor.swing.defaults.DefaultButton;
 import g3deditor.swing.defaults.DefaultTable;
 
@@ -41,7 +43,10 @@ public final class PanelLayers extends JPanel implements ActionListener
 	private final DefaultButton _buttonLayerAdd;
 	private final DefaultButton _buttonLayerRemove;
 	
-	public PanelLayers()
+	private final DialogAddLayers _dialogAddLayer;
+	private final DialogRemoveLayers _dialogRemoveLayer;
+	
+	public PanelLayers(final FrameMain frame)
 	{
 		_tableLayers = new CellLayerTable();
 		_paneLayers = new JScrollPane(_tableLayers);
@@ -53,6 +58,9 @@ public final class PanelLayers extends JPanel implements ActionListener
 		_buttonLayerRemove = new DefaultButton("Remove Layer(s)");
 		_buttonLayerRemove.setEnabled(false);
 		_buttonLayerRemove.addActionListener(this);
+		
+		_dialogAddLayer = new DialogAddLayers(frame);
+		_dialogRemoveLayer = new DialogRemoveLayers(frame);
 		
 		initLayout();
 	}
@@ -90,9 +98,11 @@ public final class PanelLayers extends JPanel implements ActionListener
 		add(_buttonLayerRemove, gbc);
 	}
 	
-	private final void setFieldsEnabled(final boolean enabled)
+	private final void setFieldsEnabled(boolean enabled)
 	{
-		_paneLayers.setEnabled(enabled);
+		_tableLayers.setEnabled(enabled);
+		
+		enabled &= GeoBlockSelector.getInstance().getSelectedTypes()[GeoEngine.GEO_BLOCK_TYPE_MULTILAYER];
 		_buttonLayerAdd.setEnabled(enabled);
 		_buttonLayerRemove.setEnabled(enabled);
 	}
@@ -120,11 +130,11 @@ public final class PanelLayers extends JPanel implements ActionListener
 	{
 		if (e.getSource() == _buttonLayerAdd)
 		{
-			new DialogAddLayers(FrameMain.getInstance()).setVisible(true);
+			_dialogAddLayer.setVisible(true);
 		}
 		else if (e.getSource() == _buttonLayerRemove)
 		{
-			
+			_dialogRemoveLayer.setVisible(true);
 		}
 	}
 	

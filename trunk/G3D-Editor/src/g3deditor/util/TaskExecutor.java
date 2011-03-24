@@ -14,6 +14,8 @@
  */
 package g3deditor.util;
 
+import g3deditor.Config;
+
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
@@ -25,31 +27,35 @@ public final class TaskExecutor
 	private final TaskQueue _taskQueue;
 	private final TaskCompleteListener _taskCompleteListener;
 	
+	private boolean _shutdown;
+	private boolean _multithreaded;
+	
 	public TaskExecutor(int threads)
 	{
 		_helper = new TaskExecutionHelper[threads];
 		_taskQueue = new TaskQueue();
 		_taskCompleteListener = new TaskCompleteListener();
-		
-		while (threads-- > 0)
-		{
-			_helper[threads] = new TaskExecutionHelper(_taskQueue, _taskCompleteListener);
-		}
 	}
 	
-	public final void init()
+	public final void shutdown()
 	{
-		for (int i = _helper.length; i-- > 0;)
-		{
-			_helper[i].start();
-		}
+		_shutdown = true;
+		shutdownInternal();
 	}
 	
-	public final void dispose()
+	private final void shutdownInternal()
 	{
-		for (int i = _helper.length; i-- > 0;)
+		if (_multithreaded)
 		{
-			_helper[i].interrupt();
+			for (int i = _helper.length; i-- > 0;)
+			{
+				if (_helper[i] != null)
+				{
+					_helper[i].interrupt();
+					_helper[i] = null;
+				}
+			}
+			_multithreaded = false;
 		}
 	}
 	
@@ -61,15 +67,39 @@ public final class TaskExecutor
 	 */
 	public final void execute(final Runnable[] tasks, final int size)
 	{
-		_taskCompleteListener.setTasksRemaining(size);
+		if (_shutdown)
+			return;
 		
-		synchronized (_taskQueue)
+		if (Config.USE_MULTITHREADING)
 		{
-			_taskQueue.offer(tasks, size);
-			_taskQueue.notifyAll();
+			if (!_multithreaded)
+			{
+				for (int i = _helper.length; i-- > 0;)
+				{
+					_helper[i] = new TaskExecutionHelper(_taskQueue, _taskCompleteListener);
+					_helper[i].start();
+				}
+				_multithreaded = true;
+			}
+			
+			_taskCompleteListener.setTasksRemaining(size);
+			
+			synchronized (_taskQueue)
+			{
+				_taskQueue.offer(tasks, size);
+				_taskQueue.notifyAll();
+			}
+			
+			_taskCompleteListener.waitForComplete();
 		}
-		
-		_taskCompleteListener.waitForComplete();
+		else
+		{
+			shutdownInternal();
+			for (int i = size; i-- > 0;)
+			{
+				tasks[i].run();
+			}
+		}
 	}
 	
 	private static final class TaskCompleteListener
@@ -123,6 +153,7 @@ public final class TaskExecutor
 		{
 			_taskQueue = taskQueue;
 			_taskCompleteListener = taskCompleteListener;
+			setDaemon(true);
 		}
 		
 		@Override

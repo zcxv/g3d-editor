@@ -89,6 +89,7 @@ public final class GeoCellCM extends GeoCell
 	{
 		final short oldHeight = getHeight();
 		_heightAndNSWE = GeoEngine.updateHeightOfHeightAndNSWE(_heightAndNSWE, (short) (getHeight() + height));
+		getBlock().updateLayerFor(this);
 		getBlock().updateMinMaxHeight(getHeight(), oldHeight);
 		
 		if (FrameMain.getInstance().isSelectedGeoCell(this))
@@ -139,6 +140,7 @@ public final class GeoCellCM extends GeoCell
 	{
 		final short oldHeight = getHeight();
 		_heightAndNSWE = heightAndNSWE;
+		getBlock().updateLayerFor(this);
 		getBlock().updateMinMaxHeight(getHeight(), oldHeight);
 		
 		if (FrameMain.getInstance().isSelectedGeoCell(this))

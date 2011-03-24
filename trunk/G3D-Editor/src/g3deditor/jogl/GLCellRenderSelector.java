@@ -20,7 +20,6 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
-import g3deditor.geo.blocks.GeoBlockFlat;
 import g3deditor.util.TaskExecutor;
 import g3deditor.util.Util;
 import g3deditor.util.Util.FastComparator;
@@ -68,7 +67,6 @@ public final class GLCellRenderSelector
 	public static final int MAX_VIS_GRID_RANGE = 96;
 	
 	private final TaskExecutor _taskExecutor;
-	
 	private float[][] _frustum;
 	
 	private GLSubRenderSelector[] _geoBlocks;
@@ -81,20 +79,12 @@ public final class GLCellRenderSelector
 	private boolean _freezeGrid;
 	private int _gridRange;
 	
+	private GeoRegion _region;
+	
 	public GLCellRenderSelector()
 	{
 		_geoBlocks = new GLSubRenderSelector[0];
 		_taskExecutor = new TaskExecutor(Runtime.getRuntime().availableProcessors());
-	}
-	
-	public final void init()
-	{
-		_taskExecutor.init();
-	}
-	
-	public final void dispose()
-	{
-		_taskExecutor.dispose();
 	}
 	
 	public final void forceUpdateFrustum()
@@ -110,7 +100,13 @@ public final class GLCellRenderSelector
 	public final void select(final GL2 gl, final GLCamera camera, final boolean freezeGrid)
 	{
 		final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
-		if (region == null)
+		if (_region != region)
+		{
+			_region = region;
+			_forceUpdateGeoBlocks = true;
+		}
+		
+		if (_region == null)
 		{
 			_geoBlocksSize = 0;
 			return;
@@ -118,8 +114,8 @@ public final class GLCellRenderSelector
 		
 		if (camera.positionXZChanged() || _freezeGrid != freezeGrid || _gridRange != Config.VIS_GRID_RANGE || _forceUpdateGeoBlocks)
 		{
-			final int geoX = Math.max(Math.min(camera.getGeoX(), region.getGeoX(GeoEngine.GEO_REGION_SIZE - 1)), region.getGeoX(0));
-			final int geoY = Math.max(Math.min(camera.getGeoY(), region.getGeoY(GeoEngine.GEO_REGION_SIZE - 1)), region.getGeoY(0));
+			final int geoX = Math.max(Math.min(camera.getGeoX(), _region.getGeoX(GeoEngine.GEO_REGION_SIZE - 1)), _region.getGeoX(0));
+			final int geoY = Math.max(Math.min(camera.getGeoY(), _region.getGeoY(GeoEngine.GEO_REGION_SIZE - 1)), _region.getGeoY(0));
 			final int camBlockX = GeoEngine.getBlockXY(geoX);
 			final int camBlockY = GeoEngine.getBlockXY(geoY);
 			
@@ -159,7 +155,7 @@ public final class GLCellRenderSelector
 					{
 						for (y = minBlockY; y < maxBlockY; y++)
 						{
-							_geoBlocks[_geoBlocksSize++].setGeoBlock(region.getBlockByBlockXY(x, y));
+							_geoBlocks[_geoBlocksSize++].setGeoBlock(_region.getBlockByBlockXY(x, y));
 						}
 					}
 					
@@ -177,7 +173,9 @@ public final class GLCellRenderSelector
 			_forceUpdateFrustum = false;
 			_frustum = camera.getFrustum(gl);
 			_taskExecutor.execute(_geoBlocks, _geoBlocksSize);
-			Util.quickSort(_geoBlocks, _geoBlocksSize, GEO_BLOCK_COMPARATOR);
+			
+			if (Config.USE_TRANSPARENCY)
+				Util.quickSort(_geoBlocks, _geoBlocksSize, GEO_BLOCK_COMPARATOR);
 		}
 	}
 	
@@ -193,7 +191,7 @@ public final class GLCellRenderSelector
 	
 	public final boolean isVisible(final GeoBlock block)
 	{
-		if (block instanceof GeoBlockFlat) // flat block`s cell get checked
+		if (block.getType() == GeoEngine.GEO_BLOCK_TYPE_FLAT) // flat block`s cell get checked
 			return true;
 		
 		final float x1 = block.getGeoX();
@@ -316,7 +314,8 @@ public final class GLCellRenderSelector
 					_geoCells[_count++] = cell;
 			}
 			
-			Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
+			if (Config.USE_TRANSPARENCY)
+				Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
 		}
 	}
 }

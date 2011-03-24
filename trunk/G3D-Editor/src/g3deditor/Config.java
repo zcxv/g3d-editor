@@ -35,16 +35,20 @@ public final class Config
 {
 	private static final LookAndFeelInfo[] LOOK_AND_FEEL_INFOS;
 
-	private static final File CONFIG_FILE					= new File("./G3DEditor.ini");
-	private static final ConfigProperties PROPERTIES		= new ConfigProperties();
+	private static final File CONFIG_FILE				= new File("./G3DEditor.ini");
+	private static final ConfigProperties PROPERTIES	= new ConfigProperties();
 	
-	public static String PATH_TO_GEO_FILES					= "./data/geodata/";
-	public static boolean TERRAIN_DEFAULT_ON				= false;
-	public static int VIS_GRID_RANGE						= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
-	public static String LOOK_AND_FEEL						= "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-	public static String CELL_RENDERER						= GLCellRenderer.validateRenderer(null);
-	public static int DLLoDRANGE							= DLLoDRenderer.MAX_DISTANCE_SQ;
-	public static boolean V_SYNC							= true;
+	public static String PATH_TO_GEO_FILES				= "./data/geodata/";
+	public static boolean TERRAIN_DEFAULT_ON			= false;
+	public static int VIS_GRID_RANGE					= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
+	public static String LOOK_AND_FEEL					= "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+	public static String CELL_RENDERER					= GLCellRenderer.validateRenderer(null);
+	public static int DLLoD_RANGE						= DLLoDRenderer.MAX_DISTANCE_SQ;
+	public static boolean V_SYNC						= true;
+	public static boolean USE_TRANSPARENCY				= true;
+	public static boolean USE_MULTITHREADING			= Runtime.getRuntime().availableProcessors() > 1;
+	public static boolean DRAW_OUTLINE					= false;
+	public static boolean VBO_DRAW_RANGE				= false;
 	
 	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
 	{
@@ -53,7 +57,6 @@ public final class Config
 	
 	public static final LookAndFeelInfo getLookAndFeel(final String className, final LookAndFeelInfo dftl)
 	{
-		
 		for (int i = LOOK_AND_FEEL_INFOS.length; i-- > 0;)
 		{
 			if (LOOK_AND_FEEL_INFOS[i].getClassName().equals(className))
@@ -92,13 +95,17 @@ public final class Config
 			{
 				PROPERTIES.load(CONFIG_FILE);
 				
-				PATH_TO_GEO_FILES		= PROPERTIES.getProperty("GeodataPath", "./data/geodata/");
-				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TerrainDefaultOn", "false"));
-				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VisibleGridRange", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
-				LOOK_AND_FEEL			= PROPERTIES.getProperty("LookAndFeel", "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-				CELL_RENDERER			= PROPERTIES.getProperty("CellRenderer", GLCellRenderer.validateRenderer(null));
-				DLLoDRANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoDRange", String.valueOf(DLLoDRenderer.MAX_DISTANCE_SQ)));
+				PATH_TO_GEO_FILES		= PROPERTIES.getProperty("PATH_TO_GEO_FILES", "./data/geodata/");
+				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TERRAIN_DEFAULT_ON", "false"));
+				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VIS_GRID_RANGE", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
+				LOOK_AND_FEEL			= PROPERTIES.getProperty("LOOK_AND_FEEL", "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", GLCellRenderer.validateRenderer(null));
+				DLLoD_RANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoD_RANGE", String.valueOf(DLLoDRenderer.MAX_DISTANCE_SQ)));
 				V_SYNC					= Boolean.parseBoolean(PROPERTIES.getProperty("V_SYNC", "true"));
+				USE_TRANSPARENCY		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_TRANSPARENCY", "true"));
+				USE_MULTITHREADING		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_MULTITHREADING", String.valueOf(Runtime.getRuntime().availableProcessors() > 1)));
+				DRAW_OUTLINE			= Boolean.parseBoolean(PROPERTIES.getProperty("DRAW_OUTLINE", "false"));
+				VBO_DRAW_RANGE			= Boolean.parseBoolean(PROPERTIES.getProperty("VBO_DRAW_RANGE", "false"));
 			}
 		}
 		catch (final Exception e)
@@ -140,26 +147,30 @@ public final class Config
 		
 		CELL_RENDERER = GLCellRenderer.validateRenderer(CELL_RENDERER);
 		
-		if (DLLoDRANGE < DLLoDRenderer.MIN_DISTANCE_SQ)
+		if (DLLoD_RANGE < DLLoDRenderer.MIN_DISTANCE_SQ)
 		{
-			DLLoDRANGE = DLLoDRenderer.MIN_DISTANCE_SQ;
+			DLLoD_RANGE = DLLoDRenderer.MIN_DISTANCE_SQ;
 		}
-		else if (DLLoDRANGE > DLLoDRenderer.MAX_DISTANCE_SQ)
+		else if (DLLoD_RANGE > DLLoDRenderer.MAX_DISTANCE_SQ)
 		{
-			DLLoDRANGE = DLLoDRenderer.MAX_DISTANCE_SQ;
+			DLLoD_RANGE = DLLoDRenderer.MAX_DISTANCE_SQ;
 		}
 	}
 	
 	public static final void save()
 	{
 		PROPERTIES.clear();
-		PROPERTIES.put("GeodataPath", String.valueOf(PATH_TO_GEO_FILES));
-		PROPERTIES.put("TerrainDefaultOn", String.valueOf(TERRAIN_DEFAULT_ON));
-		PROPERTIES.put("VisibleGridRange", String.valueOf(VIS_GRID_RANGE));
-		PROPERTIES.put("LookAndFeel", LOOK_AND_FEEL);
-		PROPERTIES.put("CellRenderer", CELL_RENDERER);
-		PROPERTIES.put("DLLoDRange", String.valueOf(DLLoDRANGE));
+		PROPERTIES.put("PATH_TO_GEO_FILES", String.valueOf(PATH_TO_GEO_FILES));
+		PROPERTIES.put("TERRAIN_DEFAULT_ON", String.valueOf(TERRAIN_DEFAULT_ON));
+		PROPERTIES.put("VIS_GRID_RANGE", String.valueOf(VIS_GRID_RANGE));
+		PROPERTIES.put("LOOK_AND_FEEL", String.valueOf(LOOK_AND_FEEL));
+		PROPERTIES.put("CELL_RENDERER", String.valueOf(CELL_RENDERER));
+		PROPERTIES.put("DLLoD_RANGE", String.valueOf(DLLoD_RANGE));
 		PROPERTIES.put("V_SYNC", String.valueOf(V_SYNC));
+		PROPERTIES.put("USE_TRANSPARENCY", String.valueOf(USE_TRANSPARENCY));
+		PROPERTIES.put("USE_MULTITHREADING", String.valueOf(USE_MULTITHREADING));
+		PROPERTIES.put("DRAW_OUTLINE", String.valueOf(DRAW_OUTLINE));
+		PROPERTIES.put("VBO_DRAW_RANGE", String.valueOf(VBO_DRAW_RANGE));
 		PROPERTIES.save(CONFIG_FILE);
 	}
 	
@@ -201,7 +212,7 @@ public final class Config
 			try
 			{
 				fw = new FileWriter(file);
-				super.store(fw, "L2j - G3DEditor Config");
+				super.store(fw, "G3DEditor Config");
 			}
 			catch (final Exception e)
 			{

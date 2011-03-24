@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -165,12 +166,12 @@ public final class GLTerrain
 		gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, 0);
 
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
-		gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
+		gl.glVertexPointer(3, GL2.GL_SHORT, 0, 0);
 
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
 		
 		gl.glPushMatrix();
-		gl.glColor4f(1f, 1f, 1f, 1f);
+		GLState.glColor4f(gl, GLColor.WHITE);
 		gl.glTranslatef(GeoEngine.getGeoXY(_region.getRegionX(), 0), -0.3f, GeoEngine.getGeoXY(_region.getRegionY(), 0));
 		final int scale = _builder.getDetailLevel().getScaleXZ();
 		gl.glScalef(scale, 1f, scale);
@@ -240,7 +241,7 @@ public final class GLTerrain
 	public static abstract class TerrainBuilder
 	{
 		private final TerrainDetailLevel _detailLevel;
-		private FloatBuffer _vertexBuffer;
+		private ShortBuffer _vertexBuffer;
 		private boolean _initialized;
 		private int _indexBufferLen;
 		
@@ -301,7 +302,7 @@ public final class GLTerrain
 			}
 			textureBuffer.flip();
 			
-			_vertexBuffer = BufferUtils.createFloatBuffer(xUp * zUp * 3);
+			_vertexBuffer = BufferUtils.createShortBuffer(xUp * zUp * 3);
 			_indexBufferLen = indexBuffer.remaining();
 			
 			gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, vboIndex);
@@ -320,10 +321,10 @@ public final class GLTerrain
 			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboVertex);
 			// call with null buffer first to tell VGA-driver that we give a shit about the old content
 			gl.glBufferData(GL2.GL_ARRAY_BUFFER, 0, null, GL2.GL_DYNAMIC_DRAW);
-			gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.remaining() * BufferUtils.FLOAT_SIZE, _vertexBuffer, GL2.GL_DYNAMIC_DRAW);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.remaining() * BufferUtils.SHORT_SIZE, _vertexBuffer, GL2.GL_DYNAMIC_DRAW);
 		}
 		
-		public abstract void updateImpl(final FloatBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped);
+		public abstract void updateImpl(final ShortBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped);
 	}
 	
 	public static final class TerrainBuilderLowDetail extends TerrainBuilder
@@ -337,15 +338,15 @@ public final class GLTerrain
 		 * @see g3deditor.jogl.GLTerrain.TerrainBuilder#updateImpl(java.nio.FloatBuffer, g3deditor.geo.GeoBlock[][], boolean)
 		 */
 		@Override
-		public final void updateImpl(final FloatBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped)
+		public final void updateImpl(final ShortBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped)
 		{
 			for (int blockY = 0, blockX; blockY < GeoEngine.GEO_REGION_SIZE; blockY++)
 			{
 				for (blockX = 0; blockX < GeoEngine.GEO_REGION_SIZE; blockX++)
 				{
-					vertexBuffer.put(blockX);
-					vertexBuffer.put(getNeighboursHeight(blocks, blockX, blockY, flipped) / 16f);
-					vertexBuffer.put(blockY);
+					vertexBuffer.put((short) blockX);
+					vertexBuffer.put((short) (getNeighboursHeight(blocks, blockX, blockY, flipped) / 16f -0.5f));
+					vertexBuffer.put((short) blockY);
 				}
 			}
 		}
@@ -416,7 +417,7 @@ public final class GLTerrain
 		 * @see g3deditor.jogl.GLTerrain.TerrainBuilder#updateImpl(java.nio.FloatBuffer, g3deditor.geo.GeoBlock[][], boolean)
 		 */
 		@Override
-		public final void updateImpl(final FloatBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped)
+		public final void updateImpl(final ShortBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped)
 		{
 			final int factor = getDetailLevel().getFactor();
 			final int cells = GeoEngine.GEO_BLOCK_SHIFT / factor;
@@ -433,9 +434,9 @@ public final class GLTerrain
 						{
 							vertexY = blockY * factor + factorY;
 							vertexBuffer.position((vertexY * xzUp + vertexX) * 3);
-							vertexBuffer.put(vertexX);
-							vertexBuffer.put(getHeight(blocks, blockX, blockY, factorX * cells, factorY * cells, cells, flipped) / 16f);
-							vertexBuffer.put(vertexY);
+							vertexBuffer.put((short) vertexX);
+							vertexBuffer.put((short) (getHeight(blocks, blockX, blockY, factorX * cells, factorY * cells, cells, flipped) / 16f - 0.5f));
+							vertexBuffer.put((short) vertexY);
 						}
 					}
 				}

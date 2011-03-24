@@ -15,6 +15,7 @@
 package g3deditor.geo.blocks;
 
 import g3deditor.geo.GeoBlock;
+import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
@@ -22,6 +23,8 @@ import g3deditor.geo.cells.GeoCellCM;
 import g3deditor.jogl.GLDisplay;
 import g3deditor.util.GeoReader;
 import g3deditor.util.GeoWriter;
+import g3deditor.util.Util;
+import g3deditor.util.Util.FastComparator;
 
 import java.util.Arrays;
 
@@ -44,6 +47,15 @@ public final class GeoBlockMultiLayer extends GeoBlock
 		
 		return new GeoBlockMultiLayer((GeoBlockMultiLayer) block);
 	}
+	
+	private static final FastComparator<GeoCell> HEIGHT_COMPARATOR = new FastComparator<GeoCell>()
+	{
+		@Override
+		public final boolean compare(final GeoCell o1, final GeoCell o2)
+		{
+			return o1.getHeight() > o2.getHeight();
+		}
+	};
 	
 	private GeoCell[][][] _cells3D;
 	private GeoCell[] _cells;
@@ -85,6 +97,7 @@ public final class GeoBlockMultiLayer extends GeoBlock
 				{
 					_cells3D[x][y][i] = new GeoCellCM(this, reader.getShort(), x, y);
 				}
+				Util.quickSort(_cells3D[x][y], HEIGHT_COMPARATOR);
 			}
 		}
 		
@@ -152,6 +165,15 @@ public final class GeoBlockMultiLayer extends GeoBlock
 		
 		copyCells(count);
 		calcMaxMinHeight();
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#updateLayerFor(g3deditor.geo.GeoCell)
+	 */
+	@Override
+	public final void updateLayerFor(final GeoCell cell)
+	{
+		Util.quickSort(_cells3D[cell.getCellX()][cell.getCellY()], HEIGHT_COMPARATOR);
 	}
 	
 	@Override
@@ -294,45 +316,44 @@ public final class GeoBlockMultiLayer extends GeoBlock
 	}
 	
 	@Override
-	public final int addLayer(final int geoX, final int geoY, final short heightAndNSWE)
+	public final GeoCell addLayer(final int geoX, final int geoY, final short heightAndNSWE)
 	{
-		/*final int cellX = GeoEngine.getCellXY(geoX);
+		final int cellX = GeoEngine.getCellXY(geoX);
 		final int cellY = GeoEngine.getCellXY(geoY);
-		final short height = GeoEngine.getHeight(heightAndNSWE);
-		int layer = nGetLayer(geoX, geoY, height);
-		final short heightAtLayer = GeoEngine.getHeight(nGetHeightAndNSWEByLayer(geoX, geoY, layer));
-		if (height > heightAtLayer)
-		{
-			if (++layer == _heights[cellX][cellY].length)
-			{
-				_heights[cellX][cellY] = ArrayUtil.arrayAdd(_heights[cellX][cellY], heightAndNSWE);
-			}
-			else
-			{
-				_heights[cellX][cellY] = ArrayUtil.arrayInsert(_heights[cellX][cellY], heightAndNSWE, layer);
-			}
-			return layer;
-		}
-		else
-		{
-			_heights[cellX][cellY] = ArrayUtil.arrayInsert(_heights[cellX][cellY], heightAndNSWE, layer);
-			return layer;
-		}*/
-		return -1;
+		final GeoCell cell = new GeoCellCM(this, heightAndNSWE, cellX, cellY);
+		final GeoCell[] layers = _cells3D[cellX][cellY];
+		_cells3D[cellX][cellY] = Util.arrayAdd(layers, cell);
+		_cells = Util.arrayAdd(_cells, cell);
+		Util.quickSort(layers, HEIGHT_COMPARATOR);
+		return cell;
 	}
 	
+	/**
+	 * @see g3deditor.geo.GeoBlock#removeCells(g3deditor.geo.GeoCell[])
+	 */
 	@Override
-	public final int removeLayer(final int geoX, final int geoY, final int layer)
+	public final int removeCells(final GeoCell... cells)
 	{
-		/*final int cellX = GeoEngine.getCellXY(geoX);
-		final int cellY = GeoEngine.getCellXY(geoY);
-		final int length = _heights[cellX][cellY].length;
-		if (layer < 0 || layer >= length || length == 1)
-			return -1;
-		
-		_heights[cellX][cellY] = ArrayUtil.arrayRemoveAtUnsafe(_heights[cellX][cellY], layer);
-		return layer;*/
-		return -1;
+		GeoCell[] layers;
+		int layer, removed = 0;
+		for (final GeoCell cell : cells)
+		{
+			layers = _cells3D[cell.getCellX()][cell.getCellY()];
+			if (layers.length == 1)
+				continue;
+			
+			layer = Util.arrayLastIndexOf(layers, cell);
+			if (layer == -1)
+				throw new RuntimeException("Smth went wrong dude: " + (cell.getBlock() == this));
+			
+			_cells3D[cell.getCellX()][cell.getCellY()] = Util.arrayRemoveAtUnsafe(layers, layer);
+			_cells = Util.arrayRemoveLast(_cells, cell);
+			GeoBlockSelector.getInstance().unselectGeoCell(cell);
+			removed++;
+		}
+		calcMaxMinHeight();
+		GLDisplay.getInstance().getRenderSelector().forceUpdateFrustum();
+		return removed;
 	}
 	
 	/**

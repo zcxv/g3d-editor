@@ -28,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.concurrent.TimeUnit;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -92,7 +91,6 @@ public final class GLDisplay implements GLEventListener
 	private final GLText _geoPositionText;
 	
 	private GLCellRenderer _renderer;
-	private boolean _vsync;
 	private GeoCell _prevPick;
 	
 	private GLU _glu;
@@ -120,12 +118,16 @@ public final class GLDisplay implements GLEventListener
 		_glInfoText = _guiRenderer.newText(10, _renderInfoText.getY() + GLGUIRenderer.TEXT_HEIGHT);
 		_geoPositionText = _guiRenderer.newText(10, _glInfoText.getY() + GLGUIRenderer.TEXT_HEIGHT);
 		_worldPositionText = _guiRenderer.newText(10, _geoPositionText.getY() + GLGUIRenderer.TEXT_HEIGHT);
-		_vsync = true;
 	}
 	
 	public final GLCanvas getCanvas()
 	{
 		return _canvas;
+	}
+	
+	public final void requestFocus()
+	{
+		getCanvas().requestFocus();
 	}
 	
 	public final GLCellRenderer getRenderer()
@@ -177,18 +179,7 @@ public final class GLDisplay implements GLEventListener
 		final GL2 gl = glautodrawable.getGL().getGL2();
 		_glu = GLU.createGLU(gl);
 		
-		gl.glEnable(GL.GL_DEPTH_TEST);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glEnable(GL.GL_CULL_FACE);
-		gl.glDisable(GL.GL_DITHER);
-		gl.glDisable(GL.GL_STENCIL_TEST);
-		gl.glDisable(GL2.GL_POLYGON_STIPPLE);
-		gl.glDisable(GL2.GL_ALPHA_TEST);
-		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
-		
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		gl.glClearDepthf(1.0f);
+		GLState.init(gl);
 		
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
@@ -196,7 +187,6 @@ public final class GLDisplay implements GLEventListener
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		
 		_guiRenderer.init(gl);
-		_renderSelector.init();
 		_terrain.init(gl);
 		_input.setEnabled(true);
 		
@@ -217,7 +207,6 @@ public final class GLDisplay implements GLEventListener
 		if (_renderer != null)
 			_renderer.dispose(gl);
 		_guiRenderer.dispose(gl);
-		_renderSelector.dispose();
 		_terrain.dispose(gl);
 	}
 	
@@ -252,11 +241,10 @@ public final class GLDisplay implements GLEventListener
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		gl.glLoadIdentity();
 		
-		if (_vsync != Config.V_SYNC)
-		{
-			_vsync = Config.V_SYNC;
-			gl.setSwapInterval(_vsync ? GL.GL_ONE : GL.GL_ZERO);
-		}
+		GLState.setBlendEnabled(gl, Config.USE_TRANSPARENCY);
+		GLState.setBlendFunc(gl, GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+		GLState.setVSyncEnabled(gl, Config.V_SYNC);
+		GLState.setDepthTestEnabled(gl, true);
 		
 		_input.update(gl, tpf);
 		_camera.checkPositionOrRotationChanged();
@@ -305,6 +293,41 @@ public final class GLDisplay implements GLEventListener
 				_renderer.render(gl, selector);
 			}
 			
+			if (Config.DRAW_OUTLINE)
+			{
+				gl.glPolygonMode(GL2.GL_BACK, GL2.GL_LINE);
+				gl.glCullFace(GL2.GL_FRONT);
+				gl.glDepthFunc(GL2.GL_LEQUAL);
+				GLState.glColor4f(gl, GLColor.BLACK);
+				GLState.lockColor(true);
+				
+				GeoBlock block;
+				float dx, dy, dz, distSq;
+				for (int i = _renderSelector.getElementsToRender(); i-- > 0;)
+				{
+					block = _renderSelector.getElementToRender(i).getGeoBlock();
+					dx = (block.getGeoX() + 4) - _camera.getX();
+					dy = (block.getMinHeight() + ((block.getMaxHeight() - block.getMinHeight()) / 2)) / 16f - _camera.getY();
+					dz = (block.getGeoY() + 4) - _camera.getZ();
+					distSq =  dx * dx + dy * dy + dz * dz;
+					if (distSq > 4096)
+						gl.glLineWidth(1f);
+					else if (distSq > 1024)
+						gl.glLineWidth(2f);
+					else
+						gl.glLineWidth(3f);
+					
+					selector = _renderSelector.getElementToRender(i);
+					_elementsFPS += selector.getElementsToRender();
+					_renderer.render(gl, selector);
+				}
+				GLState.lockColor(false);
+				gl.glDepthFunc(GL2.GL_LESS);
+				gl.glCullFace(GL2.GL_BACK);
+				gl.glPolygonMode(GL2.GL_BACK, GL2.GL_FILL);
+				gl.glLineWidth(1);
+			}
+			
 			_renderer.disableRender(gl);
 		}
 		
@@ -317,7 +340,7 @@ public final class GLDisplay implements GLEventListener
 				final MouseWheelEvent scrollevent = (MouseWheelEvent) event;
 				if (event.isControlDown())
 				{
-					final short addHeight = (short) (scrollevent.getWheelRotation() * -8);
+					final short addHeight = (short) (scrollevent.getWheelRotation() * (_input.getKeySpace() ? -32 : -8));
 					final GeoBlockSelector selector = GeoBlockSelector.getInstance();
 					FastArrayList<GeoCell> cells;
 					for (GeoBlockEntry entry = selector.getHead(), tail = selector.getTail(); (entry = entry.getNext()) != tail;)
@@ -332,7 +355,7 @@ public final class GLDisplay implements GLEventListener
 				}
 				else
 				{
-					_selectionBox.addHeight(scrollevent.getWheelRotation() * -8);
+					_selectionBox.addHeight(scrollevent.getWheelRotation() * (_input.getKeySpace() ? -32 : -8));
 				}
 			}
 			else
@@ -358,10 +381,8 @@ public final class GLDisplay implements GLEventListener
 		}
 		mouseEvents.clear();
 		
-		_selectionBox.render(gl, _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY()));
+		_selectionBox.render(gl, _input.getMouseButton3() ? null : _camera.pick(gl, _glu, _input.getMouseX(), _input.getMouseY()));
 		_guiRenderer.render(gl);
-		
-		gl.glFlush();
 	}
 	/**
 	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable, int, int, int, int)

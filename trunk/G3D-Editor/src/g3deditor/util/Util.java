@@ -20,6 +20,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Comparator;
 
 import javax.imageio.ImageIO;
@@ -36,14 +38,60 @@ public final class Util
 		public boolean compare(final T o1, final T o2);
 	}
 	
-	public static final int arrayIndexOf(final Object[] array, final Object value)
+	public static final <T> int arrayFirstIndexOf(final T[] array, final T value)
 	{
-		for (int i = array.length; i-- > 0;)
+		for (int i = 0; i < array.length; i++)
 		{
-			if (array[i] == value)
+			if (value == array[i])
 				return i;
 		}
 		return -1;
+	}
+	
+	public static final <T> int arrayLastIndexOf(final T[] array, final T value)
+	{
+		for (int i = array.length; i-- > 0;)
+		{
+			if (value == array[i])
+				return i;
+		}
+		return -1;
+	}
+	
+	public static final <T> T[] arrayAdd(T[] array, final T value)
+	{
+		final int size = array.length;
+		array = Arrays.copyOf(array, size + 1);
+		array[size] = value;
+		return array;
+	}
+	
+	public static final <T> T[] arrayRemoveFirst(final T[] array, final T value)
+	{
+		final int index = arrayFirstIndexOf(array, value);
+		if (index != -1)
+			return arrayRemoveAtUnsafe(array, index);
+		
+		return array;
+	}
+	
+	public static final <T> T[] arrayRemoveLast(final T[] array, final T value)
+	{
+		final int index = arrayLastIndexOf(array, value);
+		if (index != -1)
+			return arrayRemoveAtUnsafe(array, index);
+		
+		return array;
+	}
+	
+	public static final <T> T[] arrayRemoveAtUnsafe(final T[] array, final int index)
+	{
+		@SuppressWarnings("unchecked")
+		final T[] newArray = (array.getClass() == Object[].class) ? (T[]) new Object[array.length - 1] : (T[]) Array.newInstance(array.getClass().getComponentType(), array.length - 1);
+		if (index != 0)
+			System.arraycopy(array, 0, newArray, 0, index);
+		System.arraycopy(array, index + 1, newArray, index, newArray.length - index);
+		return newArray;
 	}
 	
 	public static final <T> void quickSort(final T[] values, final FastComparator<T> comparator)
@@ -53,9 +101,12 @@ public final class Util
 	
 	public static final <T> void quickSort(final T[] values, final int length, final FastComparator<T> comparator)
 	{
-		final int high = length - 1;
-		quickSortImpl(values, 0, high, comparator);
-		insertionSort(values, 0, high, comparator);
+		if (length > 1)
+		{
+			final int high = length - 1;
+			quickSortImpl(values, 0, high, comparator);
+			insertionSort(values, 0, high, comparator);
+		}
 	}
 	
 	private static final <T> void quickSortImpl(final T[] values, final int low, final int high, final FastComparator<T> comparator)

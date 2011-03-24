@@ -18,6 +18,7 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoBlockSelector.GeoBlockEntry;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
+import g3deditor.jogl.GLDisplay;
 import g3deditor.swing.defaults.DefaultToggleButton;
 import g3deditor.util.FastArrayList;
 import g3deditor.util.Util;
@@ -115,6 +116,8 @@ public final class PanelNswe extends JPanel implements ActionListener
 				cells.getUnsafe(i).setNswe(nsweButton.getNswe());
 			}
 		}
+		
+		GLDisplay.getInstance().requestFocus();
 	}
 	
 	private static final class NsweButton extends DefaultToggleButton

@@ -12,50 +12,39 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package g3deditor.entity;
+package g3deditor.swing.defaults;
 
-import java.awt.Color;
+import javax.swing.JComboBox;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class CellColor
+@SuppressWarnings("serial")
+public class DefaultComboBox extends JComboBox
 {
-	private static final float intToFloat(final int rgb)
+	public DefaultComboBox()
 	{
-		return Math.max(Math.min(rgb / 255f, 1f), 0f);
+		
 	}
 	
-	private final float _r;
-	private final float _g;
-	private final float _b;
-	
-	public CellColor(final Color color)
+	public DefaultComboBox(final Object[] items)
 	{
-		this(intToFloat(color.getRed()), intToFloat(color.getGreen()), intToFloat(color.getBlue()));
+		super(items);
 	}
 	
-	public CellColor(final float r, final float g, final float b)
+	@Override
+	public final void setEnabled(final boolean enabled)
 	{
-		_r = r;
-		_g = g;
-		_b = b;
+		if (isEnabled() != enabled)
+			super.setEnabled(enabled);
 	}
 	
-	public final float getR()
+	@Override
+	public final void setVisible(final boolean visible)
 	{
-		return _r;
-	}
-	
-	public final float getG()
-	{
-		return _g;
-	}
-	
-	public final float getB()
-	{
-		return _b;
+		if (isVisible() != visible)
+			super.setVisible(visible);
 	}
 }

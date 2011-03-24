@@ -147,6 +147,11 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 		return _keyFToggle;
 	}
 	
+	public final boolean getKeySpace()
+	{
+		return _keySpace;
+	}
+	
 	public final int getMouseX()
 	{
 		return _mouseX;
@@ -224,9 +229,13 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	public final void mouseClicked(final MouseEvent mouseevent)
 	{
 		if ((mouseevent.getModifiers() & MouseEvent.BUTTON1_MASK) != 0)
+		{
 			_mouseEvents.addLast(mouseevent);
+		}
 		else if ((mouseevent.getModifiers() & MouseEvent.BUTTON2_MASK) != 0)
+		{
 			GLDisplay.getInstance().getSelectionBox().toggleInfHeight();
+		}
 	}
 	
 	/**

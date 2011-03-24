@@ -123,9 +123,9 @@ public abstract class GeoBlock implements Cloneable
 	
 	public abstract int getMaxLayerCount();
 	
-	public abstract int addLayer(final int geoX, final int geoY, final short heightAndNSWE);
+	public abstract GeoCell addLayer(final int geoX, final int geoY, final short heightAndNSWE);
 	
-	public abstract int removeLayer(final int geoX, final int geoY, final int layer);
+	public abstract int removeCells(final GeoCell... cells);
 	
 	public abstract void writeTo(final GeoWriter writer, final boolean l2j);
 	
@@ -140,6 +140,8 @@ public abstract class GeoBlock implements Cloneable
 	public abstract short getMaxHeight();
 	
 	public abstract void updateMinMaxHeight(final short height, final short oldHeight);
+	
+	public abstract void updateLayerFor(final GeoCell cell);
 	
 	public abstract void unload();
 }

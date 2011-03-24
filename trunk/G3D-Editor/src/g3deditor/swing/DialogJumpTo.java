@@ -433,6 +433,8 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 		}
 		
 		super.setVisible(visible);
+		if (!visible)
+			GLDisplay.getInstance().requestFocus();
 	}
 	
 	@Override
@@ -512,7 +514,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 				}
 				
 				if (GeoEngine.getInstance().getActiveRegion() != null)
-					GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+					GLDisplay.getInstance().getCamera().setXYZ(geoX, worldZ != Integer.MIN_VALUE ? worldZ / 16f : GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
 			}
 			catch (final Exception e1)
 			{
@@ -765,6 +767,7 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 					
 					_fieldWorldX.setText(String.valueOf(worldX));
 					_fieldWorldY.setText(String.valueOf(worldY));
+					_fieldWorldZ.setText("");
 					_fieldRegionX.setText(String.valueOf(regionX + 10));
 					_fieldRegionY.setText(String.valueOf(regionY + 10));
 					_fieldGeoX.setText(String.valueOf(geoX));

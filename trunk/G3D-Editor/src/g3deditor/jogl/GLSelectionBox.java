@@ -15,7 +15,7 @@
 package g3deditor.jogl;
 
 import g3deditor.geo.GeoCell;
-import g3deditor.geo.blocks.GeoBlockMultiLayer;
+import g3deditor.geo.GeoEngine;
 import g3deditor.util.FastArrayList;
 
 import javax.media.opengl.GL2;
@@ -114,7 +114,7 @@ public final class GLSelectionBox
 	
 	public final void render(final GL2 gl, final GeoCell cell)
 	{
-		if (cell == null || !(cell.getBlock() instanceof GeoBlockMultiLayer))
+		if (cell == null || cell.getBlock().getType() != GeoEngine.GEO_BLOCK_TYPE_MULTILAYER)
 		{
 			_geoX = Integer.MIN_VALUE;
 			return;
@@ -126,7 +126,7 @@ public final class GLSelectionBox
 		_geoZ = cell.getHeight();
 		
 		gl.glPushMatrix();
-		gl.glColor4f(1f, 1f, 1f, 1f);
+		GLState.glColor4f(gl, GLColor.WHITE);
 		gl.glTranslatef(_geoX, _geoZ / 16f, _geoY);
 		
 		gl.glBegin(GL2.GL_LINE_LOOP);
