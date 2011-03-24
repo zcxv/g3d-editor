@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="G3DEditor" default="dist-deflate" basedir=".">
+<project name="G3DEditor Windows x64" default="dist-deflate" basedir=".">
 	<property name="main" location="g3deditor.Main" />
 	<property name="src" location="src" />
 	<property name="dist" location="dist" />
-	<property name="lib" location="lib" />
+	<property name="lib" location="lib_win_x64" />
 	<property name="data" location="data" />
-	<property name="build" location="build" />
+	<property name="build" location="build/win_x64" />
 	<property name="build.classes" location="${build}/classes" />
 	<property name="build.geo" location="${build}/g3deditor" />
 	<property name="build.geo.lib" location="${build.geo}/lib" />
@@ -63,6 +63,9 @@
 	</target>
 
 	<target name="dist-deflate" depends="dist">
-		<zip destfile="${build}/G3DEditor.zip" basedir="${build.geo}" update="true" compress="false" />
+		<tstamp>
+			<format property="TODAY" pattern="yyyyMMdd" />
+		</tstamp>
+		<zip destfile="${build}/G3DEditor_win_x64_${TODAY}.zip" basedir="${build.geo}" update="true" compress="false" />
 	</target>
 </project>
