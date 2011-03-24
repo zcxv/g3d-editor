@@ -2,19 +2,19 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/gluegen-rt.jar">
+	<classpathentry kind="lib" path="lib_win_x64/gluegen-rt.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib_win_x64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jogl.all.jar">
+	<classpathentry kind="lib" path="lib_win_x64/jogl.all.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib_win_x64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/nativewindow.all.jar">
+	<classpathentry kind="lib" path="lib_win_x64/nativewindow.all.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="G3DEditor/lib_win_x64"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
