@@ -14,15 +14,18 @@
  */
 package g3deditor.jogl.renderer;
 
+import g3deditor.Config;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
+import g3deditor.jogl.GLState;
 import g3deditor.util.BufferUtils;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 /**
@@ -35,7 +38,7 @@ public final class VBORenderer extends GLCellRenderer
 	public static final String NAME = "VertexBufferObject";
 	public static final String NAME_SHORT = "VBO";
 	
-	private static final short[] GEOMETRY_INDICES_DATA =
+	private static final byte[] GEOMETRY_INDICES_DATA =
 	{
 		0, 1, 2, 2, 3, 0,
 		1, 5, 6, 6, 2, 1,
@@ -46,7 +49,8 @@ public final class VBORenderer extends GLCellRenderer
 	};
 	
 	private static final int GEOMETRY_INDICES_DATA_LENGTH = GEOMETRY_INDICES_DATA.length;
-	private static final int GEOMETRY_INDICES_DATA_MAX = 12;
+	private static final int GEOMETRY_INDICES_DATA_MAX_INDEX = 11;
+	private static final int GEOMETRY_INDICES_DATA_MAX = GEOMETRY_INDICES_DATA_MAX_INDEX + 1;
 	
 	private static final float[] GEOMETRY_VERTEX_DATA_SMALL =
 	{
@@ -91,7 +95,7 @@ public final class VBORenderer extends GLCellRenderer
 	
 	private static final int GEOMETRY_TEXTURE_DATA_LENGTH = GEOMETRY_TEXTURE_DATA.length;
 	
-	private ShortBuffer _indexBuffer;
+	private ByteBuffer _indexBuffer;
 	private FloatBuffer _vertexBuffer;
 	private FloatBuffer _textureBuffer;
 	
@@ -124,7 +128,7 @@ public final class VBORenderer extends GLCellRenderer
 	public final void init(final GL2 gl)
 	{
 		super.init(gl);
-		_indexBuffer = BufferUtils.createShortBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
+		_indexBuffer = BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
 		_vertexBuffer = BufferUtils.createFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * NSWE_COMBINATIONS + GEOMETRY_VERTEX_DATA_SMALL_LENGTH);
 		_textureBuffer = BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_TEXTURE_DATA_LENGTH);
 		
@@ -136,7 +140,7 @@ public final class VBORenderer extends GLCellRenderer
 		{
 			for (j = 0; j < GEOMETRY_INDICES_DATA_LENGTH; j++)
 			{
-				_indexBuffer.put((short) (GEOMETRY_INDICES_DATA[j] + GEOMETRY_INDICES_DATA_MAX * i + GEOMETRY_INDICES_DATA_MAX));
+				_indexBuffer.put((byte) (GEOMETRY_INDICES_DATA[j] + GEOMETRY_INDICES_DATA_MAX * i + GEOMETRY_INDICES_DATA_MAX));
 			}
 			
 			_vertexBuffer.put(GEOMETRY_VERTEX_DATA_SMALL);
@@ -153,7 +157,7 @@ public final class VBORenderer extends GLCellRenderer
 		_vboTexture = temp[2];
 		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
-		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, _indexBuffer.limit() * BufferUtils.SHORT_SIZE, _indexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, _indexBuffer.limit() * BufferUtils.BYTE_SIZE, _indexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
 		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.limit() * BufferUtils.FLOAT_SIZE, _vertexBuffer, GL2.GL_STATIC_DRAW);
@@ -187,19 +191,41 @@ public final class VBORenderer extends GLCellRenderer
 	public final void render(final GL2 gl, final GLSubRenderSelector selector)
 	{
 		GeoCell cell;
-		for (int i = selector.getElementsToRender(); i-- > 0;)
+		if (Config.VBO_DRAW_RANGE)
 		{
-			cell = selector.getElementToRender(i);
-			setColor(gl, cell.getSelectionState().getColor(cell));
-			translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-			
-			if (cell.isBig())
+			for (int i = selector.getElementsToRender(), indexOffset; i-- > 0;)
 			{
-				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, 0);
+				cell = selector.getElementToRender(i);
+				GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+				GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+				
+				if (cell.isBig())
+				{
+					gl.glDrawRangeElements(GL2.GL_TRIANGLES, 0, GEOMETRY_INDICES_DATA_MAX_INDEX, GEOMETRY_INDICES_DATA_LENGTH, GL.GL_UNSIGNED_BYTE, 0);
+				}
+				else
+				{
+					indexOffset = (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH);
+					gl.glDrawRangeElements(GL2.GL_TRIANGLES, indexOffset, indexOffset + GEOMETRY_INDICES_DATA_MAX_INDEX, GEOMETRY_INDICES_DATA_LENGTH, GL.GL_UNSIGNED_BYTE, indexOffset);
+				}
 			}
-			else
+		}
+		else
+		{
+			for (int i = selector.getElementsToRender(); i-- > 0;)
 			{
-				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_SHORT, (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH) * BufferUtils.SHORT_SIZE);
+				cell = selector.getElementToRender(i);
+				GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+				GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+				
+				if (cell.isBig())
+				{
+					gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, 0);
+				}
+				else
+				{
+					gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH);
+				}
 			}
 		}
 	}

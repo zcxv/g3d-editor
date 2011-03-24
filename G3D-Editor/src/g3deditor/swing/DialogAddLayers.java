@@ -14,12 +14,17 @@
  */
 package g3deditor.swing;
 
+import g3deditor.geo.GeoBlock;
+import g3deditor.geo.GeoBlockSelector;
+import g3deditor.geo.GeoBlockSelector.GeoBlockEntry;
+import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
-import g3deditor.geo.GeoRegion;
+import g3deditor.jogl.GLDisplay;
 import g3deditor.swing.defaults.DefaultButton;
 import g3deditor.swing.defaults.DefaultCheckBox;
 import g3deditor.swing.defaults.DefaultLabel;
 import g3deditor.swing.defaults.DefaultTextField;
+import g3deditor.util.FastArrayList;
 
 import java.awt.Color;
 import java.awt.Frame;
@@ -29,19 +34,9 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -55,7 +50,9 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 {
 	private final JPanel _panelChecks;
 	private final DefaultCheckBox _checkAddToFullBlock;
+	private final DefaultCheckBox _checkAddIfHeightAlreadyExist;
 	private final DefaultCheckBox _checkAutoSelectAdded;
+	private final DefaultCheckBox _checkAutoSelectAppend;
 	
 	private final DefaultLabel _labelHeight;
 	private final DefaultTextField _fieldHeight;
@@ -66,13 +63,13 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 	
 	public DialogAddLayers(final Frame owner)
 	{
-		super(owner, "Add Layers", true);
+		super(owner, "Add Layer(s)", true);
 		
 		_panelChecks = new JPanel();
 		_checkAddToFullBlock = new DefaultCheckBox("Apply to full block");
-		_checkAddToFullBlock.addActionListener(this);
-		_checkAutoSelectAdded = new DefaultCheckBox("Selected added cells");
-		_checkAutoSelectAdded.addActionListener(this);
+		_checkAddIfHeightAlreadyExist = new DefaultCheckBox("Add if already exist");
+		_checkAutoSelectAdded = new DefaultCheckBox("Selecte added cells");
+		_checkAutoSelectAppend = new DefaultCheckBox("Append to selection");
 		
 		_labelHeight = new DefaultLabel("Height:");
 		_fieldHeight = new DefaultTextField();
@@ -81,6 +78,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 		_panelButtons = new JPanel();
 		_buttonOk = new DefaultButton("Ok");
 		_buttonOk.addActionListener(this);
+		_buttonOk.setEnabled(false);
 		_buttonCancel = new DefaultButton("Cancel");
 		_buttonCancel.addActionListener(this);
 		
@@ -88,9 +86,11 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 		gbc.insets = new Insets(2, 2, 2, 2);
 		gbc.fill = GridBagConstraints.BOTH;
 		
-		_panelChecks.setLayout(new GridLayout(2, 1));
+		_panelChecks.setLayout(new GridLayout(4, 1));
 		_panelChecks.add(_checkAddToFullBlock);
+		_panelChecks.add(_checkAddIfHeightAlreadyExist);
 		_panelChecks.add(_checkAutoSelectAdded);
+		_panelChecks.add(_checkAutoSelectAppend);
 		
 		_panelButtons.setLayout(new GridLayout(1, 2));
 		_panelButtons.add(_buttonOk);
@@ -150,7 +150,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 		
 		super.setVisible(visible);
 		if (!visible)
-			dispose();
+			GLDisplay.getInstance().requestFocus();
 	}
 	
 	@Override
@@ -158,7 +158,106 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 	{
 		if (e.getSource() == _buttonOk)
 		{
+			final short heightAndNSWE;
 			
+			try
+			{
+				final int height = Integer.parseInt(_fieldHeight.getText());
+				if (height < GeoEngine.HEIGHT_MIN_VALUE || height > GeoEngine.HEIGHT_MAX_VALUE)
+					throw new NumberFormatException();
+				
+				heightAndNSWE = GeoEngine.convertHeightToHeightAndNSWEALL((short) height);
+			}
+			catch (final NumberFormatException e1)
+			{
+				return;
+			}
+			
+			final GeoBlockSelector selector = GeoBlockSelector.getInstance();
+			if (!selector.hasSelected())
+				return;
+			
+			final FastArrayList<GeoCell> added = new FastArrayList<GeoCell>();
+			
+			GeoBlock block;
+			GeoCell temp;
+			FastArrayList<GeoCell> selected;
+			for (GeoBlockEntry entry = selector.getHead(); (entry = entry.getNext()) != selector.getTail();)
+			{
+				block = entry.getKey();
+				if (block.getType() == GeoEngine.GEO_BLOCK_TYPE_MULTILAYER)
+				{
+					if (_checkAddToFullBlock.isSelected())
+					{
+						for (int cellX = GeoEngine.GEO_BLOCK_SHIFT, cellY; cellX-- > 0;)
+						{
+							for (cellY = GeoEngine.GEO_BLOCK_SHIFT; cellY-- > 0;)
+							{
+								if (!_checkAddIfHeightAlreadyExist.isSelected())
+								{
+									temp = block.nGetCell(cellX, cellY, GeoEngine.getHeight(heightAndNSWE));
+									if (temp.getHeightAndNSWE() == heightAndNSWE)
+										continue;
+								}
+									
+								temp = block.addLayer(cellX, cellY, heightAndNSWE);
+								if (temp != null)
+									added.addLast(temp);
+							}
+						}
+					}
+					else
+					{
+						GeoCell temp2;
+						boolean contains;
+						selected = entry.getValue();
+						for (int i = selected.size(), j; i-- > 0;)
+						{
+							temp = selected.getUnsafe(i);
+							contains = false;
+							for (j = added.size(); j-- > 0;)
+							{
+								temp2 = added.getUnsafe(i);
+								if (temp2.getCellX() == temp.getCellX() && temp2.getCellY() == temp.getCellY())
+								{
+									contains = true;
+									break;
+								}
+							}
+							if (!contains)
+							{
+								if (!_checkAddIfHeightAlreadyExist.isSelected())
+								{
+									temp = block.nGetCell(temp.getCellX(), temp.getCellY(), GeoEngine.getHeight(heightAndNSWE));
+									if (temp.getHeightAndNSWE() == heightAndNSWE)
+										continue;
+								}
+								
+								temp = block.addLayer(temp.getCellX(), temp.getCellY(), heightAndNSWE);
+								if (temp != null)
+								{
+									added.addLast(temp);
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			if (!added.isEmpty())
+			{
+				if (!_checkAutoSelectAppend.isSelected())
+					selector.unselectAll();
+				
+				for (int i = added.size(); i-- > 0;)
+				{
+					temp = added.getUnsafe(i);
+					selector.selectGeoCell(temp, false, true);
+				}
+				GLDisplay.getInstance().getRenderSelector().forceUpdateFrustum();
+			}
+			
+			setVisible(false);
 		}
 		else if (e.getSource() == _buttonCancel)
 		{

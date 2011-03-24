@@ -112,15 +112,18 @@ public final class GeoBlockFlat extends GeoBlock
 	}
 	
 	@Override
-	public final int addLayer(final int geoX, final int geoY, final short heightAndNSWE)
+	public final GeoCell addLayer(final int geoX, final int geoY, final short heightAndNSWE)
 	{
-		return -1;
+		return null;
 	}
 	
+	/**
+	 * @see g3deditor.geo.GeoBlock#removeCells(g3deditor.geo.GeoCell[])
+	 */
 	@Override
-	public final int removeLayer(final int geoX, final int geoY, final int layer)
+	public final int removeCells(final GeoCell... cells)
 	{
-		return -1;
+		return 0;
 	}
 	
 	/**
@@ -187,5 +190,14 @@ public final class GeoBlockFlat extends GeoBlock
 			return false;
 		
 		return true;
+	}
+	
+	/**
+	 * @see g3deditor.geo.GeoBlock#updateLayerFor(g3deditor.geo.GeoCell)
+	 */
+	@Override
+	public final void updateLayerFor(final GeoCell cell)
+	{
+		
 	}
 }

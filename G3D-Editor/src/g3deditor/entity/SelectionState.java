@@ -14,14 +14,14 @@
  */
 package g3deditor.entity;
 
-import java.awt.Color;
-
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
-import g3deditor.geo.blocks.GeoBlockComplex;
-import g3deditor.geo.blocks.GeoBlockFlat;
+import g3deditor.geo.GeoEngine;
+import g3deditor.jogl.GLColor;
 import g3deditor.jogl.GLDisplay;
 import g3deditor.swing.FrameMain;
+
+import java.awt.Color;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -30,32 +30,34 @@ import g3deditor.swing.FrameMain;
  */
 public enum SelectionState
 {
-	NORMAL		(new CellColor(Color.BLUE), new CellColor(Color.GREEN), new CellColor(Color.RED)),
-	HIGHLIGHTED	(new CellColor(Color.CYAN), new CellColor(Color.CYAN), new CellColor(Color.CYAN)),
-	SELECTED	(new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA), new CellColor(Color.MAGENTA));
+	NORMAL		(Color.BLUE, Color.GREEN, Color.RED),
+	HIGHLIGHTED	(Color.CYAN, Color.CYAN, Color.CYAN),
+	SELECTED	(Color.MAGENTA, Color.MAGENTA, Color.MAGENTA);
 	
-	private final CellColor _colorGuiSelected;
-	private final CellColor _colorFlat;
-	private final CellColor _colorComplex1;
-	private final CellColor _colorComplex2;
-	private final CellColor _colorMutliLayer1a;
-	private final CellColor _colorMutliLayer2a;
-	private final CellColor _colorMutliLayer1b;
-	private final CellColor _colorMutliLayer2b;
+	public static final float ALPHA = 0.7f;
 	
-	private SelectionState(final CellColor colorFlat, final CellColor colorComplex, final CellColor colorMutliLayer)
+	private final GLColor _colorGuiSelected;
+	private final GLColor _colorFlat;
+	private final GLColor _colorComplex1;
+	private final GLColor _colorComplex2;
+	private final GLColor _colorMutliLayer1a;
+	private final GLColor _colorMutliLayer2a;
+	private final GLColor _colorMutliLayer1b;
+	private final GLColor _colorMutliLayer2b;
+	
+	private SelectionState(final Color colorFlat, final Color colorComplex, final Color colorMutliLayer)
 	{
-		_colorGuiSelected = new CellColor(Color.YELLOW);
-		_colorFlat = colorFlat;
-		_colorComplex1 = colorComplex;
-		_colorComplex2 = new CellColor(colorComplex.getR() * 0.85f, colorComplex.getG() * 0.85f, colorComplex.getB() * 0.85f);
-		_colorMutliLayer1a = colorMutliLayer;
-		_colorMutliLayer2a = new CellColor(colorMutliLayer.getR() * 0.85f, colorMutliLayer.getG() * 0.85f, colorMutliLayer.getB() * 0.85f);
-		_colorMutliLayer1b = new CellColor(Math.min(_colorMutliLayer1a.getR() + 0.5f, 1f), Math.min(_colorMutliLayer1a.getG() + 0.5f, 1f), Math.min(_colorMutliLayer1a.getB() + 0.5f, 1f));
-		_colorMutliLayer2b = new CellColor(Math.min(_colorMutliLayer2a.getR() + 0.5f, 1f), Math.min(_colorMutliLayer2a.getG() + 0.5f, 1f), Math.min(_colorMutliLayer2a.getB() + 0.5f, 1f));
+		_colorGuiSelected = new GLColor(Color.YELLOW, ALPHA);
+		_colorFlat = new GLColor(colorFlat, ALPHA);
+		_colorComplex1 = new GLColor(colorComplex, ALPHA);
+		_colorComplex2 = new GLColor(_colorComplex1, 0.85f, 0.85f, 0.85f);
+		_colorMutliLayer1a = new GLColor(colorMutliLayer, ALPHA);
+		_colorMutliLayer2a = new GLColor(_colorMutliLayer1a, 0.85f, 0.85f, 0.85f);
+		_colorMutliLayer1b = new GLColor(_colorMutliLayer1a.getR() + 0.5f, _colorMutliLayer1a.getG() + 0.5f, _colorMutliLayer1a.getB() + 0.5f, ALPHA);
+		_colorMutliLayer2b = new GLColor(_colorMutliLayer2a.getR() + 0.5f,_colorMutliLayer2a.getG() + 0.5f, _colorMutliLayer2a.getB() + 0.5f, ALPHA);
 	}
 	
-	public final CellColor getColor(final GeoCell cell)
+	public final GLColor getColor(final GeoCell cell)
 	{
 		if (FrameMain.getInstance().isSelectedGeoCell(cell))
 			return _colorGuiSelected;
@@ -63,17 +65,23 @@ public enum SelectionState
 		return getColor(cell.getBlock(), GLDisplay.getInstance().getSelectionBox().isInside(cell));
 	}
 	
-	public final CellColor getColor(final GeoBlock block, final boolean insideSelectionBox)
+	public final GLColor getColor(final GeoBlock block, final boolean insideSelectionBox)
 	{
-		if (block instanceof GeoBlockFlat)
-			return _colorFlat;
-		
-		if (block instanceof GeoBlockComplex)
-			return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorComplex2 : _colorComplex1;
-		
-		if (insideSelectionBox)
-			return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2b : _colorMutliLayer1b;
-		
-		return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2a : _colorMutliLayer1a;
+		switch (block.getType())
+		{
+			case GeoEngine.GEO_BLOCK_TYPE_FLAT:
+				return _colorFlat;
+				
+			case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
+				return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorComplex2 : _colorComplex1;
+				
+			default:
+			{
+				if (insideSelectionBox)
+					return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2b : _colorMutliLayer1b;
+				
+				return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2a : _colorMutliLayer1a;
+			}
+		}
 	}
 }

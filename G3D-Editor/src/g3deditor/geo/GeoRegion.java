@@ -277,6 +277,13 @@ public final class GeoRegion
 		return _geoBlocks[blockX][blockY].nGetLayerCount(geoX, geoY);
 	}
 	
+	public final GeoCell addLayer(final int geoX, final int geoY, final short heightAndNSWE)
+	{
+		final int blockX = GeoEngine.getBlockXY(geoX);
+		final int blockY = GeoEngine.getBlockXY(geoY);
+		return _geoBlocks[blockX][blockY].addLayer(geoX, geoY, heightAndNSWE);
+	}
+	
 	public final void saveTo(final OutputStream os, final boolean l2j, final DialogSave observ) throws IOException
 	{
 		if (!l2j)

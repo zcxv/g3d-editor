@@ -338,7 +338,10 @@ public final class GeoEngine
 	{
 		final GeoRegion region = _activeRegion;
 		if (region != null)
+		{
+			GeoBlockSelector.getInstance().unload();
 			region.unload();
+		}
 		
 		_activeRegion = null;
 	}
@@ -365,7 +368,6 @@ public final class GeoEngine
 				}
 			}
 			
-			GeoBlockSelector.getInstance().unload();
 			_activeRegion = new GeoRegion(regionX, regionY, reader, l2j, file);
 		}
 		catch (final Exception e)

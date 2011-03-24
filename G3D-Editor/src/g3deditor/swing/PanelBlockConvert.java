@@ -18,6 +18,7 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
+import g3deditor.jogl.GLDisplay;
 import g3deditor.swing.defaults.DefaultButton;
 
 import java.awt.GridBagConstraints;
@@ -150,7 +151,7 @@ public final class PanelBlockConvert extends JPanel implements ActionListener
 			final int notEqualCount = GeoBlockSelector.getInstance().getSelectedTypesNotEqual(GeoEngine.GEO_BLOCK_TYPE_FLAT);
 			if (notEqualCount > 0)
 			{
-				if (JOptionPane.showConfirmDialog(this, "Do you really want to convert the selected " + notEqualCount + " blocks to Flat?", "Convert to Flat", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				if (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Do you really want to convert the selected " + notEqualCount + " blocks to Flat?", "Convert to Flat", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 					GeoBlockSelector.getInstance().convertSelectedToType(GeoEngine.GEO_BLOCK_TYPE_FLAT);
 			}
 		}
@@ -159,7 +160,7 @@ public final class PanelBlockConvert extends JPanel implements ActionListener
 			final int notEqualCount = GeoBlockSelector.getInstance().getSelectedTypesNotEqual(GeoEngine.GEO_BLOCK_TYPE_COMPLEX);
 			if (notEqualCount > 0)
 			{
-				if (JOptionPane.showConfirmDialog(this, "Do you really want to convert the selected " + notEqualCount + " blocks to Complex?", "Convert to Complex", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				if (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Do you really want to convert the selected " + notEqualCount + " blocks to Complex?", "Convert to Complex", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 					GeoBlockSelector.getInstance().convertSelectedToType(GeoEngine.GEO_BLOCK_TYPE_COMPLEX);
 			}
 		}
@@ -168,7 +169,7 @@ public final class PanelBlockConvert extends JPanel implements ActionListener
 			final int notEqualCount = GeoBlockSelector.getInstance().getSelectedTypesNotEqual(GeoEngine.GEO_BLOCK_TYPE_MULTILAYER);
 			if (notEqualCount > 0)
 			{
-				if (JOptionPane.showConfirmDialog(this, "Do you really want to convert the selected " + notEqualCount + " blocks to MultiLayer?", "Convert to MultiLayer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				if (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Do you really want to convert the selected " + notEqualCount + " blocks to MultiLayer?", "Convert to MultiLayer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 					GeoBlockSelector.getInstance().convertSelectedToType(GeoEngine.GEO_BLOCK_TYPE_MULTILAYER);
 			}
 		}
@@ -177,9 +178,11 @@ public final class PanelBlockConvert extends JPanel implements ActionListener
 			final int notEqualCount = GeoBlockSelector.getInstance().getSelectedDataNotEqualCount();
 			if (notEqualCount > 0)
 			{
-				if (JOptionPane.showConfirmDialog(this, "Do you really want to restore the selected " + notEqualCount + " blocks?", "Restore from Base", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+				if (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Do you really want to restore the selected " + notEqualCount + " blocks?", "Restore from Base", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
 					GeoBlockSelector.getInstance().restoreSelectedData();
 			}
 		}
+		
+		GLDisplay.getInstance().requestFocus();
 	}
 }

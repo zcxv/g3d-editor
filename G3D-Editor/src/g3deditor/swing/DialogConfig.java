@@ -3,7 +3,9 @@ package g3deditor.swing;
 import g3deditor.Config;
 import g3deditor.jogl.GLCellRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
+import g3deditor.jogl.GLDisplay;
 import g3deditor.jogl.renderer.DLLoDRenderer;
+import g3deditor.jogl.renderer.VBORenderer;
 import g3deditor.swing.defaults.DefaultButton;
 import g3deditor.swing.defaults.DefaultLabel;
 import g3deditor.swing.defaults.DefaultTextField;
@@ -54,8 +56,13 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	private final JComboBox _comboLookAndFeel;
 	
 	private final JPanel _panelEditor;
+	private final JPanel _panelCheckButtons;
 	private final JCheckBox _checkTerrainDefaultOn;
 	private final JCheckBox _checkVSync;
+	private final JCheckBox _checkTransparency;
+	private final JCheckBox _checkMultiThreading;
+	private final JCheckBox _checkDrawOutline;
+	private final JCheckBox _checkVBODrawRange;
 	
 	private final DefaultLabel _labelCellRenderer;
 	private final JComboBox _comboCellRenderer;
@@ -90,14 +97,17 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelMisc.setBorder(BorderFactory.createTitledBorder("Misc"));
 		_labelLookAndFeel = new DefaultLabel("LookAndFeel:");
 		_comboLookAndFeel = new JComboBox(Config.getInstalledLookAndFeels());
-		_comboLookAndFeel.setSelectedItem(Config.getActiveLookAndFeel());
 		
 		_panelEditor = new JPanel();
 		_panelEditor.setBorder(BorderFactory.createTitledBorder("Editor"));
+		
+		_panelCheckButtons = new JPanel();
 		_checkTerrainDefaultOn = new JCheckBox("Terrain default ON");
-		_checkTerrainDefaultOn.setSelected(Config.TERRAIN_DEFAULT_ON);
 		_checkVSync = new JCheckBox("VSync");
-		_checkVSync.setSelected(Config.V_SYNC);
+		_checkTransparency = new JCheckBox("Transparency");
+		_checkMultiThreading = new JCheckBox("MultiThreading");
+		_checkDrawOutline = new JCheckBox("Draw Outline");
+		_checkVBODrawRange = new JCheckBox("VBO DrawRangeElements");
 		
 		_labelCellRenderer = new DefaultLabel("CellRenderer:");
 		_comboCellRenderer = new JComboBox(GLCellRenderer.RENDERER_NAMES);
@@ -109,6 +119,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			public final void itemStateChanged(final ItemEvent e)
 			{
 				checkDLLoDSliderEnabled();
+				checkVBODrawRangeEnabled();
 			}
 		});
 		
@@ -119,7 +130,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderDLLoDRange.setMinorTickSpacing(256);
 		_sliderDLLoDRange.setMajorTickSpacing(1024);
 		_sliderDLLoDRange.setPaintTicks(true);
-		_sliderDLLoDRange.setValue(Config.DLLoDRANGE);
 		Hashtable<Integer, DefaultLabel> rangeTable = new Hashtable<Integer, DefaultLabel>();
 		for (int i = DLLoDRenderer.MIN_DISTANCE_SQ; i <= DLLoDRenderer.MAX_DISTANCE_SQ; i += 2048)
 		{
@@ -135,7 +145,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderGridRange.setMinorTickSpacing(2);
 		_sliderGridRange.setMajorTickSpacing(8);
 		_sliderGridRange.setPaintTicks(true);
-		_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
 		rangeTable = new Hashtable<Integer, DefaultLabel>();
 		for (int i = 8; i <= 96; i += 8)
 		{
@@ -149,7 +158,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_labelGeodataPath = new DefaultLabel("Path to Geodata:");
 		_fieldGeodataPath = new DefaultTextField(16);
 		_fieldGeodataPath.setEditable(false);
-		_fieldGeodataPath.setText(Config.PATH_TO_GEO_FILES);
 		_fieldGeodataPath.addMouseListener(this);
 		
 		_panelButtons = new JPanel();
@@ -185,6 +193,14 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.ipady = 0;
 		_panelMisc.add(_comboLookAndFeel, gbc);
 		
+		_panelCheckButtons.setLayout(new GridLayout(3, 2));
+		_panelCheckButtons.add(_checkTerrainDefaultOn);
+		_panelCheckButtons.add(_checkVSync);
+		_panelCheckButtons.add(_checkTransparency);
+		_panelCheckButtons.add(_checkMultiThreading);
+		_panelCheckButtons.add(_checkDrawOutline);
+		_panelCheckButtons.add(_checkVBODrawRange);
+		
 		_panelEditor.setLayout(new GridBagLayout());
 		
 		gbc.gridx = 0;
@@ -195,20 +211,10 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.weighty = 0;
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
-		_panelEditor.add(_checkTerrainDefaultOn, gbc);
+		_panelEditor.add(_panelCheckButtons, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 1;
-		gbc.gridwidth = 2;
-		gbc.gridheight = 1;
-		gbc.weightx = 1;
-		gbc.weighty = 0;
-		gbc.ipadx = 0;
-		gbc.ipady = 0;
-		_panelEditor.add(_checkVSync, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.gridy = 4;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 		gbc.weightx = 0;
@@ -218,7 +224,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_labelCellRenderer, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 2;
+		gbc.gridy = 4;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -228,7 +234,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_comboCellRenderer, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 3;
+		gbc.gridy = 5;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -238,7 +244,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_labelDLLoDRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 4;
+		gbc.gridy = 6;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -248,7 +254,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_sliderDLLoDRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 5;
+		gbc.gridy = 7;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -258,7 +264,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_labelGridRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 6;
+		gbc.gridy = 8;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -346,6 +352,12 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderDLLoDRange.setEnabled(enabled);
 	}
 	
+	private final void checkVBODrawRangeEnabled()
+	{
+		final boolean enabled = _comboCellRenderer.getSelectedItem() == VBORenderer.NAME;
+		_checkVBODrawRange.setEnabled(enabled);
+	}
+	
 	@Override
 	public final void setVisible(final boolean visible)
 	{
@@ -355,14 +367,23 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			
 			_checkTerrainDefaultOn.setSelected(Config.TERRAIN_DEFAULT_ON);
 			_checkVSync.setSelected(Config.V_SYNC);
+			_checkTransparency.setSelected(Config.USE_TRANSPARENCY);
+			_checkMultiThreading.setSelected(Config.USE_MULTITHREADING);
+			_checkDrawOutline.setSelected(Config.DRAW_OUTLINE);
+			_checkVBODrawRange.setSelected(Config.VBO_DRAW_RANGE);
 			_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
 			_comboLookAndFeel.setSelectedItem(Config.getLookAndFeel(Config.LOOK_AND_FEEL, Config.getActiveLookAndFeel()));
 			_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
-			_sliderDLLoDRange.setValue(Config.DLLoDRANGE);
+			_sliderDLLoDRange.setValue(Config.DLLoD_RANGE);
+			_fieldGeodataPath.setText(Config.PATH_TO_GEO_FILES);
 			checkDLLoDSliderEnabled();
+			checkVBODrawRangeEnabled();
 		}
 		
 		super.setVisible(visible);
+		
+		if (!visible)
+			GLDisplay.getInstance().requestFocus();
 	}
 	
 	@Override
@@ -415,10 +436,14 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		{
 			Config.TERRAIN_DEFAULT_ON = _checkTerrainDefaultOn.isSelected();
 			Config.V_SYNC = _checkVSync.isSelected();
+			Config.USE_TRANSPARENCY = _checkTransparency.isSelected();
+			Config.USE_MULTITHREADING = _checkMultiThreading.isSelected();
+			Config.DRAW_OUTLINE = _checkDrawOutline.isSelected();
+			Config.VBO_DRAW_RANGE = _checkVBODrawRange.isSelected();
 			Config.VIS_GRID_RANGE = _sliderGridRange.getValue();
 			Config.LOOK_AND_FEEL = ((LookAndFeelInfo) _comboLookAndFeel.getSelectedItem()).getClassName();
 			Config.CELL_RENDERER = GLCellRenderer.validateRenderer((String) _comboCellRenderer.getSelectedItem());
-			Config.DLLoDRANGE = _sliderDLLoDRange.getValue();
+			Config.DLLoD_RANGE = _sliderDLLoDRange.getValue();
 			
 			Config.save();
 			setVisible(false);

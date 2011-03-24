@@ -18,6 +18,7 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
+import g3deditor.jogl.GLState;
 
 import javax.media.opengl.GL2;
 
@@ -63,8 +64,8 @@ public final class DLRenderer extends GLCellRenderer
 		for (int i = selector.getElementsToRender(); i-- > 0;)
 		{
 			cell = selector.getElementToRender(i);
-			setColor(gl, cell.getSelectionState().getColor(cell));
-			translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+			GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+			GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
 			gl.glCallList(_listId + (cell.isBig() ? 0 : cell.getNSWE() + 1));
 		}
 	}

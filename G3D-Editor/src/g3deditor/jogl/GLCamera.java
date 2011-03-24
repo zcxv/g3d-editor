@@ -329,7 +329,7 @@ public final class GLCamera
 			{
 				final GeoCell cell = region.nGetCellChecked((int) _pickResult[0], (int) _pickResult[2], (int) (_pickResult[1] * 16f));
 				// check height difference from cell to picked point to eliminate ground/terrain picking
-				if (cell != null && Math.abs(cell.getHeight() - (int) (_pickResult[1] * 16f)) <= 4)
+				if (cell != null && Math.abs(cell.getHeight() - (int) (_pickResult[1] * 16f)) <= 5)
 					return cell;
 			}
 		}

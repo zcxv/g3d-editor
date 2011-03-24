@@ -21,6 +21,7 @@ import g3deditor.jogl.GLCamera;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.GLDisplay;
+import g3deditor.jogl.GLState;
 
 import javax.media.opengl.GL2;
 
@@ -92,7 +93,7 @@ public final class DLLoDRenderer extends GLCellRenderer
 		final GLCamera camera = GLDisplay.getInstance().getCamera();
 		GeoCell cell;
 		
-		if (Config.DLLoDRANGE > 0)
+		if (Config.DLLoD_RANGE > 0)
 		{
 			float distSq, dx, dy, dz;
 			for (int i = selector.getElementsToRender(); i-- > 0;)
@@ -103,10 +104,10 @@ public final class DLLoDRenderer extends GLCellRenderer
 				dz = cell.getRenderZ() - camera.getZ();
 				distSq =  dx * dx + dy * dy + dz * dz;
 				
-				if (distSq > Config.DLLoDRANGE)
+				if (distSq > Config.DLLoD_RANGE)
 				{
-					setColor(gl, cell.getSelectionState().getColor(cell));
-					translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+					GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+					GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
 					
 					if (cell.isBig())
 					{
@@ -124,8 +125,8 @@ public final class DLLoDRenderer extends GLCellRenderer
 					while (i-- > 0)
 					{
 						cell = selector.getElementToRender(i);
-						setColor(gl, cell.getSelectionState().getColor(cell));
-						translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+						GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+						GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
 						
 						if (cell.isBig())
 						{
@@ -145,8 +146,8 @@ public final class DLLoDRenderer extends GLCellRenderer
 			for (int i = selector.getElementsToRender(); i-- > 0;)
 			{
 				cell = selector.getElementToRender(i);
-				setColor(gl, cell.getSelectionState().getColor(cell));
-				translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+				GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+				GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
 				
 				if (cell.isBig())
 				{

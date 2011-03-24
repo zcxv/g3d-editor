@@ -27,6 +27,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -77,14 +79,48 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	private FrameMain()
 	{
-		super("G3D-Editor [A1] by Forsaiken");
-		super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		super("G3D-Editor [Beta 1 R39] by Forsaiken");
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public final void windowClosing(final WindowEvent e)
+			{
+				final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+				if (region != null && !region.allDataEqual())
+				{
+					switch (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Region " + region.getName() + " was modified.\nWould u like to save it before closing?", "Save and exit", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE))
+					{
+						case JOptionPane.YES_OPTION:
+						{
+							new DialogSave(FrameMain.getInstance(), region, new Runnable()
+							{
+								@Override
+								public final void run()
+								{
+									System.exit(0);
+								}
+							}).setVisible(true);
+							return;
+						}
+						
+						case JOptionPane.NO_OPTION:
+							break;
+							
+						default:
+							return;
+					}
+				}
+				System.exit(0);
+			}
+		});
+		setIconImage(Util.loadImage("./data/icon/l2.jpg"));
 		
 		_panelRight = new JPanel();
 		_panelNswe = new PanelNswe();
 		_panelCellInfo = new PanelCellInfo();
 		_panelBlockConvert = new PanelBlockConvert();
-		_panelLayers = new PanelLayers();
+		_panelLayers = new PanelLayers(this);
 		_dialogJumpTo = new DialogJumpTo(this);
 		_dialogConfig = new DialogConfig(this);
 		
@@ -101,7 +137,6 @@ public final class FrameMain extends JFrame implements ActionListener
 		_labelLogoL2j = new DefaultLabel(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
 		
 		setJMenuBar(_menuBar);
-		
 		initLayout();
 		
 		setMinimumSize(new Dimension(1024, 768));
@@ -293,7 +328,31 @@ public final class FrameMain extends JFrame implements ActionListener
 		}
 		else if (e.getSource() == _buttonHelp)
 		{
-			JOptionPane.showMessageDialog(this, "<html>G3D-Editor<br>By Forsaiken<br>If you like this programm please donate!<br>PayPal: patrickbiesenbach@yahoo.de</html>", "About", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this,
+					"<html><b>G3D-Editor</b> - By Forsaiken<br>If you like this programm please donate!<br>PayPal: <i>patrickbiesenbach@yahoo.de</i><br><br>" +
+					"Controll:<br><table>" +
+					"<tr><td>Look around:</td><td>Hold RIGHT-MOUSE and move</td></tr>" +
+					"<tr><td>Move around:</td><td>Use WASD and QE</td></tr>" +
+					"<tr><td>Move faster:</td><td>Hold SPACE while moving</td></tr>" +
+					"<tr><td>Select a single cell:</td><td>LEFT-MOUSE-CLICK on any cell</td></tr>" +
+					"<tr><td>Select multiple cells:</td><td>Hold SHIFT while selecting</td></tr>" +
+					"<tr><td>Select a whole block:</td><td>Hold ALT while selecting</td></tr>" +
+					"<tr><td>Unselect a cell:</td><td>Hold SHIFT and LEFT-MOUSE-CLICK on it again</td></tr>" +
+					"<tr><td>Special MultiLayer:</td><td>You see a white box when selecting</td></tr>" +
+					"<tr><td>*</td><td>This box is you selection radius, only cells in this box will be selected</td></tr>" +
+					"<tr><td>*</td><td>To change the radius use the MOUSE_WHEEL or MIDDLE_MOUSE_CLICK to (un)set radius to infinite</td></tr>" +
+					"<tr><td>*</td><td>To change it faster hold SPACE while using the MOUSE_WHEEL</td></tr>" +
+					"<tr><td>Changing height:</td><td>To change the height of the selected cells hold CTRL while using the MOUSE_WHEEL</td></tr>" +
+					"<tr><td>*</td><td>To change the height faster hold SPACE while using the MOUSE_WHEEL</td></tr>" +
+					"<tr><td>Dis/Enable terrain:</td><td>Press T (toggle)</td></tr>" +
+					"<tr><td>Dis/Enable terrain wireframe:</td><td>Press R (toggle)</td></tr>" +
+					"<tr><td>Dis/Enable grid:</td><td>Press G (toggle)</td></tr>" +
+					"<tr><td>Freeze/Unfreeze grid:</td><td>Press F (toggle)</td></tr>" +
+					"</table><br>" +
+					"Note: The editor window need focus to accept inputs!<br><br>" +
+					"This programm is FREE and licensed under GNU GPLv3 <i>http://www.gnu.org/licenses/</i><br>" +
+					"Use it on your OWN RISC! I will not take an ANY WARRANTY!" +
+					"</html>", "About", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 }

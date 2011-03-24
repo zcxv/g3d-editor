@@ -134,7 +134,11 @@ public final class GeoBlockSelector
 		}
 		
 		if (convertedAny)
+		{
+			//GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(false, true);
 			GLDisplay.getInstance().getRenderSelector().forceUpdateGeoBlocks();
+			updateGUI(null);
+		}
 	}
 	
 	public final boolean getSelectedDataEqual()
@@ -186,7 +190,11 @@ public final class GeoBlockSelector
 		}
 		
 		if (restoredAny)
+		{
+			GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(true, true);
 			GLDisplay.getInstance().getRenderSelector().forceUpdateGeoBlocks();
+			updateGUI(null);
+		}
 	}
 	
 	public final boolean hasSelected()
@@ -200,7 +208,7 @@ public final class GeoBlockSelector
 		return selected != null && selected.contains(cell);
 	}
 	
-	private final void unselectAll()
+	public final void unselectAll()
 	{
 		for (GeoBlockEntry e = getHead(), p; (e = e.getNext()) != getTail();)
 		{
@@ -493,17 +501,43 @@ public final class GeoBlockSelector
 				break;
 		}
 		
+		updateGUI(cell);
+	}
+	
+	public final void unselectGeoCell(final GeoCell cell)
+	{
+		final GeoBlock block = cell.getBlock();
+		final GeoBlockEntry entry = getEntry(block);
+		final FastArrayList<GeoCell> selected = entry.getValue();
+		if (selected != null && selected.remove(cell))
+		{
+			if (selected.isEmpty())
+			{
+				setStateOf(block.getCells(), SelectionState.NORMAL);
+				entry.remove();
+				updateGUI(null);
+			}
+			else
+			{
+				cell.setSelectionState(SelectionState.HIGHLIGHTED);
+				updateGUI(selected.getLastUnsafe());
+			}
+		}
+	}
+	
+	private final void updateGUI(final GeoCell cell)
+	{
 		if (!hasSelected())
 		{
 			FrameMain.getInstance().setSelectedGeoCell(null);
 		}
 		else
 		{
-			FastArrayList<GeoCell> selected = getEntry(cell.getBlock()).getValue();
+			FastArrayList<GeoCell> selected = cell == null ? null : getEntry(cell.getBlock()).getValue();
 			if (selected == null)
 				selected = getTail().getPrev().getValue();
 			
-			if (selected.contains(cell))
+			if (cell != null && selected.contains(cell))
 			{
 				FrameMain.getInstance().setSelectedGeoCell(cell);
 			}

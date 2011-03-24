@@ -14,6 +14,8 @@
  */
 package g3deditor.util;
 
+import g3deditor.util.Util.FastComparator;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -85,6 +87,11 @@ public final class FastArrayList<E> implements List<E>
 	public FastArrayList(final int initialCapacity)
 	{
 		_values = (E[]) new Object[initialCapacity];
+	}
+	
+	public final void sort(final FastComparator<? super E> comparator)
+	{
+		Util.quickSort(_values, _size, comparator);
 	}
 	
 	/**
