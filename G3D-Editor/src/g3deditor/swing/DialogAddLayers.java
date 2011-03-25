@@ -217,7 +217,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 							contains = false;
 							for (j = added.size(); j-- > 0;)
 							{
-								temp2 = added.getUnsafe(i);
+								temp2 = added.getUnsafe(j);
 								if (temp2.getCellX() == temp.getCellX() && temp2.getCellY() == temp.getCellY())
 								{
 									contains = true;
