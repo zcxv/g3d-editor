@@ -68,7 +68,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 		_panelChecks = new JPanel();
 		_checkAddToFullBlock = new DefaultCheckBox("Apply to full block");
 		_checkAddIfHeightAlreadyExist = new DefaultCheckBox("Add if already exist");
-		_checkAutoSelectAdded = new DefaultCheckBox("Selecte added cells");
+		_checkAutoSelectAdded = new DefaultCheckBox("Select added cells");
 		_checkAutoSelectAppend = new DefaultCheckBox("Append to selection");
 		
 		_labelHeight = new DefaultLabel("Height:");

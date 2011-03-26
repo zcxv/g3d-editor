@@ -59,6 +59,11 @@ public final class GLColor
 		_a = Math.max(Math.min(a, 1f), 0f);
 	}
 	
+	public final Color getColor()
+	{
+		return new Color((int) (_r * 255f), (int) (_g * 255f), (int) (_b * 255f), (int) (_a * 255f));
+	}
+	
 	public final float getR()
 	{
 		return _r;
@@ -83,6 +88,9 @@ public final class GLColor
 	{
 		if (color == this)
 			return true;
+		
+		if (color == null)
+			return false;
 		
 		return color.getR() == getR() && color.getB() == getB() && color.getB() == getB() && color.getA() == getA();
 	}

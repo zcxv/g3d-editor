@@ -62,8 +62,10 @@ public final class Main
 				GeoEngine.init();
 				GeoBlockSelector.init();
 				
-				GLProfile.initSingleton(false);
+				GLProfile.initSingleton(true);
 				GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
+				caps.setSampleBuffers(false);
+				caps.setNumSamples(0);
 				GLCanvas canvas = new GLCanvas(caps);
 				GLDisplay.init(canvas);
 				canvas.addGLEventListener(GLDisplay.getInstance());

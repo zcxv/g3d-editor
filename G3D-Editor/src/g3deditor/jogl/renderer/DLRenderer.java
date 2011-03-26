@@ -38,9 +38,11 @@ public final class DLRenderer extends GLCellRenderer
 	 * @see g3deditor.jogl.GLCellRenderer#init(javax.media.opengl.GL2)
 	 */
 	@Override
-	public final void init(final GL2 gl)
+	public final boolean init(final GL2 gl)
 	{
-		super.init(gl);
+		if (!super.init(gl))
+			return false;
+		
 		_listId = gl.glGenLists(NSWE_COMBINATIONS + 1);
 		
 		gl.glNewList(_listId, GL2.GL_COMPILE);
@@ -53,6 +55,8 @@ public final class DLRenderer extends GLCellRenderer
 			renderCellFull(gl, false, i);
 			gl.glEndList();
 		}
+		
+		return true;
 	}
 	
 	/**
