@@ -125,10 +125,10 @@ public abstract class GLCellRenderer
 	private boolean _initialized;
 	private Texture _nsweTexture;
 	
-	public void init(final GL2 gl)
+	public boolean init(final GL2 gl)
 	{
 		if (_initialized)
-			return;
+			return false;
 		
 		_initialized = true;
 		
@@ -144,6 +144,7 @@ public abstract class GLCellRenderer
 			_nsweTexture = null;
 			e.printStackTrace();
 		}
+		return true;
 	}
 	
 	public void enableRender(final GL2 gl)

@@ -125,9 +125,11 @@ public final class VBORenderer extends GLCellRenderer
 	 * @see g3deditor.jogl.GLCellRenderer#init(javax.media.opengl.GL2)
 	 */
 	@Override
-	public final void init(final GL2 gl)
+	public final boolean init(final GL2 gl)
 	{
-		super.init(gl);
+		if (!super.init(gl))
+			return false;
+		
 		_indexBuffer = BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
 		_vertexBuffer = BufferUtils.createFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * NSWE_COMBINATIONS + GEOMETRY_VERTEX_DATA_SMALL_LENGTH);
 		_textureBuffer = BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_TEXTURE_DATA_LENGTH);
@@ -164,6 +166,8 @@ public final class VBORenderer extends GLCellRenderer
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
 		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _textureBuffer.limit() * BufferUtils.FLOAT_SIZE, _textureBuffer, GL2.GL_STATIC_DRAW);
+		
+		return true;
 	}
 	
 	/**

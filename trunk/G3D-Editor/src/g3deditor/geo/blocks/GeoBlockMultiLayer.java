@@ -325,6 +325,7 @@ public final class GeoBlockMultiLayer extends GeoBlock
 		_cells3D[cellX][cellY] = Util.arrayAdd(layers, cell);
 		_cells = Util.arrayAdd(_cells, cell);
 		Util.quickSort(layers, HEIGHT_COMPARATOR);
+		updateMinMaxHeight(cell.getHeight(), Short.MIN_VALUE);
 		return cell;
 	}
 	

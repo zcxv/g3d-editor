@@ -58,7 +58,7 @@ public final class GLState
 	
 	public static final void glColor4f(final GL2 gl, final GLColor color)
 	{
-		if (!_lockColor && _color != color)
+		if (!_lockColor && !color.equals(_color))
 		{
 			_color = color;
 			if (color.getA() != 1f)
