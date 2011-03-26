@@ -26,10 +26,10 @@ public final class GLColor
 	public static final GLColor WHITE = new GLColor(1f, 1f, 1f, 1f);
 	public static final GLColor BLACK = new GLColor(0f, 0f, 0f, 1f);
 	
-	private final float _r;
-	private final float _g;
-	private final float _b;
-	private final float _a;
+	private float _r;
+	private float _g;
+	private float _b;
+	private float _a;
 	
 	public GLColor(final Color color)
 	{
@@ -57,6 +57,13 @@ public final class GLColor
 		_g = Math.max(Math.min(g, 1f), 0f);
 		_b = Math.max(Math.min(b, 1f), 0f);
 		_a = Math.max(Math.min(a, 1f), 0f);
+	}
+	
+	public final void setRGB(final float r, final float g, final float b)
+	{
+		_r = Math.max(Math.min(r, 1f), 0f);
+		_g = Math.max(Math.min(g, 1f), 0f);
+		_b = Math.max(Math.min(b, 1f), 0f);
 	}
 	
 	public final Color getColor()

@@ -14,7 +14,6 @@
  */
 package g3deditor.jogl.renderer;
 
-import g3deditor.Config;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
@@ -25,7 +24,6 @@ import g3deditor.util.BufferUtils;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 /**
@@ -182,10 +180,10 @@ public final class VBORenderer extends GLCellRenderer
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
 		gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, 0);
-
+		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
 		gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
-
+		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
 	}
 	
@@ -195,41 +193,19 @@ public final class VBORenderer extends GLCellRenderer
 	public final void render(final GL2 gl, final GLSubRenderSelector selector)
 	{
 		GeoCell cell;
-		if (Config.VBO_DRAW_RANGE)
+		for (int i = selector.getElementsToRender(); i-- > 0;)
 		{
-			for (int i = selector.getElementsToRender(), indexOffset; i-- > 0;)
+			cell = selector.getElementToRender(i);
+			GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
+			GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
+			
+			if (cell.isBig())
 			{
-				cell = selector.getElementToRender(i);
-				GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
-				GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-				
-				if (cell.isBig())
-				{
-					gl.glDrawRangeElements(GL2.GL_TRIANGLES, 0, GEOMETRY_INDICES_DATA_MAX_INDEX, GEOMETRY_INDICES_DATA_LENGTH, GL.GL_UNSIGNED_BYTE, 0);
-				}
-				else
-				{
-					indexOffset = (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH);
-					gl.glDrawRangeElements(GL2.GL_TRIANGLES, indexOffset, indexOffset + GEOMETRY_INDICES_DATA_MAX_INDEX, GEOMETRY_INDICES_DATA_LENGTH, GL.GL_UNSIGNED_BYTE, indexOffset);
-				}
+				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, 0);
 			}
-		}
-		else
-		{
-			for (int i = selector.getElementsToRender(); i-- > 0;)
+			else
 			{
-				cell = selector.getElementToRender(i);
-				GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
-				GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-				
-				if (cell.isBig())
-				{
-					gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, 0);
-				}
-				else
-				{
-					gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH);
-				}
+				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH);
 			}
 		}
 	}

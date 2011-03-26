@@ -14,6 +14,7 @@
  */
 package g3deditor.entity;
 
+import g3deditor.Config;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
@@ -30,9 +31,9 @@ import java.awt.Color;
  */
 public enum SelectionState
 {
-	NORMAL		(Color.BLUE, Color.GREEN, Color.RED),
-	HIGHLIGHTED	(Color.CYAN, Color.CYAN, Color.CYAN),
-	SELECTED	(Color.MAGENTA, Color.MAGENTA, Color.MAGENTA);
+	NORMAL		(Config.COLOR_FLAT_NORMAL, Config.COLOR_COMPLEX_NORMAL, Config.COLOR_MULTILAYER_NORMAL),
+	HIGHLIGHTED	(Config.COLOR_FLAT_HIGHLIGHTED, Config.COLOR_COMPLEX_HIGHLIGHTED, Config.COLOR_MULTILAYER_HIGHLIGHTED),
+	SELECTED	(Config.COLOR_FLAT_SELECTED, Config.COLOR_COMPLEX_SELECTED, Config.COLOR_MULTILAYER_SELECTED);
 	
 	public static final float ALPHA = 0.7f;
 	
@@ -45,13 +46,13 @@ public enum SelectionState
 	private final GLColor _colorMutliLayer1b;
 	private final GLColor _colorMutliLayer2b;
 	
-	private SelectionState(final Color colorFlat, final Color colorComplex, final Color colorMutliLayer)
+	private SelectionState(final int colorFlat, final int colorComplex, final int colorMutliLayer)
 	{
 		_colorGuiSelected = new GLColor(Color.YELLOW, ALPHA);
-		_colorFlat = new GLColor(colorFlat, ALPHA);
-		_colorComplex1 = new GLColor(colorComplex, ALPHA);
+		_colorFlat = new GLColor(new Color(colorFlat), ALPHA);
+		_colorComplex1 = new GLColor(new Color(colorComplex), ALPHA);
 		_colorComplex2 = new GLColor(_colorComplex1, 0.85f, 0.85f, 0.85f);
-		_colorMutliLayer1a = new GLColor(colorMutliLayer, ALPHA);
+		_colorMutliLayer1a = new GLColor(new Color(colorMutliLayer), ALPHA);
 		_colorMutliLayer2a = new GLColor(_colorMutliLayer1a, 0.85f, 0.85f, 0.85f);
 		_colorMutliLayer1b = new GLColor(_colorMutliLayer1a.getR() + 0.5f, _colorMutliLayer1a.getG() + 0.5f, _colorMutliLayer1a.getB() + 0.5f, ALPHA);
 		_colorMutliLayer2b = new GLColor(_colorMutliLayer2a.getR() + 0.5f,_colorMutliLayer2a.getG() + 0.5f, _colorMutliLayer2a.getB() + 0.5f, ALPHA);

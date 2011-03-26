@@ -5,7 +5,6 @@ import g3deditor.jogl.GLCellRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.GLDisplay;
 import g3deditor.jogl.renderer.DLLoDRenderer;
-import g3deditor.jogl.renderer.VBORenderer;
 import g3deditor.swing.defaults.DefaultButton;
 import g3deditor.swing.defaults.DefaultLabel;
 import g3deditor.swing.defaults.DefaultTextField;
@@ -16,8 +15,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -62,7 +59,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	private final JCheckBox _checkTransparency;
 	private final JCheckBox _checkMultiThreading;
 	private final JCheckBox _checkDrawOutline;
-	private final JCheckBox _checkVBODrawRange;
 	
 	private final DefaultLabel _labelCellRenderer;
 	private final JComboBox _comboCellRenderer;
@@ -107,21 +103,10 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_checkTransparency = new JCheckBox("Transparency");
 		_checkMultiThreading = new JCheckBox("MultiThreading");
 		_checkDrawOutline = new JCheckBox("Draw Outline");
-		_checkVBODrawRange = new JCheckBox("VBO DrawRangeElements");
 		
 		_labelCellRenderer = new DefaultLabel("CellRenderer:");
 		_comboCellRenderer = new JComboBox(GLCellRenderer.RENDERER_NAMES);
 		_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
-		_comboCellRenderer.addItemListener(new ItemListener()
-		{
-			@SuppressWarnings("synthetic-access")
-			@Override
-			public final void itemStateChanged(final ItemEvent e)
-			{
-				checkDLLoDSliderEnabled();
-				checkVBODrawRangeEnabled();
-			}
-		});
 		
 		_labelDLLoDRange = new DefaultLabel("DisplayList LoD - max detail range:");
 		_sliderDLLoDRange = new JSlider();
@@ -199,7 +184,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelCheckButtons.add(_checkTransparency);
 		_panelCheckButtons.add(_checkMultiThreading);
 		_panelCheckButtons.add(_checkDrawOutline);
-		_panelCheckButtons.add(_checkVBODrawRange);
 		
 		_panelEditor.setLayout(new GridBagLayout());
 		
@@ -352,12 +336,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderDLLoDRange.setEnabled(enabled);
 	}
 	
-	private final void checkVBODrawRangeEnabled()
-	{
-		final boolean enabled = _comboCellRenderer.getSelectedItem() == VBORenderer.NAME;
-		_checkVBODrawRange.setEnabled(enabled);
-	}
-	
 	@Override
 	public final void setVisible(final boolean visible)
 	{
@@ -370,14 +348,12 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			_checkTransparency.setSelected(Config.USE_TRANSPARENCY);
 			_checkMultiThreading.setSelected(Config.USE_MULTITHREADING);
 			_checkDrawOutline.setSelected(Config.DRAW_OUTLINE);
-			_checkVBODrawRange.setSelected(Config.VBO_DRAW_RANGE);
 			_sliderGridRange.setValue(Config.VIS_GRID_RANGE);
 			_comboLookAndFeel.setSelectedItem(Config.getLookAndFeel(Config.LOOK_AND_FEEL, Config.getActiveLookAndFeel()));
 			_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
 			_sliderDLLoDRange.setValue(Config.DLLoD_RANGE);
 			_fieldGeodataPath.setText(Config.PATH_TO_GEO_FILES);
 			checkDLLoDSliderEnabled();
-			checkVBODrawRangeEnabled();
 		}
 		
 		super.setVisible(visible);
@@ -439,7 +415,6 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			Config.USE_TRANSPARENCY = _checkTransparency.isSelected();
 			Config.USE_MULTITHREADING = _checkMultiThreading.isSelected();
 			Config.DRAW_OUTLINE = _checkDrawOutline.isSelected();
-			Config.VBO_DRAW_RANGE = _checkVBODrawRange.isSelected();
 			Config.VIS_GRID_RANGE = _sliderGridRange.getValue();
 			Config.LOOK_AND_FEEL = ((LookAndFeelInfo) _comboLookAndFeel.getSelectedItem()).getClassName();
 			Config.CELL_RENDERER = GLCellRenderer.validateRenderer((String) _comboCellRenderer.getSelectedItem());
