@@ -18,6 +18,7 @@ import g3deditor.jogl.GLCellRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.renderer.DLLoDRenderer;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -48,7 +49,16 @@ public final class Config
 	public static boolean USE_TRANSPARENCY				= true;
 	public static boolean USE_MULTITHREADING			= Runtime.getRuntime().availableProcessors() > 1;
 	public static boolean DRAW_OUTLINE					= false;
-	public static boolean VBO_DRAW_RANGE				= false;
+	
+	public static int COLOR_FLAT_NORMAL					= Color.BLUE.getRGB();
+	public static int COLOR_FLAT_HIGHLIGHTED			= Color.CYAN.getRGB();
+	public static int COLOR_FLAT_SELECTED				= Color.MAGENTA.getRGB();
+	public static int COLOR_COMPLEX_NORMAL				= Color.GREEN.getRGB();
+	public static int COLOR_COMPLEX_HIGHLIGHTED			= Color.CYAN.getRGB();
+	public static int COLOR_COMPLEX_SELECTED			= Color.MAGENTA.getRGB();
+	public static int COLOR_MULTILAYER_NORMAL			= Color.RED.getRGB();
+	public static int COLOR_MULTILAYER_HIGHLIGHTED		= Color.CYAN.getRGB();
+	public static int COLOR_MULTILAYER_SELECTED			= Color.MAGENTA.getRGB();
 	
 	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
 	{
@@ -105,7 +115,16 @@ public final class Config
 				USE_TRANSPARENCY		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_TRANSPARENCY", "true"));
 				USE_MULTITHREADING		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_MULTITHREADING", String.valueOf(Runtime.getRuntime().availableProcessors() > 1)));
 				DRAW_OUTLINE			= Boolean.parseBoolean(PROPERTIES.getProperty("DRAW_OUTLINE", "false"));
-				VBO_DRAW_RANGE			= Boolean.parseBoolean(PROPERTIES.getProperty("VBO_DRAW_RANGE", "false"));
+				
+				COLOR_FLAT_NORMAL				= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_NORMAL", String.valueOf(Color.BLUE.getRGB())));
+				COLOR_FLAT_HIGHLIGHTED			= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_HIGHLIGHTED", String.valueOf(Color.CYAN.getRGB())));
+				COLOR_FLAT_SELECTED				= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_SELECTED", String.valueOf(Color.MAGENTA.getRGB())));
+				COLOR_COMPLEX_NORMAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_NORMAL", String.valueOf(Color.GREEN.getRGB())));
+				COLOR_COMPLEX_HIGHLIGHTED		= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_HIGHLIGHTED", String.valueOf(Color.CYAN.getRGB())));
+				COLOR_COMPLEX_SELECTED			= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_SELECTED", String.valueOf(Color.MAGENTA.getRGB())));
+				COLOR_MULTILAYER_NORMAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_NORMAL", String.valueOf(Color.RED.getRGB())));
+				COLOR_MULTILAYER_HIGHLIGHTED	= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_HIGHLIGHTED", String.valueOf(Color.BLUE.getRGB())));
+				COLOR_MULTILAYER_SELECTED		= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_SELECTED", String.valueOf(Color.MAGENTA.getRGB())));
 			}
 		}
 		catch (final Exception e)
@@ -170,7 +189,17 @@ public final class Config
 		PROPERTIES.put("USE_TRANSPARENCY", String.valueOf(USE_TRANSPARENCY));
 		PROPERTIES.put("USE_MULTITHREADING", String.valueOf(USE_MULTITHREADING));
 		PROPERTIES.put("DRAW_OUTLINE", String.valueOf(DRAW_OUTLINE));
-		PROPERTIES.put("VBO_DRAW_RANGE", String.valueOf(VBO_DRAW_RANGE));
+		
+		PROPERTIES.put("COLOR_FLAT_NORMAL", String.valueOf(COLOR_FLAT_NORMAL));
+		PROPERTIES.put("COLOR_FLAT_HIGHLIGHTED", String.valueOf(COLOR_FLAT_HIGHLIGHTED));
+		PROPERTIES.put("COLOR_FLAT_SELECTED", String.valueOf(COLOR_FLAT_SELECTED));
+		PROPERTIES.put("COLOR_COMPLEX_NORMAL", String.valueOf(COLOR_COMPLEX_NORMAL));
+		PROPERTIES.put("COLOR_COMPLEX_HIGHLIGHTED", String.valueOf(COLOR_COMPLEX_HIGHLIGHTED));
+		PROPERTIES.put("COLOR_COMPLEX_SELECTED", String.valueOf(COLOR_COMPLEX_SELECTED));
+		PROPERTIES.put("COLOR_MULTILAYER_NORMAL", String.valueOf(COLOR_MULTILAYER_NORMAL));
+		PROPERTIES.put("COLOR_MULTILAYER_HIGHLIGHTED", String.valueOf(COLOR_MULTILAYER_HIGHLIGHTED));
+		PROPERTIES.put("COLOR_MULTILAYER_SELECTED", String.valueOf(COLOR_MULTILAYER_SELECTED));
+		
 		PROPERTIES.save(CONFIG_FILE);
 	}
 	

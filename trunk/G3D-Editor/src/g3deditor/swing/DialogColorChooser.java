@@ -238,7 +238,14 @@ public final class DialogColorChooser extends JDialog implements ChangeListener,
 	@Override
 	public final void actionPerformed(final ActionEvent e)
 	{
-		
+		if (e.getSource() == _buttonOk)
+		{
+			setVisible(false);
+		}
+		else if (e.getSource() == _buttonCancel)
+		{
+			setVisible(false);
+		}
 	}
 	
 	/**
