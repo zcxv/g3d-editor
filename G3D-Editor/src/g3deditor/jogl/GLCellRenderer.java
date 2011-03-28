@@ -18,6 +18,7 @@ import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.renderer.DLLoDRenderer;
 import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
+import g3deditor.jogl.renderer.VBOGSLSRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
 
 import java.io.File;
@@ -39,7 +40,8 @@ public abstract class GLCellRenderer
 		IRenderer.NAME,
 		DLRenderer.NAME,
 		VBORenderer.NAME,
-		DLLoDRenderer.NAME
+		DLLoDRenderer.NAME,
+		VBOGSLSRenderer.NAME,
 	};
 	
 	public static final GLCellRenderer getRenderer(final String name)
@@ -52,6 +54,9 @@ public abstract class GLCellRenderer
 		
 		if (VBORenderer.NAME.equals(name))
 			return new VBORenderer();
+		
+		if (VBOGSLSRenderer.NAME.equals(name))
+			return new VBOGSLSRenderer();
 		
 		return new DLLoDRenderer();
 	}
@@ -124,6 +129,11 @@ public abstract class GLCellRenderer
 	
 	private boolean _initialized;
 	private Texture _nsweTexture;
+	
+	protected final Texture getNsweTexture()
+	{
+		return _nsweTexture;
+	}
 	
 	public boolean init(final GL2 gl)
 	{

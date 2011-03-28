@@ -20,6 +20,7 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
+import g3deditor.jogl.renderer.VBOGSLSRenderer;
 import g3deditor.util.TaskExecutor;
 import g3deditor.util.Util;
 import g3deditor.util.Util.FastComparator;
@@ -191,9 +192,6 @@ public final class GLCellRenderSelector
 	
 	public final boolean isVisible(final GeoBlock block)
 	{
-		if (block.getType() == GeoEngine.GEO_BLOCK_TYPE_FLAT) // flat block`s cell get checked
-			return true;
-		
 		final float x1 = block.getGeoX();
 		final float x2 = x1 + 8f;
 		final float y1 = block.getMinHeight() / 16f;
@@ -297,25 +295,78 @@ public final class GLCellRenderSelector
 			return _geoCells[index];
 		}
 		
+		private final void ensureCapacity(final int count)
+		{
+			if (_geoCells.length < count)
+				_geoCells = new GeoCell[count];
+		}
+		
+		private final void addElementToRender(final GeoCell cell)
+		{
+			_geoCells[_count++] = cell;
+		}
+		
 		@Override
 		public final void run()
 		{
 			_count = 0;
-			if (!GLCellRenderSelector.this.isVisible(_block))
-				return;
-			
-			final GeoCell[] cells = _block.getCells();
-			if (_geoCells.length < cells.length)
-				_geoCells = new GeoCell[cells.length];
-			
-			for (final GeoCell cell : cells)
+			switch (_block.getType())
 			{
-				if (GLCellRenderSelector.this.isVisible(cell))
-					_geoCells[_count++] = cell;
+				case GeoEngine.GEO_BLOCK_TYPE_FLAT:
+				{
+					final GeoCell cell = _block.getCells()[0];
+					if (GLCellRenderSelector.this.isVisible(cell))
+					{
+						ensureCapacity(1);
+						addElementToRender(cell);
+					}
+					break;
+				}
+				
+				case GeoEngine.GEO_BLOCK_TYPE_COMPLEX:
+				{
+					if (GLCellRenderSelector.this.isVisible(_block))
+					{
+						if (!(GLDisplay.getInstance().getRenderer() instanceof VBOGSLSRenderer))
+						{
+							final GeoCell[] cells = _block.getCells();
+							ensureCapacity(cells.length);
+							for (final GeoCell cell : cells)
+							{
+								if (GLCellRenderSelector.this.isVisible(cell))
+									addElementToRender(cell);
+							}
+							
+							if (Config.USE_TRANSPARENCY)
+								Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
+						}
+						else
+						{
+							_count = 64;
+						}
+					}
+					break;
+				}
+				
+				case GeoEngine.GEO_BLOCK_TYPE_MULTILAYER:
+				{
+					if (GLCellRenderSelector.this.isVisible(_block))
+					{
+						final GeoCell[] cells = _block.getCells();
+						ensureCapacity(cells.length);
+						
+						for (final GeoCell cell : cells)
+						{
+							if (GLCellRenderSelector.this.isVisible(cell))
+								addElementToRender(cell);
+						}
+						
+						if (Config.USE_TRANSPARENCY)
+							Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
+					}
+					break;
+				}
 			}
-			
-			if (Config.USE_TRANSPARENCY)
-				Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
 		}
 	}
 }

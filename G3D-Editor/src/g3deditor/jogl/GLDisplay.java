@@ -258,8 +258,6 @@ public final class GLDisplay implements GLEventListener
 		_terrain.setWireframe(_input.getKeyRToggle());
 		_terrain.render(gl);
 		
-		_renderSelector.select(gl, _camera, _input.getKeyFToggle());
-		
 		if (_renderer == null)
 		{
 			_renderer = GLCellRenderer.getRenderer(Config.CELL_RENDERER);
@@ -279,6 +277,8 @@ public final class GLDisplay implements GLEventListener
 				Config.CELL_RENDERER = _renderer.getName();
 			}
 		}
+		
+		_renderSelector.select(gl, _camera, _input.getKeyFToggle());
 		
 		if (_input.getKeyGToggle())
 		{
