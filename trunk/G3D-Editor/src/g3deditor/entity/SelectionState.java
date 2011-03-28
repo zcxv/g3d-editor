@@ -58,6 +58,36 @@ public enum SelectionState
 		_colorMutliLayer2b = new GLColor(_colorMutliLayer2a.getR() + 0.5f,_colorMutliLayer2a.getG() + 0.5f, _colorMutliLayer2a.getB() + 0.5f, ALPHA);
 	}
 	
+	public final GLColor getColorGuiSelected()
+	{
+		return _colorGuiSelected;
+	}
+	
+	public final GLColor getColorFlat()
+	{
+		return _colorFlat;
+	}
+	
+	public final GLColor getColorComplex()
+	{
+		return _colorComplex1;
+	}
+	
+	public final GLColor getColorMultiLayer()
+	{
+		return _colorMutliLayer1a;
+	}
+	
+	/**
+	 * For the cells inside the selection box
+	 * 
+	 * @return
+	 */
+	public final GLColor getColorMultiLayerSpecial()
+	{
+		return _colorMutliLayer1b;
+	}
+	
 	public final GLColor getColor(final GeoCell cell)
 	{
 		if (FrameMain.getInstance().isSelectedGeoCell(cell))
