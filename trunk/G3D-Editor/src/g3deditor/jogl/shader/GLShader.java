@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl.shader;
 
+import g3deditor.jogl.shader.uniform.GLUniformVec1f;
 import g3deditor.jogl.shader.uniform.GLUniformVec1fv;
 import g3deditor.jogl.shader.uniform.GLUniformVec1i;
 import g3deditor.jogl.shader.uniform.GLUniformVec1iv;
@@ -286,6 +287,22 @@ public final class GLShader
 			throw new RuntimeException("Unexpected uniform type: " + uniform.getClass() + ", expected: " + GLUniformVec2f.class);
 		}
 		return (GLUniformVec2f) uniform;
+	}
+	
+	public final GLUniformVec1f getUniformVec1f(final GL2 gl, final String uniformName)
+	{
+		GLUniform uniform = _uniforms.get(uniformName);
+		if (uniform == null)
+		{
+			uniform = new GLUniformVec1f(uniformName);
+			uniform.init(gl, this);
+			_uniforms.put(uniformName, uniform);
+		}
+		else if (!(uniform instanceof GLUniformVec1f))
+		{
+			throw new RuntimeException("Unexpected uniform type: " + uniform.getClass() + ", expected: " + GLUniformVec1f.class);
+		}
+		return (GLUniformVec1f) uniform;
 	}
 	
 	public final void dispose(final GL2 gl)

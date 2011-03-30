@@ -21,6 +21,7 @@ import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLColor;
 import g3deditor.jogl.GLDisplay;
 import g3deditor.swing.FrameMain;
+import g3deditor.util.Util;
 
 import java.awt.Color;
 
@@ -31,9 +32,9 @@ import java.awt.Color;
  */
 public enum SelectionState
 {
-	NORMAL		(Config.COLOR_FLAT_NORMAL, Config.COLOR_COMPLEX_NORMAL, Config.COLOR_MULTILAYER_NORMAL),
-	HIGHLIGHTED	(Config.COLOR_FLAT_HIGHLIGHTED, Config.COLOR_COMPLEX_HIGHLIGHTED, Config.COLOR_MULTILAYER_HIGHLIGHTED),
-	SELECTED	(Config.COLOR_FLAT_SELECTED, Config.COLOR_COMPLEX_SELECTED, Config.COLOR_MULTILAYER_SELECTED);
+	NORMAL		(Config.COLOR_FLAT_NORMAL, Config.COLOR_COMPLEX_NORMAL, Config.COLOR_MULTILAYER_NORMAL, Config.COLOR_MULTILAYER_NORMAL_SPECIAL),
+	HIGHLIGHTED	(Config.COLOR_FLAT_HIGHLIGHTED, Config.COLOR_COMPLEX_HIGHLIGHTED, Config.COLOR_MULTILAYER_HIGHLIGHTED, Config.COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL),
+	SELECTED	(Config.COLOR_FLAT_SELECTED, Config.COLOR_COMPLEX_SELECTED, Config.COLOR_MULTILAYER_SELECTED, Config.COLOR_MULTILAYER_SELECTED_SPECIAL);
 	
 	public static final float ALPHA = 0.7f;
 	
@@ -41,21 +42,21 @@ public enum SelectionState
 	private final GLColor _colorFlat;
 	private final GLColor _colorComplex1;
 	private final GLColor _colorComplex2;
-	private final GLColor _colorMutliLayer1a;
-	private final GLColor _colorMutliLayer2a;
-	private final GLColor _colorMutliLayer1b;
-	private final GLColor _colorMutliLayer2b;
+	private final GLColor _colorMutliLayer1;
+	private final GLColor _colorMutliLayer2;
+	private final GLColor _colorMutliLayer1Special;
+	private final GLColor _colorMutliLayer2Special;
 	
-	private SelectionState(final int colorFlat, final int colorComplex, final int colorMutliLayer)
+	private SelectionState(final int colorFlat, final int colorComplex, final int colorMutliLayer, final int colorMultiLayerSpecial)
 	{
 		_colorGuiSelected = new GLColor(Color.YELLOW, ALPHA);
 		_colorFlat = new GLColor(new Color(colorFlat), ALPHA);
 		_colorComplex1 = new GLColor(new Color(colorComplex), ALPHA);
 		_colorComplex2 = new GLColor(_colorComplex1, 0.85f, 0.85f, 0.85f);
-		_colorMutliLayer1a = new GLColor(new Color(colorMutliLayer), ALPHA);
-		_colorMutliLayer2a = new GLColor(_colorMutliLayer1a, 0.85f, 0.85f, 0.85f);
-		_colorMutliLayer1b = new GLColor(_colorMutliLayer1a.getR() + 0.5f, _colorMutliLayer1a.getG() + 0.5f, _colorMutliLayer1a.getB() + 0.5f, ALPHA);
-		_colorMutliLayer2b = new GLColor(_colorMutliLayer2a.getR() + 0.5f,_colorMutliLayer2a.getG() + 0.5f, _colorMutliLayer2a.getB() + 0.5f, ALPHA);
+		_colorMutliLayer1 = new GLColor(new Color(colorMutliLayer), ALPHA);
+		_colorMutliLayer2 = new GLColor(_colorMutliLayer1, 0.85f, 0.85f, 0.85f);
+		_colorMutliLayer1Special = new GLColor(new Color(colorMultiLayerSpecial), ALPHA);
+		_colorMutliLayer2Special = new GLColor(_colorMutliLayer1Special, 0.85f, 0.85f, 0.85f);
 	}
 	
 	public final GLColor getColorGuiSelected()
@@ -75,7 +76,7 @@ public enum SelectionState
 	
 	public final GLColor getColorMultiLayer()
 	{
-		return _colorMutliLayer1a;
+		return _colorMutliLayer1;
 	}
 	
 	/**
@@ -85,7 +86,7 @@ public enum SelectionState
 	 */
 	public final GLColor getColorMultiLayerSpecial()
 	{
-		return _colorMutliLayer1b;
+		return _colorMutliLayer1Special;
 	}
 	
 	public final GLColor getColor(final GeoCell cell)
@@ -109,10 +110,16 @@ public enum SelectionState
 			default:
 			{
 				if (insideSelectionBox)
-					return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2b : _colorMutliLayer1b;
+					return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2Special : _colorMutliLayer1Special;
 				
-				return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2a : _colorMutliLayer1a;
+				return block.getBlockX() % 2 != block.getBlockY() % 2 ? _colorMutliLayer2 : _colorMutliLayer1;
 			}
 		}
+	}
+	
+	@Override
+	public final String toString()
+	{
+		return Util.capitalizeString(name());
 	}
 }

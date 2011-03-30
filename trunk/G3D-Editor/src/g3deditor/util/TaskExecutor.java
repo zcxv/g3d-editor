@@ -116,11 +116,12 @@ public final class TaskExecutor
 			_tasksRemaining = tasksRemaining;
 		}
 		
-		public final void onTaskCompleted()
+		public final void onTasksCompleted(final int count)
 		{
 			synchronized (this)
 			{
-				if (--_tasksRemaining == 0)
+				_tasksRemaining -= count;
+				if (_tasksRemaining == 0)
 					notify();
 			}
 		}
@@ -159,7 +160,8 @@ public final class TaskExecutor
 		@Override
 		public final void run()
 		{
-			Runnable task;
+			Runnable task1;
+			Runnable task2;
 			
 			try
 			{
@@ -171,16 +173,19 @@ public final class TaskExecutor
 						{
 							_taskQueue.wait();
 						}
-						task = _taskQueue.poll();
+						task1 = _taskQueue.poll();
+						task2 = _taskQueue.isEmpty() ? null : _taskQueue.poll();
 					}
 					
 					try
 					{
-						task.run();
+						task1.run();
+						if (task2 != null)
+							task2.run();
 					}
 					finally
 					{
-						_taskCompleteListener.onTaskCompleted();
+						_taskCompleteListener.onTasksCompleted(task2 != null ? 2 : 1);
 					}
 				}
 			}

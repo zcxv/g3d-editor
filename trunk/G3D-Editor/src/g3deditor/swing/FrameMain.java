@@ -73,13 +73,14 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final DefaultButton _buttonSave;
 	private final DefaultButton _buttonHelp;
 	private final DefaultLabel _labelLogoL2j;
+	private final DefaultButton _buttonDonate;
 	
 	private GeoCell _selectedCell;
 	private boolean _waitForUpdate;
 	
 	private FrameMain()
 	{
-		super("G3D-Editor [Beta 1 R39] by Forsaiken");
+		super("G3D-Editor [Beta 1.1] by Forsaiken");
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -133,8 +134,11 @@ public final class FrameMain extends JFrame implements ActionListener
 		_buttonSave.addActionListener(this);
 		_buttonHelp = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/help.png")));
 		_buttonHelp.addActionListener(this);
-		final BufferedImage img = Util.loadImage("./data/icon/l2jserverlogo.png");
+		BufferedImage img = Util.loadImage("./data/icon/l2jserverlogo.png");
 		_labelLogoL2j = new DefaultLabel(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
+		img = Util.loadImage("./data/icon/donate.png");
+		_buttonDonate = new DefaultButton(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
+		_buttonDonate.addActionListener(this);
 		
 		setJMenuBar(_menuBar);
 		initLayout();
@@ -210,6 +214,14 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		_menuBar.add(_buttonHelp, gbc);
+		
+		gbc.gridx = 7;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		_menuBar.add(_buttonDonate);
 		
 		//gbc.insets = new Insets(2, 2, 2, 2);
 		
@@ -353,6 +365,10 @@ public final class FrameMain extends JFrame implements ActionListener
 					"This programm is FREE and licensed under GNU GPLv3 <i>http://www.gnu.org/licenses/</i><br>" +
 					"Use it on your OWN RISC! I will not take an ANY WARRANTY!" +
 					"</html>", "About", JOptionPane.INFORMATION_MESSAGE);
+		}
+		else if (e.getSource() == _buttonDonate)
+		{
+			Util.openBrowser("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=R3U86G5YDPRNQ");
 		}
 	}
 }

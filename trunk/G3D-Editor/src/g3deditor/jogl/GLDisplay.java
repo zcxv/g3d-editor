@@ -98,8 +98,8 @@ public final class GLDisplay implements GLEventListener
 	private int _height;
 	private long _time;
 	private long _timeFPS;
-	private int _loopsFPS;
-	private int _elementsFPS;
+	private int _loopsPS;
+	private int _elementsPS;
 	
 	private GLDisplay(final GLCanvas canvas)
 	{
@@ -192,7 +192,7 @@ public final class GLDisplay implements GLEventListener
 		
 		_time = System.nanoTime();
 		_timeFPS = 0L;
-		_loopsFPS = 0;
+		_loopsPS = 0;
 		
 		_glInfoText.setText("GLProfile: " + glautodrawable.getGLProfile().getName());
 	}
@@ -219,16 +219,16 @@ public final class GLDisplay implements GLEventListener
 		final long currentTime = System.nanoTime();
 		final double tpf = nanosToTpf(currentTime - _time);
 		_timeFPS += currentTime - _time;
-		_loopsFPS++;
+		_loopsPS++;
 		_time = currentTime;
 		
 		if (TimeUnit.SECONDS.convert(_timeFPS, TimeUnit.NANOSECONDS) >= 1)
 		{
-			final double fps = _loopsFPS == 0 ? Double.POSITIVE_INFINITY : nanosToFps(_timeFPS / _loopsFPS);
-			final int elements = _elementsFPS / (_loopsFPS == 0 ? 1 : _loopsFPS);
+			final double fps = _loopsPS == 0 ? Double.POSITIVE_INFINITY : nanosToFps(_timeFPS / _loopsPS);
+			final int elements = _elementsPS / (_loopsPS == 0 ? 1 : _loopsPS);
 			_timeFPS = 0L;
-			_loopsFPS = 0;
-			_elementsFPS = 0;
+			_loopsPS = 0;
+			_elementsPS = 0;
 			_fpsText.setText("Fps:   " + roundFps(fps));
 			_callsText.setText("Calls: " + elements);
 		}
@@ -271,6 +271,7 @@ public final class GLDisplay implements GLEventListener
 				_renderer.dispose(gl);
 				_renderer = newRenderer;
 				_renderInfoText.setText("Renderer: " + _renderer);
+				getRenderSelector().forceUpdateFrustum();
 			}
 			else
 			{
@@ -289,7 +290,7 @@ public final class GLDisplay implements GLEventListener
 			for (int i = _renderSelector.getElementsToRender(); i-- > 0;)
 			{
 				selector = _renderSelector.getElementToRender(i);
-				_elementsFPS += selector.getElementsToRender();
+				_elementsPS += selector.getElementsToRender();
 				_renderer.render(gl, selector);
 			}
 			
@@ -318,7 +319,7 @@ public final class GLDisplay implements GLEventListener
 						gl.glLineWidth(3f);
 					
 					selector = _renderSelector.getElementToRender(i);
-					_elementsFPS += selector.getElementsToRender();
+					_elementsPS += selector.getElementsToRender();
 					_renderer.render(gl, selector);
 				}
 				GLState.lockColor(false);

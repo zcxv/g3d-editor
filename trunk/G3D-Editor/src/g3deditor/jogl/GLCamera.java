@@ -17,13 +17,14 @@ package g3deditor.jogl;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
-import g3deditor.util.BufferUtils;
 
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
+
+import com.jogamp.common.nio.Buffers;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -70,7 +71,7 @@ public final class GLCamera
 		_combinedMatrix = new float[16];
 		_frustum = new float[6][4];
 		_pickResult = new float[3];
-		_pickZBuffer = BufferUtils.createFloatBuffer(1);
+		_pickZBuffer = Buffers.newDirectFloatBuffer(1);
 		
 		_prevCamPosX = Float.NEGATIVE_INFINITY;
 		_prevCamPosY = Float.NEGATIVE_INFINITY;

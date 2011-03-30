@@ -17,7 +17,6 @@ package g3deditor.jogl;
 import g3deditor.geo.GeoBlock;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
-import g3deditor.util.BufferUtils;
 import g3deditor.util.Util;
 
 import java.awt.image.BufferedImage;
@@ -29,6 +28,7 @@ import java.nio.ShortBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.awt.ImageUtil;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
@@ -273,7 +273,7 @@ public final class GLTerrain
 			
 			final int xUnit = xUp - 1;
 			final int zUnit = zUp - 1;
-			final IntBuffer indexBuffer = BufferUtils.createIntBuffer(xUnit * zUnit * 6);
+			final IntBuffer indexBuffer = Buffers.newDirectIntBuffer(xUnit * zUnit * 6);
 			for (int i = 0, j; i < zUnit; i++)
 			{
 				for (j = 0; j < xUnit; j++)
@@ -289,7 +289,7 @@ public final class GLTerrain
 			
 			indexBuffer.flip();
 			
-			final FloatBuffer textureBuffer = BufferUtils.createFloatBuffer(xUp * zUp * 2);
+			final FloatBuffer textureBuffer = Buffers.newDirectFloatBuffer(xUp * zUp * 2);
 			final float xStep = 1F / (xUp);
 			final float zStep = 1F / (zUp);
 			for (int i = 0, j; i < zUp; i++)
@@ -302,14 +302,14 @@ public final class GLTerrain
 			}
 			textureBuffer.flip();
 			
-			_vertexBuffer = BufferUtils.createShortBuffer(xUp * zUp * 3);
+			_vertexBuffer = Buffers.newDirectShortBuffer(xUp * zUp * 3);
 			_indexBufferLen = indexBuffer.remaining();
 			
 			gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, vboIndex);
-			gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.remaining() * BufferUtils.INTEGER_SIZE, indexBuffer, GL2.GL_STATIC_DRAW);
+			gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.remaining() * Buffers.SIZEOF_INT, indexBuffer, GL2.GL_STATIC_DRAW);
 			
 			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboTexture);
-			gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * BufferUtils.FLOAT_SIZE, textureBuffer, GL2.GL_STATIC_DRAW);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * Buffers.SIZEOF_FLOAT, textureBuffer, GL2.GL_STATIC_DRAW);
 		}
 		
 		public final void update(final GL2 gl, final int vboVertex, final GeoBlock[][] blocks, final boolean flipped)
@@ -321,7 +321,7 @@ public final class GLTerrain
 			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboVertex);
 			// call with null buffer first to tell VGA-driver that we give a shit about the old content
 			gl.glBufferData(GL2.GL_ARRAY_BUFFER, 0, null, GL2.GL_DYNAMIC_DRAW);
-			gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.remaining() * BufferUtils.SHORT_SIZE, _vertexBuffer, GL2.GL_DYNAMIC_DRAW);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.remaining() * Buffers.SIZEOF_SHORT, _vertexBuffer, GL2.GL_DYNAMIC_DRAW);
 		}
 		
 		public abstract void updateImpl(final ShortBuffer vertexBuffer, final GeoBlock[][] blocks, final boolean flipped);

@@ -19,12 +19,13 @@ import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.GLState;
-import g3deditor.util.BufferUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL2;
+
+import com.jogamp.common.nio.Buffers;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -36,63 +37,6 @@ public final class VBORenderer extends GLCellRenderer
 	public static final String NAME = "VertexBufferObject";
 	public static final String NAME_SHORT = "VBO";
 	
-	private static final byte[] GEOMETRY_INDICES_DATA =
-	{
-		0, 1, 2, 2, 3, 0,
-		1, 5, 6, 6, 2, 1,
-		7, 6, 5, 5, 4, 7,
-		4, 0, 3, 3, 7, 4,
-		0, 5, 1, 5, 0, 4,
-		8, 9, 10, 10, 11, 8 // top
-	};
-	
-	private static final int GEOMETRY_INDICES_DATA_LENGTH = GEOMETRY_INDICES_DATA.length;
-	private static final int GEOMETRY_INDICES_DATA_MAX_INDEX = 11;
-	private static final int GEOMETRY_INDICES_DATA_MAX = GEOMETRY_INDICES_DATA_MAX_INDEX + 1;
-	
-	private static final float[] GEOMETRY_VERTEX_DATA_SMALL =
-	{
-		0.1f, -0.2f, 0.9f,
-		0.9f, -0.2f, 0.9f,
-		0.9f,  0.0f, 0.9f,
-		0.1f,  0.0f, 0.9f,
-		0.1f, -0.2f, 0.1f,
-		0.9f, -0.2f, 0.1f,
-		0.9f,  0.0f, 0.1f,
-		0.1f,  0.0f, 0.1f,
-		0.1f,  0.0f, 0.9f, // top
-		0.9f,  0.0f, 0.9f, // top
-		0.9f,  0.0f, 0.1f, // top
-		0.1f,  0.0f, 0.1f // top
-	};
-	
-	private static final int GEOMETRY_VERTEX_DATA_SMALL_LENGTH = GEOMETRY_VERTEX_DATA_SMALL.length;
-	
-	private static final float[] GEOMETRY_VERTEX_DATA_BIG =
-	{
-		0.1f, -0.2f, 7.9f,
-		7.9f, -0.2f, 7.9f,
-		7.9f,  0.0f, 7.9f,
-		0.1f,  0.0f, 7.9f,
-		0.1f, -0.2f, 0.1f,
-		7.9f, -0.2f, 0.1f,
-		7.9f,  0.0f, 0.1f,
-		0.1f,  0.0f, 0.1f,
-		0.1f,  0.0f, 7.9f, // top
-		7.9f,  0.0f, 7.9f, // top
-		7.9f,  0.0f, 0.1f, // top
-		0.1f,  0.0f, 0.1f // top
-	};
-	
-	private static final float[] GEOMETRY_TEXTURE_DATA =
-	{
-		0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,
-		0, 1, 0, 0, 1, 0, 1, 1 // top
-	};
-	
-	private static final int GEOMETRY_TEXTURE_DATA_LENGTH = GEOMETRY_TEXTURE_DATA.length;
-	
 	private ByteBuffer _indexBuffer;
 	private FloatBuffer _vertexBuffer;
 	private FloatBuffer _textureBuffer;
@@ -100,24 +44,6 @@ public final class VBORenderer extends GLCellRenderer
 	private int _vboIndex;
 	private int _vboVertex;
 	private int _vboTexture;
-	
-	private static final void fillTextureUV(final int nswe, final FloatBuffer textureBuffer)
-	{
-		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float u2 = u1 + NSWE_TEX_BLOCK;
-		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float v2 = v1 + NSWE_TEX_BLOCK;
-		
-		textureBuffer.position(textureBuffer.position() + GEOMETRY_TEXTURE_DATA_LENGTH - 8);
-		textureBuffer.put(u1);
-		textureBuffer.put(v2);
-		textureBuffer.put(u1);
-		textureBuffer.put(v1);
-		textureBuffer.put(u2);
-		textureBuffer.put(v1);
-		textureBuffer.put(u2);
-		textureBuffer.put(v2);
-	}
 	
 	/**
 	 * @see g3deditor.jogl.GLCellRenderer#init(javax.media.opengl.GL2)
@@ -128,11 +54,11 @@ public final class VBORenderer extends GLCellRenderer
 		if (!super.init(gl))
 			return false;
 		
-		_indexBuffer = BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
-		_vertexBuffer = BufferUtils.createFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * NSWE_COMBINATIONS + GEOMETRY_VERTEX_DATA_SMALL_LENGTH);
-		_textureBuffer = BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_TEXTURE_DATA_LENGTH);
+		_indexBuffer = Buffers.newDirectByteBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
+		_vertexBuffer = Buffers.newDirectFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * NSWE_COMBINATIONS + GEOMETRY_VERTEX_DATA_SMALL_LENGTH);
+		_textureBuffer = Buffers.newDirectFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_TEXTURE_DATA_LENGTH);
 		
-		_indexBuffer.put(GEOMETRY_INDICES_DATA);
+		_indexBuffer.put(GEOMETRY_INDICES_DATA_BYTE);
 		_vertexBuffer.put(GEOMETRY_VERTEX_DATA_BIG);
 		fillTextureUV(GeoEngine.NSWE_ALL, _textureBuffer);
 		
@@ -140,7 +66,7 @@ public final class VBORenderer extends GLCellRenderer
 		{
 			for (j = 0; j < GEOMETRY_INDICES_DATA_LENGTH; j++)
 			{
-				_indexBuffer.put((byte) (GEOMETRY_INDICES_DATA[j] + GEOMETRY_INDICES_DATA_MAX * i + GEOMETRY_INDICES_DATA_MAX));
+				_indexBuffer.put((byte) (GEOMETRY_INDICES_DATA_BYTE[j] + GEOMETRY_INDICES_DATA_MAX * i + GEOMETRY_INDICES_DATA_MAX));
 			}
 			
 			_vertexBuffer.put(GEOMETRY_VERTEX_DATA_SMALL);
@@ -157,13 +83,13 @@ public final class VBORenderer extends GLCellRenderer
 		_vboTexture = temp[2];
 		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
-		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, _indexBuffer.limit() * BufferUtils.BYTE_SIZE, _indexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, _indexBuffer.limit() * Buffers.SIZEOF_BYTE, _indexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.limit() * BufferUtils.FLOAT_SIZE, _vertexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _vertexBuffer.limit() * Buffers.SIZEOF_FLOAT, _vertexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _textureBuffer.limit() * BufferUtils.FLOAT_SIZE, _textureBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, _textureBuffer.limit() * Buffers.SIZEOF_FLOAT, _textureBuffer, GL2.GL_STATIC_DRAW);
 		
 		return true;
 	}

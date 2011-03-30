@@ -318,4 +318,49 @@ public final class Util
 		os.write((byte) (value & 0xFF));
 		os.write((byte) (value >> 8 & 0xFF));
 	}
+	
+	public static final void openBrowser(final String url)
+	{
+		final String osName = System.getProperty("os.name");
+		try
+		{
+			if (osName.startsWith("Windows"))
+			{
+				Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
+			}
+			else
+			{
+				final String[] browsers = {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
+				
+				String browser;
+				for (int i = browsers.length; i-- > 0;)
+				{
+					browser = browsers[i];
+					if (Runtime.getRuntime().exec(new String[]{"which", browser}).waitFor() == 0)
+					{
+						Runtime.getRuntime().exec(new String[]{browser, url});
+						break;
+					}
+				}
+			}
+		}
+		catch (final Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public static final String capitalizeString(final String in)
+	{
+		if (in.isEmpty())
+			return in;
+		
+		final StringBuilder sb = new StringBuilder(in.length());
+		sb.append(Character.toUpperCase(in.charAt(0)));
+		for (int i = 1; i < in.length(); i++)
+		{
+			sb.append(Character.toLowerCase(in.charAt(i)));
+		}
+		return sb.toString();
+	}
 }
