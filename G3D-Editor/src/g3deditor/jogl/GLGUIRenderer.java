@@ -14,7 +14,6 @@
  */
 package g3deditor.jogl;
 
-import g3deditor.util.BufferUtils;
 import g3deditor.util.FastArrayList;
 
 import java.io.File;
@@ -23,6 +22,7 @@ import java.nio.charset.Charset;
 
 import javax.media.opengl.GL2;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
@@ -179,7 +179,7 @@ public final class GLGUIRenderer
 		
 		public GLText(final int x, final int y)
 		{
-			_buffer = BufferUtils.createByteBuffer(256);
+			_buffer = Buffers.newDirectByteBuffer(256);
 			_x = x;
 			_y = y;
 		}

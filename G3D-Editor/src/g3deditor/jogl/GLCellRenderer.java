@@ -20,8 +20,10 @@ import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
 import g3deditor.jogl.renderer.VBOGSLSRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
+import g3deditor.jogl.shader.GLShader;
 
 import java.io.File;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL2;
 
@@ -75,6 +77,103 @@ public abstract class GLCellRenderer
 	protected static final int NSWE_TEX_ROWS_COLS = 4;
 	protected static final float NSWE_TEX_BLOCK = 1f / NSWE_TEX_ROWS_COLS;
 	
+	protected static final byte[] GEOMETRY_INDICES_DATA_BYTE =
+	{
+		0, 1, 2, 2, 3, 0,
+		1, 5, 6, 6, 2, 1,
+		7, 6, 5, 5, 4, 7,
+		4, 0, 3, 3, 7, 4,
+		0, 5, 1, 5, 0, 4,
+		8, 9, 10, 10, 11, 8 // top
+	};
+	
+	protected static final short[] GEOMETRY_INDICES_DATA_SHORT =
+	{
+		0, 1, 2, 2, 3, 0,
+		1, 5, 6, 6, 2, 1,
+		7, 6, 5, 5, 4, 7,
+		4, 0, 3, 3, 7, 4,
+		0, 5, 1, 5, 0, 4,
+		8, 9, 10, 10, 11, 8 // top
+	};
+	
+	protected static final int GEOMETRY_INDICES_DATA_LENGTH = GEOMETRY_INDICES_DATA_BYTE.length;
+	protected static final int GEOMETRY_INDICES_DATA_MAX_INDEX = 11;
+	protected static final int GEOMETRY_INDICES_DATA_MAX = GEOMETRY_INDICES_DATA_MAX_INDEX + 1;
+	
+	protected static final float[] GEOMETRY_VERTEX_DATA_SMALL =
+	{
+		0.1f, -0.2f, 0.9f,
+		0.9f, -0.2f, 0.9f,
+		0.9f,  0.0f, 0.9f,
+		0.1f,  0.0f, 0.9f,
+		0.1f, -0.2f, 0.1f,
+		0.9f, -0.2f, 0.1f,
+		0.9f,  0.0f, 0.1f,
+		0.1f,  0.0f, 0.1f,
+		0.1f,  0.0f, 0.9f, // top
+		0.9f,  0.0f, 0.9f, // top
+		0.9f,  0.0f, 0.1f, // top
+		0.1f,  0.0f, 0.1f // top
+	};
+	
+	protected static final int GEOMETRY_VERTEX_DATA_SMALL_LENGTH = GEOMETRY_VERTEX_DATA_SMALL.length;
+	
+	protected static final float[] GEOMETRY_VERTEX_DATA_BIG =
+	{
+		0.1f, -0.2f, 7.9f,
+		7.9f, -0.2f, 7.9f,
+		7.9f,  0.0f, 7.9f,
+		0.1f,  0.0f, 7.9f,
+		0.1f, -0.2f, 0.1f,
+		7.9f, -0.2f, 0.1f,
+		7.9f,  0.0f, 0.1f,
+		0.1f,  0.0f, 0.1f,
+		0.1f,  0.0f, 7.9f, // top
+		7.9f,  0.0f, 7.9f, // top
+		7.9f,  0.0f, 0.1f, // top
+		0.1f,  0.0f, 0.1f // top
+	};
+	
+	private static final float TEX_COORD_U1 = 0.1f; // identifier for vertex shader
+	private static final float TEX_COORD_U2 = 0.2f; // identifier for vertex shader
+	private static final float TEX_COORD_V1 = 0.3f; // identifier for vertex shader
+	private static final float TEX_COORD_V2 = 0.4f; // identifier for vertex shader
+	
+	protected static final float[] GEOMETRY_TEXTURE_DATA =
+	{
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		TEX_COORD_U1, // top
+		TEX_COORD_V2, // top
+		TEX_COORD_U2, // top
+		TEX_COORD_V2, // top
+		TEX_COORD_U2, // top
+		TEX_COORD_V1, // top
+		TEX_COORD_U1, // top
+		TEX_COORD_V1 // top
+	};
+	
+	protected static final void fillTextureUV(final int nswe, final FloatBuffer textureBuffer)
+	{
+		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float u2 = u1 + NSWE_TEX_BLOCK;
+		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float v2 = v1 + NSWE_TEX_BLOCK;
+		
+		textureBuffer.position(textureBuffer.position() + GEOMETRY_TEXTURE_DATA_LENGTH - 8);
+		textureBuffer.put(u1);
+		textureBuffer.put(v2);
+		textureBuffer.put(u2);
+		textureBuffer.put(v2);
+		textureBuffer.put(u2);
+		textureBuffer.put(v1);
+		textureBuffer.put(u1);
+		textureBuffer.put(v1);
+	}
+	
+	protected static final int GEOMETRY_TEXTURE_DATA_LENGTH = GEOMETRY_TEXTURE_DATA.length;
+	
 	protected static final void renderCellFull(final GL2 gl, final boolean big, final int nswe)
 	{
 		final float size = big ? 7.9f : 0.9f;
@@ -104,13 +203,13 @@ public abstract class GLCellRenderer
 		final float v2 = v1 + NSWE_TEX_BLOCK;
 		
 		gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-		gl.glTexCoord2f(u2, v2);
+		gl.glTexCoord2f(u1, v1);
 		gl.glVertex3f(0.1f, 0.0f, 0.1f);
 		gl.glTexCoord2f(u1, v2);
 		gl.glVertex3f(0.1f, 0.0f, size);
 		gl.glTexCoord2f(u2, v1);
 		gl.glVertex3f(size, 0.0f, 0.1f);
-		gl.glTexCoord2f(u1, v1);
+		gl.glTexCoord2f(u2, v2);
 		gl.glVertex3f(size, 0.0f, size);
 		gl.glEnd();
 	}
@@ -129,10 +228,22 @@ public abstract class GLCellRenderer
 	
 	private boolean _initialized;
 	private Texture _nsweTexture;
+	private GLShader _shader;
 	
 	protected final Texture getNsweTexture()
 	{
 		return _nsweTexture;
+	}
+	
+	protected final GLShader getShader()
+	{
+		return _shader;
+	}
+	
+	protected final void initShader(final GL2 gl, final String vertexShaderPath, final String fragmentShaderPath)
+	{
+		_shader = new GLShader(vertexShaderPath, fragmentShaderPath);
+		_shader.init(gl);
 	}
 	
 	public boolean init(final GL2 gl)
@@ -154,6 +265,10 @@ public abstract class GLCellRenderer
 			_nsweTexture = null;
 			e.printStackTrace();
 		}
+		
+		if (_shader != null && _nsweTexture != null)
+			_shader.setTexture(gl, _nsweTexture, "nswe_texture");
+		
 		return true;
 	}
 	
@@ -161,6 +276,11 @@ public abstract class GLCellRenderer
 	{
 		if (_nsweTexture != null)
 			_nsweTexture.bind();
+		
+		if (_shader != null)
+		{
+			gl.glUseProgram(getShader().getProgramId());
+		}
 		
 		gl.glPushMatrix();
 		GLState.resetTranslate();
@@ -171,6 +291,7 @@ public abstract class GLCellRenderer
 	public void disableRender(final GL2 gl)
 	{
 		gl.glPopMatrix();
+		gl.glUseProgram(0);
 	}
 	
 	public void dispose(final GL2 gl)
@@ -182,6 +303,9 @@ public abstract class GLCellRenderer
 		
 		if (_nsweTexture != null)
 			_nsweTexture.destroy(gl);
+		
+		if (_shader != null)
+			_shader.dispose(gl);
 	}
 	
 	public abstract String getName();

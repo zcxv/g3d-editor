@@ -21,12 +21,10 @@ import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.GLDisplay;
-import g3deditor.jogl.shader.GLShader;
 import g3deditor.jogl.shader.uniform.GLUniformVec1i;
 import g3deditor.jogl.shader.uniform.GLUniformVec1iv;
 import g3deditor.jogl.shader.uniform.GLUniformVec2f;
 import g3deditor.jogl.shader.uniform.GLUniformVec4fv;
-import g3deditor.util.BufferUtils;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -45,89 +43,10 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 	public static final String NAME = "VertexBufferObject GSLS";
 	public static final String NAME_SHORT = "VBO GSLS";
 	
-	private static final short[] GEOMETRY_INDICES_DATA =
-	{
-		0, 1, 2, 2, 3, 0,
-		1, 5, 6, 6, 2, 1,
-		7, 6, 5, 5, 4, 7,
-		4, 0, 3, 3, 7, 4,
-		0, 5, 1, 5, 0, 4,
-		8, 9, 10, 10, 11, 8 // top
-	};
-	
-	private static final int GEOMETRY_INDICES_DATA_LENGTH = GEOMETRY_INDICES_DATA.length;
-	private static final int GEOMETRY_INDICES_DATA_MAX_INDEX = 11;
-	private static final int GEOMETRY_INDICES_DATA_MAX = GEOMETRY_INDICES_DATA_MAX_INDEX + 1;
-	
-	private static final float[] GEOMETRY_VERTEX_DATA_SMALL =
-	{
-		0.1f, -0.2f, 0.9f,
-		0.9f, -0.2f, 0.9f,
-		0.9f,  0.0f, 0.9f,
-		0.1f,  0.0f, 0.9f,
-		0.1f, -0.2f, 0.1f,
-		0.9f, -0.2f, 0.1f,
-		0.9f,  0.0f, 0.1f,
-		0.1f,  0.0f, 0.1f,
-		0.1f,  0.0f, 0.9f, // top
-		0.9f,  0.0f, 0.9f, // top
-		0.9f,  0.0f, 0.1f, // top
-		0.1f,  0.0f, 0.1f // top
-	};
-	
-	private static final int GEOMETRY_VERTEX_DATA_SMALL_LENGTH = GEOMETRY_VERTEX_DATA_SMALL.length;
-	
-	private static final float[] GEOMETRY_VERTEX_DATA_BIG =
-	{
-		0.1f, -0.2f, 7.9f,
-		7.9f, -0.2f, 7.9f,
-		7.9f,  0.0f, 7.9f,
-		0.1f,  0.0f, 7.9f,
-		0.1f, -0.2f, 0.1f,
-		7.9f, -0.2f, 0.1f,
-		7.9f,  0.0f, 0.1f,
-		0.1f,  0.0f, 0.1f,
-		0.1f,  0.0f, 7.9f, // top
-		7.9f,  0.0f, 7.9f, // top
-		7.9f,  0.0f, 0.1f, // top
-		0.1f,  0.0f, 0.1f // top
-	};
-	
-	private static final float[] GEOMETRY_TEXTURE_DATA =
-	{
-		0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,
-		0.1f, 0.4f, 0.1f, 0.3f, 0.2f, 0.3f, 0.2f, 0.4f // top
-	};
-	
-	private static final int GEOMETRY_TEXTURE_DATA_LENGTH = GEOMETRY_TEXTURE_DATA.length;
-	
-	private static final void fillTextureUV(final int nswe, final FloatBuffer textureBuffer)
-	{
-		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float u2 = u1 + NSWE_TEX_BLOCK;
-		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
-		final float v2 = v1 + NSWE_TEX_BLOCK;
-		
-		textureBuffer.position(textureBuffer.position() + GEOMETRY_TEXTURE_DATA_LENGTH - 8);
-		textureBuffer.put(u1);
-		textureBuffer.put(v2);
-		
-		textureBuffer.put(u1);
-		textureBuffer.put(v1);
-		
-		textureBuffer.put(u2);
-		textureBuffer.put(v1);
-		
-		textureBuffer.put(u2);
-		textureBuffer.put(v2);
-	}
-	
 	private int _vboIndex;
 	private int _vboVertex;
 	private int _vboTexture;
 	
-	private GLShader _shader;
 	private GLUniformVec4fv _cellColors;
 	private GLUniformVec2f _blockPosition;
 	private GLUniformVec1iv _blockData;
@@ -150,11 +69,11 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 		_vboVertex = temp[1];
 		_vboTexture = temp[2];
 		
-		final ShortBuffer indexBuffer = BufferUtils.createShortBuffer(GEOMETRY_INDICES_DATA_LENGTH * 65);
-		final FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * 65);
-		final FloatBuffer textureBuffer = BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * 65);
+		final ShortBuffer indexBuffer = Buffers.newDirectShortBuffer(GEOMETRY_INDICES_DATA_LENGTH * 65);
+		final FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * 65);
+		final FloatBuffer textureBuffer = Buffers.newDirectFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * 65);
 		
-		indexBuffer.put(GEOMETRY_INDICES_DATA);
+		indexBuffer.put(GEOMETRY_INDICES_DATA_SHORT);
 		vertexBuffer.put(GEOMETRY_VERTEX_DATA_BIG);
 		fillTextureUV(GeoEngine.NSWE_ALL, textureBuffer);
 		
@@ -164,7 +83,7 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 			{
 				for (i = 0; i < GEOMETRY_INDICES_DATA_LENGTH; i++)
 				{
-					indexBuffer.put((short) (GEOMETRY_INDICES_DATA[i] + GEOMETRY_INDICES_DATA_MAX * (x * 8 + y) + GEOMETRY_INDICES_DATA_MAX));
+					indexBuffer.put((short) (GEOMETRY_INDICES_DATA_SHORT[i] + GEOMETRY_INDICES_DATA_MAX * (x * 8 + y) + GEOMETRY_INDICES_DATA_MAX));
 				}
 				
 				for (i = 0; i < GEOMETRY_VERTEX_DATA_SMALL_LENGTH;)
@@ -183,23 +102,21 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 		textureBuffer.flip();
 		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
-		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.remaining() * BufferUtils.SHORT_SIZE, indexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.remaining() * Buffers.SIZEOF_SHORT, indexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboVertex);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertexBuffer.remaining() * BufferUtils.FLOAT_SIZE, vertexBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertexBuffer.remaining() * Buffers.SIZEOF_FLOAT, vertexBuffer, GL2.GL_STATIC_DRAW);
 		
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
-		gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * BufferUtils.FLOAT_SIZE, textureBuffer, GL2.GL_STATIC_DRAW);
+		gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * Buffers.SIZEOF_FLOAT, textureBuffer, GL2.GL_STATIC_DRAW);
 		
-		_shader = new GLShader("./data/shader/VertexShader.txt", "./data/shader/FragmentShader.txt");
-		_shader.init(gl);
-		_shader.setTexture(gl, getNsweTexture(), "nswe_texture");
-		_cellColors = _shader.getUniformVec4fv(gl, "cell_colors", 12);
-		_blockPosition = _shader.getUniformVec2f(gl, "block_position");
-		_blockData = _shader.getUniformVec1iv(gl, "block_data", 64);
-		_blockType = _shader.getUniformVec1i(gl, "block_type");
-		_cellData = _shader.getUniformVec1i(gl, "cell_data");
-		_cellPositions = _shader.getUniformVec1iv(gl, "cell_positions", 64);
+		initShader(gl, "./data/shader/VertexShader.txt", "./data/shader/FragmentShader.txt");
+		_cellColors = getShader().getUniformVec4fv(gl, "cell_colors", 12);
+		_blockPosition = getShader().getUniformVec2f(gl, "block_position");
+		_blockData = getShader().getUniformVec1iv(gl, "block_data", 64);
+		_blockType = getShader().getUniformVec1i(gl, "block_type");
+		_cellData = getShader().getUniformVec1i(gl, "cell_data");
+		_cellPositions = getShader().getUniformVec1iv(gl, "cell_positions", 64);
 		return true;
 	}
 	
@@ -221,8 +138,6 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 		gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
 		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
-		
-		gl.glUseProgram(_shader.getProgramId());
 		
 		_cellColors.clear();
 		_cellColors.put(SelectionState.NORMAL.getColorFlat());
@@ -328,8 +243,6 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 	{
 		super.disableRender(gl);
 		
-		gl.glUseProgram(0);
-		
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
 		
@@ -345,7 +258,6 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 	{
 		super.dispose(gl);
 		
-		_shader.dispose(gl);
 		gl.glDeleteBuffers(3, new int[]{_vboIndex, _vboVertex, _vboTexture}, 0);
 	}
 	

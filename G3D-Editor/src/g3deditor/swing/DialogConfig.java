@@ -69,6 +69,9 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	private final DefaultLabel _labelGridRange;
 	private final JSlider _sliderGridRange;
 	
+	private final DialogColorChooser _dialogColor;
+	private final DefaultButton _buttonChooseColors;
+	
 	private final JPanel _panelGeodata;
 	private final DefaultLabel _labelGeodataPath;
 	private final DefaultTextField _fieldGeodataPath;
@@ -138,6 +141,10 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_sliderGridRange.setLabelTable(rangeTable);
 		_sliderGridRange.setPaintLabels(true);
 		
+		_dialogColor = new DialogColorChooser(this);
+		_buttonChooseColors = new DefaultButton("Choose cell/block colors");
+		_buttonChooseColors.addActionListener(this);
+		
 		_panelGeodata = new JPanel();
 		_panelGeodata.setBorder(BorderFactory.createTitledBorder("Geodata"));
 		_labelGeodataPath = new DefaultLabel("Path to Geodata:");
@@ -151,6 +158,11 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_buttonCancel = new DefaultButton("Cancel");
 		_buttonCancel.addActionListener(this);
 		
+		initLayout();
+	}
+	
+	private final void initLayout()
+	{
 		final GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(2, 2, 2, 2);
 		gbc.anchor = GridBagConstraints.CENTER;
@@ -257,6 +269,16 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.ipady = 0;
 		_panelEditor.add(_sliderGridRange, gbc);
 		
+		gbc.gridx = 0;
+		gbc.gridy = 9;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_buttonChooseColors, gbc);
+		
 		_panelGeodata.setLayout(new GridBagLayout());
 		
 		gbc.gridx = 0;
@@ -327,6 +349,11 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		
 		pack();
 		setResizable(false);
+	}
+	
+	public final DialogColorChooser getColorChooser()
+	{
+		return _dialogColor;
 	}
 	
 	private final void checkDLLoDSliderEnabled()
@@ -408,7 +435,11 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	@Override
 	public final void actionPerformed(final ActionEvent e)
 	{
-		if (e.getSource() == _buttonOk)
+		if (e.getSource() == this._buttonChooseColors)
+		{
+			_dialogColor.setVisible(true);
+		}
+		else if (e.getSource() == _buttonOk)
 		{
 			Config.TERRAIN_DEFAULT_ON = _checkTerrainDefaultOn.isSelected();
 			Config.V_SYNC = _checkVSync.isSelected();

@@ -59,6 +59,11 @@ public final class GLColor
 		_a = Math.max(Math.min(a, 1f), 0f);
 	}
 	
+	public final void setColorRGB(final Color color)
+	{
+		setRGB(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f);
+	}
+	
 	public final void setRGB(final float r, final float g, final float b)
 	{
 		_r = Math.max(Math.min(r, 1f), 0f);
@@ -69,6 +74,11 @@ public final class GLColor
 	public final Color getColor()
 	{
 		return new Color((int) (_r * 255f), (int) (_g * 255f), (int) (_b * 255f), (int) (_a * 255f));
+	}
+	
+	public final Color getColorRGB()
+	{
+		return new Color((int) (_r * 255f), (int) (_g * 255f), (int) (_b * 255f), 255);
 	}
 	
 	public final float getR()

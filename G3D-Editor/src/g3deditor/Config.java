@@ -38,6 +38,18 @@ public final class Config
 
 	private static final File CONFIG_FILE				= new File("./G3DEditor.ini");
 	private static final ConfigProperties PROPERTIES	= new ConfigProperties();
+	public static int DEFAULT_COLOR_FLAT_NORMAL					= Color.BLUE.getRGB();
+	public static int DEFAULT_COLOR_FLAT_HIGHLIGHTED			= Color.CYAN.getRGB();
+	public static int DEFAULT_COLOR_FLAT_SELECTED				= Color.MAGENTA.getRGB();
+	public static int DEFAULT_COLOR_COMPLEX_NORMAL				= Color.GREEN.getRGB();
+	public static int DEFAULT_COLOR_COMPLEX_HIGHLIGHTED			= Color.CYAN.getRGB();
+	public static int DEFAULT_COLOR_COMPLEX_SELECTED			= Color.MAGENTA.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_NORMAL			= Color.RED.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED		= Color.CYAN.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_SELECTED			= Color.MAGENTA.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_NORMAL_SPECIAL			= Color.WHITE.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL		= Color.WHITE.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_SELECTED_SPECIAL			= Color.WHITE.getRGB();
 	
 	public static String PATH_TO_GEO_FILES				= "./data/geodata/";
 	public static boolean TERRAIN_DEFAULT_ON			= false;
@@ -50,15 +62,18 @@ public final class Config
 	public static boolean USE_MULTITHREADING			= Runtime.getRuntime().availableProcessors() > 1;
 	public static boolean DRAW_OUTLINE					= false;
 	
-	public static int COLOR_FLAT_NORMAL					= Color.BLUE.getRGB();
-	public static int COLOR_FLAT_HIGHLIGHTED			= Color.CYAN.getRGB();
-	public static int COLOR_FLAT_SELECTED				= Color.MAGENTA.getRGB();
-	public static int COLOR_COMPLEX_NORMAL				= Color.GREEN.getRGB();
-	public static int COLOR_COMPLEX_HIGHLIGHTED			= Color.CYAN.getRGB();
-	public static int COLOR_COMPLEX_SELECTED			= Color.MAGENTA.getRGB();
-	public static int COLOR_MULTILAYER_NORMAL			= Color.RED.getRGB();
-	public static int COLOR_MULTILAYER_HIGHLIGHTED		= Color.CYAN.getRGB();
-	public static int COLOR_MULTILAYER_SELECTED			= Color.MAGENTA.getRGB();
+	public static int COLOR_FLAT_NORMAL					= DEFAULT_COLOR_FLAT_NORMAL;
+	public static int COLOR_FLAT_HIGHLIGHTED			= DEFAULT_COLOR_FLAT_HIGHLIGHTED;
+	public static int COLOR_FLAT_SELECTED				= DEFAULT_COLOR_FLAT_SELECTED;
+	public static int COLOR_COMPLEX_NORMAL				= DEFAULT_COLOR_COMPLEX_NORMAL;
+	public static int COLOR_COMPLEX_HIGHLIGHTED			= DEFAULT_COLOR_COMPLEX_HIGHLIGHTED;
+	public static int COLOR_COMPLEX_SELECTED			= DEFAULT_COLOR_COMPLEX_SELECTED;
+	public static int COLOR_MULTILAYER_NORMAL			= DEFAULT_COLOR_MULTILAYER_NORMAL;
+	public static int COLOR_MULTILAYER_HIGHLIGHTED		= DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED;
+	public static int COLOR_MULTILAYER_SELECTED			= DEFAULT_COLOR_MULTILAYER_SELECTED;
+	public static int COLOR_MULTILAYER_NORMAL_SPECIAL			= DEFAULT_COLOR_MULTILAYER_NORMAL_SPECIAL;
+	public static int COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL		= DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL;
+	public static int COLOR_MULTILAYER_SELECTED_SPECIAL			= DEFAULT_COLOR_MULTILAYER_SELECTED_SPECIAL;
 	
 	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
 	{
@@ -105,26 +120,30 @@ public final class Config
 			{
 				PROPERTIES.load(CONFIG_FILE);
 				
-				PATH_TO_GEO_FILES		= PROPERTIES.getProperty("PATH_TO_GEO_FILES", "./data/geodata/");
-				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TERRAIN_DEFAULT_ON", "false"));
-				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VIS_GRID_RANGE", String.valueOf(GLCellRenderSelector.MIN_VIS_GRID_RANGE)));
-				LOOK_AND_FEEL			= PROPERTIES.getProperty("LOOK_AND_FEEL", "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", GLCellRenderer.validateRenderer(null));
-				DLLoD_RANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoD_RANGE", String.valueOf(DLLoDRenderer.MAX_DISTANCE_SQ)));
-				V_SYNC					= Boolean.parseBoolean(PROPERTIES.getProperty("V_SYNC", "true"));
-				USE_TRANSPARENCY		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_TRANSPARENCY", "true"));
-				USE_MULTITHREADING		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_MULTITHREADING", String.valueOf(Runtime.getRuntime().availableProcessors() > 1)));
-				DRAW_OUTLINE			= Boolean.parseBoolean(PROPERTIES.getProperty("DRAW_OUTLINE", "false"));
+				PATH_TO_GEO_FILES		= PROPERTIES.getProperty("PATH_TO_GEO_FILES", PATH_TO_GEO_FILES);
+				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TERRAIN_DEFAULT_ON", String.valueOf(TERRAIN_DEFAULT_ON)));
+				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VIS_GRID_RANGE", String.valueOf(VIS_GRID_RANGE)));
+				LOOK_AND_FEEL			= PROPERTIES.getProperty("LOOK_AND_FEEL", LOOK_AND_FEEL);
+				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", GLCellRenderer.validateRenderer(CELL_RENDERER));
+				DLLoD_RANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoD_RANGE", String.valueOf(DLLoD_RANGE)));
+				V_SYNC					= Boolean.parseBoolean(PROPERTIES.getProperty("V_SYNC", String.valueOf(V_SYNC)));
+				USE_TRANSPARENCY		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_TRANSPARENCY", String.valueOf(USE_TRANSPARENCY)));
+				USE_MULTITHREADING		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_MULTITHREADING", String.valueOf(USE_MULTITHREADING)));
+				DRAW_OUTLINE			= Boolean.parseBoolean(PROPERTIES.getProperty("DRAW_OUTLINE", String.valueOf(DRAW_OUTLINE)));
 				
-				COLOR_FLAT_NORMAL				= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_NORMAL", String.valueOf(Color.BLUE.getRGB())));
-				COLOR_FLAT_HIGHLIGHTED			= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_HIGHLIGHTED", String.valueOf(Color.CYAN.getRGB())));
-				COLOR_FLAT_SELECTED				= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_SELECTED", String.valueOf(Color.MAGENTA.getRGB())));
-				COLOR_COMPLEX_NORMAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_NORMAL", String.valueOf(Color.GREEN.getRGB())));
-				COLOR_COMPLEX_HIGHLIGHTED		= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_HIGHLIGHTED", String.valueOf(Color.CYAN.getRGB())));
-				COLOR_COMPLEX_SELECTED			= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_SELECTED", String.valueOf(Color.MAGENTA.getRGB())));
-				COLOR_MULTILAYER_NORMAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_NORMAL", String.valueOf(Color.RED.getRGB())));
-				COLOR_MULTILAYER_HIGHLIGHTED	= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_HIGHLIGHTED", String.valueOf(Color.BLUE.getRGB())));
-				COLOR_MULTILAYER_SELECTED		= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_SELECTED", String.valueOf(Color.MAGENTA.getRGB())));
+				COLOR_FLAT_NORMAL				= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_NORMAL", String.valueOf(COLOR_FLAT_NORMAL)));
+				COLOR_FLAT_HIGHLIGHTED			= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_HIGHLIGHTED", String.valueOf(COLOR_FLAT_HIGHLIGHTED)));
+				COLOR_FLAT_SELECTED				= Integer.parseInt(PROPERTIES.getProperty("COLOR_FLAT_SELECTED", String.valueOf(COLOR_FLAT_SELECTED)));
+				COLOR_COMPLEX_NORMAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_NORMAL", String.valueOf(COLOR_COMPLEX_NORMAL)));
+				COLOR_COMPLEX_HIGHLIGHTED		= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_HIGHLIGHTED", String.valueOf(COLOR_COMPLEX_HIGHLIGHTED)));
+				COLOR_COMPLEX_SELECTED			= Integer.parseInt(PROPERTIES.getProperty("COLOR_COMPLEX_SELECTED", String.valueOf(COLOR_COMPLEX_SELECTED)));
+				COLOR_MULTILAYER_NORMAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_NORMAL", String.valueOf(COLOR_MULTILAYER_NORMAL)));
+				COLOR_MULTILAYER_HIGHLIGHTED	= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_HIGHLIGHTED", String.valueOf(COLOR_MULTILAYER_HIGHLIGHTED)));
+				COLOR_MULTILAYER_SELECTED		= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_SELECTED", String.valueOf(COLOR_MULTILAYER_SELECTED)));
+				
+				COLOR_MULTILAYER_NORMAL_SPECIAL			= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_NORMAL_SPECIAL", String.valueOf(COLOR_MULTILAYER_NORMAL_SPECIAL)));
+				COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL	= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL", String.valueOf(COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL)));
+				COLOR_MULTILAYER_SELECTED_SPECIAL		= Integer.parseInt(PROPERTIES.getProperty("COLOR_MULTILAYER_SELECTED_SPECIAL", String.valueOf(COLOR_MULTILAYER_SELECTED_SPECIAL)));
 			}
 		}
 		catch (final Exception e)
@@ -199,6 +218,10 @@ public final class Config
 		PROPERTIES.put("COLOR_MULTILAYER_NORMAL", String.valueOf(COLOR_MULTILAYER_NORMAL));
 		PROPERTIES.put("COLOR_MULTILAYER_HIGHLIGHTED", String.valueOf(COLOR_MULTILAYER_HIGHLIGHTED));
 		PROPERTIES.put("COLOR_MULTILAYER_SELECTED", String.valueOf(COLOR_MULTILAYER_SELECTED));
+		
+		PROPERTIES.put("COLOR_MULTILAYER_NORMAL_SPECIAL", String.valueOf(COLOR_MULTILAYER_NORMAL_SPECIAL));
+		PROPERTIES.put("COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL", String.valueOf(COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL));
+		PROPERTIES.put("COLOR_MULTILAYER_SELECTED_SPECIAL", String.valueOf(COLOR_MULTILAYER_SELECTED_SPECIAL));
 		
 		PROPERTIES.save(CONFIG_FILE);
 	}
