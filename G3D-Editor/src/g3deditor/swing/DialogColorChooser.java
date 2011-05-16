@@ -101,6 +101,7 @@ public final class DialogColorChooser extends JDialog implements ChangeListener,
 		super(dialog, "Choose colors...", true);
 		addWindowListener(new WindowAdapter()
 		{
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public final void windowClosing(final WindowEvent e)
 			{
