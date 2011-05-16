@@ -56,10 +56,22 @@ public final class PanelNswe extends JPanel implements ActionListener
 	private final void initLayout()
 	{
 		setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-		for (final NsweButton buttonNswe : _buttonsNswe)
-		{
-			add(buttonNswe);
-		}
+		add(_buttonsNswe[GeoEngine.NSWE_NONE]);
+		add(_buttonsNswe[GeoEngine.NORTH]);
+		add(_buttonsNswe[GeoEngine.SOUTH]);
+		add(_buttonsNswe[GeoEngine.WEST]);
+		add(_buttonsNswe[GeoEngine.EAST]);
+		add(_buttonsNswe[GeoEngine.NORTH | GeoEngine.WEST]);
+		add(_buttonsNswe[GeoEngine.SOUTH | GeoEngine.EAST]);
+		add(_buttonsNswe[GeoEngine.NORTH | GeoEngine.EAST]);
+		add(_buttonsNswe[GeoEngine.SOUTH | GeoEngine.WEST]);
+		add(_buttonsNswe[GeoEngine.NORTH | GeoEngine.SOUTH]);
+		add(_buttonsNswe[GeoEngine.WEST | GeoEngine.EAST]);
+		add(_buttonsNswe[GeoEngine.NNORTH]);
+		add(_buttonsNswe[GeoEngine.NSOUTH]);
+		add(_buttonsNswe[GeoEngine.NWEST]);
+		add(_buttonsNswe[GeoEngine.NEAST]);
+		add(_buttonsNswe[GeoEngine.NSWE_ALL]);
 	}
 	
 	private final void setButtonsEnabled(final boolean enabled)

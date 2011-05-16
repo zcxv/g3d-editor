@@ -22,6 +22,7 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLGUIRenderer.GLText;
+import g3deditor.jogl.renderer.VBOGSLSRenderer;
 import g3deditor.util.FastArrayList;
 
 import java.awt.event.MouseEvent;
@@ -294,7 +295,7 @@ public final class GLDisplay implements GLEventListener
 				_renderer.render(gl, selector);
 			}
 			
-			if (Config.DRAW_OUTLINE)
+			if (Config.DRAW_OUTLINE && !(_renderer instanceof VBOGSLSRenderer))
 			{
 				gl.glPolygonMode(GL2.GL_BACK, GL2.GL_LINE);
 				gl.glCullFace(GL2.GL_FRONT);

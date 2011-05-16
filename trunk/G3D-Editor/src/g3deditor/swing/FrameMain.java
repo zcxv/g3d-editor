@@ -63,6 +63,7 @@ public final class FrameMain extends JFrame implements ActionListener
 	private final PanelCellInfo _panelCellInfo;
 	private final PanelBlockConvert _panelBlockConvert;
 	private final PanelLayers _panelLayers;
+	private final PanelDirectNswe _panelDirectNswe;
 	
 	private final DialogJumpTo _dialogJumpTo;
 	private final DialogConfig _dialogConfig;
@@ -80,7 +81,7 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	private FrameMain()
 	{
-		super("G3D-Editor [Beta 1.1] by Forsaiken");
+		super("G3D-Editor [Beta 1.2] by Forsaiken");
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -122,6 +123,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		_panelCellInfo = new PanelCellInfo();
 		_panelBlockConvert = new PanelBlockConvert();
 		_panelLayers = new PanelLayers(this);
+		_panelDirectNswe = new PanelDirectNswe();
 		_dialogJumpTo = new DialogJumpTo(this);
 		_dialogConfig = new DialogConfig(this);
 		
@@ -251,6 +253,14 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weighty = 1;
 		_panelRight.add(_panelLayers, gbc);
 		
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		_panelRight.add(_panelDirectNswe, gbc);
+		
 		setLayout(new GridBagLayout());
 		
 		gbc.gridx = 0;
@@ -303,6 +313,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		_panelCellInfo.onSelectedCellUpdated();
 		_panelBlockConvert.onSelectedCellUpdated();
 		_panelLayers.onSelectedCellUpdated();
+		_panelDirectNswe.onSelectedCellUpdated();
 	}
 	
 	public final GeoCell getSelectedGeoCell()
