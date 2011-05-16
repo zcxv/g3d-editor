@@ -81,7 +81,7 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	private FrameMain()
 	{
-		super("G3D-Editor [Beta 1.2] by Forsaiken");
+		super("G3D-Editor [Beta 1.3] by Forsaiken");
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -286,6 +286,11 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weightx = 0;
 		gbc.weighty = 1;
 		add(_panelRight, gbc);
+	}
+	
+	public final void onNsweTexIdUpdated()
+	{
+		_panelDirectNswe.updateNsweTexId();
 	}
 	
 	public final void setSelectedGeoCell(final GeoCell cell)

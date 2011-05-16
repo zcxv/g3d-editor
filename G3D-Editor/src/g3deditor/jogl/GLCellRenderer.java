@@ -14,6 +14,7 @@
  */
 package g3deditor.jogl;
 
+import g3deditor.Config;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.renderer.DLLoDRenderer;
 import g3deditor.jogl.renderer.DLRenderer;
@@ -227,6 +228,7 @@ public abstract class GLCellRenderer
 	}
 	
 	private boolean _initialized;
+	private int _textureId;
 	private Texture _nsweTexture;
 	private GLShader _shader;
 	
@@ -246,16 +248,19 @@ public abstract class GLCellRenderer
 		_shader.init(gl);
 	}
 	
-	public boolean init(final GL2 gl)
+	private final void updateTexture(final GL2 gl)
 	{
-		if (_initialized)
-			return false;
+		if (_textureId == Config.NSWE_TEXTURE_ID)
+			return;
 		
-		_initialized = true;
-		
+		_textureId = Config.NSWE_TEXTURE_ID;
+			
 		try
 		{
-			_nsweTexture = TextureIO.newTexture(new File("./data/textures/nswe.png"), true);
+			if (_nsweTexture != null)
+				_nsweTexture.destroy(gl);
+			
+			_nsweTexture = TextureIO.newTexture(new File("./data/textures/nswe_" + _textureId + ".png"), true);
 			_nsweTexture.enable();
 			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
 			_nsweTexture.setTexParameteri(GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
@@ -268,12 +273,21 @@ public abstract class GLCellRenderer
 		
 		if (_shader != null && _nsweTexture != null)
 			_shader.setTexture(gl, _nsweTexture, "nswe_texture");
+	}
+	
+	public boolean init(final GL2 gl)
+	{
+		if (_initialized)
+			return false;
 		
+		_initialized = true;
+		updateTexture(gl);
 		return true;
 	}
 	
 	public void enableRender(final GL2 gl)
 	{
+		updateTexture(gl);
 		if (_nsweTexture != null)
 			_nsweTexture.bind();
 		

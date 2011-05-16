@@ -14,6 +14,7 @@
  */
 package g3deditor.swing;
 
+import g3deditor.Config;
 import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoBlockSelector.GeoBlockEntry;
 import g3deditor.geo.GeoCell;
@@ -104,15 +105,28 @@ public final class PanelDirectNswe extends JPanel implements MouseListener
 		}
 	}
 	
-	private final Image _imageNswes;
 	private final BufferedImage _imageNswe;
 	private final ImageIcon _iconNswe;
 	private final JLabel _labelNswe;
 	private byte _nswe;
+	private Image _imageNswes;
 	
 	public PanelDirectNswe()
 	{
-		_imageNswes = Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(Util.loadImage("./data/textures/nswe.png").getSource(), new RGBImageFilter()
+		_imageNswe = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+		_iconNswe = new ImageIcon();
+		_iconNswe.setImage(_imageNswe);
+		_labelNswe = new JLabel(_iconNswe);
+		_labelNswe.addMouseListener(this);
+		
+		_nswe = -1;
+		updateNsweTexId();
+		initLayout();
+	}
+	
+	public final void updateNsweTexId()
+	{
+		_imageNswes = Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(Util.loadImage("./data/textures/nswe_" + Config.NSWE_TEXTURE_ID + ".png").getSource(), new RGBImageFilter()
 	    {
 	    	@Override
 	    	public final int filterRGB(final int x, final int y, final int rgb)
@@ -120,14 +134,7 @@ public final class PanelDirectNswe extends JPanel implements MouseListener
 	            return rgb == Color.WHITE.getRGB() ? 0 : rgb;
 	        }
 	    }));
-		_imageNswe = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
-		_iconNswe = new ImageIcon();
-		_iconNswe.setImage(_imageNswe);
-		_labelNswe = new JLabel(_iconNswe);
-		_labelNswe.addMouseListener(this);
-		
-		updateNswe(-1);
-		initLayout();
+		updateNswe(_nswe, true);
 	}
 	
 	private final void initLayout()
@@ -136,9 +143,9 @@ public final class PanelDirectNswe extends JPanel implements MouseListener
 		add(_labelNswe);
 	}
 	
-	private final void updateNswe(final int nswe)
+	private final void updateNswe(final int nswe, final boolean force)
 	{
-		if (nswe == _nswe)
+		if (!force && nswe == _nswe)
 			return;
 		
 		if (nswe != -1 && (nswe < 0 || nswe > GeoEngine.NSWE_MASK))
@@ -169,11 +176,11 @@ public final class PanelDirectNswe extends JPanel implements MouseListener
 		final GeoCell cell = FrameMain.getInstance().getSelectedGeoCell();
 		if (cell == null)
 		{
-			updateNswe(-1);
+			updateNswe(-1, false);
 		}
 		else
 		{
-			updateNswe(cell.getNSWE());
+			updateNswe(cell.getNSWE(), false);
 		}
 	}
 	
@@ -214,7 +221,7 @@ public final class PanelDirectNswe extends JPanel implements MouseListener
 		else
 			nswe &= ~change & GeoEngine.NSWE_MASK;
 		
-		updateNswe(nswe);
+		updateNswe(nswe, false);
 		
 		final GeoBlockSelector selector = GeoBlockSelector.getInstance();
 		FastArrayList<GeoCell> cells;

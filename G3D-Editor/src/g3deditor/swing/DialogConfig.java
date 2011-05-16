@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
@@ -48,6 +49,19 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		}
 	};
 	
+	private static final Integer[] getNsweTexIds()
+	{
+		final ArrayList<Integer> ids = new ArrayList<Integer>();
+		ids.add(1);
+		for (int i = 2;; i++)
+		{
+			if (!new File("./data/textures/nswe_" + i + ".png").isFile())
+				break;
+			ids.add(i);
+		}
+		return ids.toArray(new Integer[ids.size()]);
+	}
+	
 	private final JPanel _panelMisc;
 	private final DefaultLabel _labelLookAndFeel;
 	private final JComboBox _comboLookAndFeel;
@@ -71,6 +85,9 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 	
 	private final DialogColorChooser _dialogColor;
 	private final DefaultButton _buttonChooseColors;
+	
+	private final DefaultLabel _labelNSWETexture;
+	private final JComboBox _comboNSWETexture;
 	
 	private final JPanel _panelGeodata;
 	private final DefaultLabel _labelGeodataPath;
@@ -145,6 +162,9 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_buttonChooseColors = new DefaultButton("Choose cell/block colors");
 		_buttonChooseColors.addActionListener(this);
 		
+		_labelNSWETexture = new DefaultLabel("NSWE Texture:");
+		_comboNSWETexture = new JComboBox(getNsweTexIds());
+		
 		_panelGeodata = new JPanel();
 		_panelGeodata.setBorder(BorderFactory.createTitledBorder("Geodata"));
 		_labelGeodataPath = new DefaultLabel("Path to Geodata:");
@@ -210,7 +230,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_panelCheckButtons, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 4;
+		gbc.gridy = 1;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 		gbc.weightx = 0;
@@ -220,7 +240,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_labelCellRenderer, gbc);
 		
 		gbc.gridx = 1;
-		gbc.gridy = 4;
+		gbc.gridy = 1;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -230,7 +250,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_comboCellRenderer, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 5;
+		gbc.gridy = 2;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -240,7 +260,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_labelDLLoDRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 6;
+		gbc.gridy = 3;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -250,7 +270,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_sliderDLLoDRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 7;
+		gbc.gridy = 4;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -260,7 +280,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_labelGridRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 8;
+		gbc.gridy = 5;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -270,7 +290,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_panelEditor.add(_sliderGridRange, gbc);
 		
 		gbc.gridx = 0;
-		gbc.gridy = 9;
+		gbc.gridy = 6;
 		gbc.gridwidth = 2;
 		gbc.gridheight = 1;
 		gbc.weightx = 1;
@@ -278,6 +298,36 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		gbc.ipadx = 0;
 		gbc.ipady = 0;
 		_panelEditor.add(_buttonChooseColors, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 7;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_buttonChooseColors, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = 8;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_labelNSWETexture, gbc);
+		
+		gbc.gridx = 1;
+		gbc.gridy = 8;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
+		gbc.ipadx = 0;
+		gbc.ipady = 0;
+		_panelEditor.add(_comboNSWETexture, gbc);
 		
 		_panelGeodata.setLayout(new GridBagLayout());
 		
@@ -380,6 +430,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
 			_sliderDLLoDRange.setValue(Config.DLLoD_RANGE);
 			_fieldGeodataPath.setText(Config.PATH_TO_GEO_FILES);
+			_comboNSWETexture.setSelectedItem(Config.NSWE_TEXTURE_ID);
 			checkDLLoDSliderEnabled();
 		}
 		
@@ -450,6 +501,8 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			Config.LOOK_AND_FEEL = ((LookAndFeelInfo) _comboLookAndFeel.getSelectedItem()).getClassName();
 			Config.CELL_RENDERER = GLCellRenderer.validateRenderer((String) _comboCellRenderer.getSelectedItem());
 			Config.DLLoD_RANGE = _sliderDLLoDRange.getValue();
+			Config.NSWE_TEXTURE_ID = (Integer) _comboNSWETexture.getSelectedItem();
+			FrameMain.getInstance().onNsweTexIdUpdated();
 			
 			Config.save();
 			setVisible(false);
