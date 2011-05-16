@@ -79,6 +79,13 @@ public enum SelectionState
 		return _colorMutliLayer1;
 	}
 	
+	public final void updateSecondaryColors()
+	{
+		_colorComplex2.setRGB(_colorComplex1.getR() * 0.85f, _colorComplex1.getG() * 0.85f, _colorComplex1.getB() * 0.85f);
+		_colorMutliLayer2.setRGB(_colorMutliLayer1.getR() * 0.85f, _colorMutliLayer1.getG() * 0.85f, _colorMutliLayer1.getB() * 0.85f);
+		_colorMutliLayer2Special.setRGB(_colorMutliLayer1Special.getR() * 0.85f, _colorMutliLayer1Special.getG() * 0.85f, _colorMutliLayer1Special.getB() * 0.85f);
+	}
+	
 	/**
 	 * For the cells inside the selection box
 	 * 

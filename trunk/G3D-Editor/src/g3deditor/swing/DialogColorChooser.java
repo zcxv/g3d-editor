@@ -380,6 +380,8 @@ public final class DialogColorChooser extends JDialog implements ChangeListener,
 		{
 			state.getColorMultiLayerSpecial().setColorRGB(color);
 		}
+		
+		state.updateSecondaryColors();
 	}
 	
 	public final Color getColorOfField()
@@ -470,6 +472,9 @@ public final class DialogColorChooser extends JDialog implements ChangeListener,
 			SelectionState.NORMAL.getColorMultiLayerSpecial().setColorRGB(_colorMultiLayerSpecialNormal);
 			SelectionState.HIGHLIGHTED.getColorMultiLayerSpecial().setColorRGB(_colorMultiLayerSpecialHighlighted);
 			SelectionState.SELECTED.getColorMultiLayerSpecial().setColorRGB(_colorMultiLayerSpecialSelected);
+			SelectionState.NORMAL.updateSecondaryColors();
+			SelectionState.HIGHLIGHTED.updateSecondaryColors();
+			SelectionState.SELECTED.updateSecondaryColors();
 			setVisible(false);
 		}
 		else if (e.getSource() == _buttonRestoreDefault)
@@ -486,6 +491,9 @@ public final class DialogColorChooser extends JDialog implements ChangeListener,
 			SelectionState.NORMAL.getColorMultiLayerSpecial().setColorRGB(new Color(Config.DEFAULT_COLOR_MULTILAYER_NORMAL_SPECIAL));
 			SelectionState.HIGHLIGHTED.getColorMultiLayerSpecial().setColorRGB(new Color(Config.DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL));
 			SelectionState.SELECTED.getColorMultiLayerSpecial().setColorRGB(new Color(Config.DEFAULT_COLOR_MULTILAYER_SELECTED_SPECIAL));
+			SelectionState.NORMAL.updateSecondaryColors();
+			SelectionState.HIGHLIGHTED.updateSecondaryColors();
+			SelectionState.SELECTED.updateSecondaryColors();
 			setColorOfField(getColorOfState());
 		}
 	}
