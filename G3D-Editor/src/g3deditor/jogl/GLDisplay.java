@@ -404,5 +404,6 @@ public final class GLDisplay implements GLEventListener
 		
 		_camera.onProjectionMatrixChanged();
 		_camera.onViewportChanged();
+		_renderSelector.forceUpdateFrustum();
 	}
 }
