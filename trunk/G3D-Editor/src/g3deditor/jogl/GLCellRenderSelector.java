@@ -71,6 +71,7 @@ public final class GLCellRenderSelector
 	private float[][] _frustum;
 	
 	private GLSubRenderSelector[] _geoBlocks;
+	private GLSubRenderSelector[] _geoBlocks2;
 	private int _geoBlocksSize;
 	
 	private int _camBlockX;
@@ -85,6 +86,7 @@ public final class GLCellRenderSelector
 	public GLCellRenderSelector()
 	{
 		_geoBlocks = new GLSubRenderSelector[0];
+		_geoBlocks2 = new GLSubRenderSelector[0];
 		_taskExecutor = new TaskExecutor(Runtime.getRuntime().availableProcessors());
 	}
 	
@@ -131,6 +133,7 @@ public final class GLCellRenderSelector
 				if (_geoBlocks.length != requiredSize)
 				{
 					_geoBlocks = new GLSubRenderSelector[requiredSize];
+					_geoBlocks2 = new GLSubRenderSelector[requiredSize];
 					for (int i = requiredSize; i-- > 0;)
 					{
 						_geoBlocks[i] = new GLSubRenderSelector();
@@ -176,7 +179,10 @@ public final class GLCellRenderSelector
 			_taskExecutor.execute(_geoBlocks, _geoBlocksSize);
 			
 			if (Config.USE_TRANSPARENCY)
-				Util.quickSort(_geoBlocks, _geoBlocksSize, GEO_BLOCK_COMPARATOR);
+			{
+				System.arraycopy(_geoBlocks, 0, _geoBlocks2, 0, _geoBlocksSize);
+				Util.mergeSort(_geoBlocks2, _geoBlocks, _geoBlocksSize, GEO_BLOCK_COMPARATOR);
+			}
 		}
 	}
 	
@@ -268,11 +274,13 @@ public final class GLCellRenderSelector
 	{
 		private GeoBlock _block;
 		private GeoCell[] _geoCells;
+		private GeoCell[] _geoCells2;
 		private int _count;
 		
 		public GLSubRenderSelector()
 		{
 			_geoCells = new GeoCell[0];
+			_geoCells2 = new GeoCell[0];
 		}
 		
 		public final void setGeoBlock(final GeoBlock block)
@@ -298,7 +306,10 @@ public final class GLCellRenderSelector
 		private final void ensureCapacity(final int count)
 		{
 			if (_geoCells.length < count)
+			{
 				_geoCells = new GeoCell[count];
+				_geoCells2 = new GeoCell[count];
+			}
 		}
 		
 		private final void addElementToRender(final GeoCell cell)
@@ -338,7 +349,10 @@ public final class GLCellRenderSelector
 							}
 							
 							if (Config.USE_TRANSPARENCY)
-								Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
+							{
+								System.arraycopy(_geoCells, 0, _geoCells2, 0, _count);
+								Util.mergeSort(_geoCells2, _geoCells, _count, GEO_CELL_COMPARATOR);
+							}
 						}
 						else
 						{
@@ -362,7 +376,10 @@ public final class GLCellRenderSelector
 						}
 						
 						if (Config.USE_TRANSPARENCY)
-							Util.quickSort(_geoCells, _count, GEO_CELL_COMPARATOR);
+						{
+							System.arraycopy(_geoCells, 0, _geoCells2, 0, _count);
+							Util.mergeSort(_geoCells2, _geoCells, _count, GEO_CELL_COMPARATOR);
+						}
 					}
 					break;
 				}
