@@ -111,75 +111,78 @@ public final class GLShader
 		return _programId;
 	}
 	
-	private final void logShader(final GL2 gl, final int shaderId, final String name)
+	private final boolean checkCompilationOk(final GL2 gl, final int id, final boolean shader, final String name)
 	{
-		final IntBuffer lenBuffer = Buffers.newDirectIntBuffer(1);
-		gl.glGetShaderiv(shaderId, GL2.GL_INFO_LOG_LENGTH, lenBuffer);
-		final int length = lenBuffer.get();
-		if (length > 1)
-		{
-			lenBuffer.clear();
-			final ByteBuffer logBuffer = Buffers.newDirectByteBuffer(length);
-			gl.glGetShaderInfoLog(shaderId, length, lenBuffer, logBuffer);
-			final byte[] logData = new byte[length];
-			logBuffer.get(logData);
-			System.out.println("Error in " + name + ":");
-			System.out.println(new String(logData));
-		}
+		final IntBuffer ib = Buffers.newDirectIntBuffer(1);
+		
+		if (shader)
+			gl.glGetShaderiv(id, GL2.GL_COMPILE_STATUS, ib);
 		else
+			gl.glGetProgramiv(id, GL2.GL_LINK_STATUS, ib);
+		final boolean error = ib.get(0) == GL2.GL_FALSE;
+		
+		if (shader)
+			gl.glGetShaderiv(id, GL2.GL_INFO_LOG_LENGTH, ib);
+		else
+			gl.glGetProgramiv(id, GL2.GL_INFO_LOG_LENGTH, ib);
+		int length = ib.get(0);
+		String log = null;
+		
+		if (length > 0)
 		{
-			System.out.println(name + " compile successful");
+			final ByteBuffer bb = Buffers.newDirectByteBuffer(length);
+			
+			if (shader)
+				gl.glGetShaderInfoLog(id, length, ib, bb);
+			else
+				gl.glGetProgramInfoLog(id, length, ib, bb);
+			length = ib.get(0);
+			if (length > 0)
+			{
+				final byte[] logData = new byte[length];
+				bb.get(logData);
+				log = new String(logData);
+			}
 		}
+		
+		System.out.println((shader ? "Compilation" : "Link") + " of " + name + (shader ? "-Shader" : "-Program") + (error ? " has failed" : " was successful") + (log != null ? ":" : "."));
+		if (log != null)
+			System.out.print(log);
+		
+		return !error;
 	}
 	
-	private final void logProgram(final GL2 gl, final int programId, final String name)
-	{
-		final IntBuffer lenBuffer = Buffers.newDirectIntBuffer(1);
-		gl.glGetProgramiv(programId, GL2.GL_INFO_LOG_LENGTH, lenBuffer);
-		final int length = lenBuffer.get();
-		if (length > 1)
-		{
-			lenBuffer.clear();
-			final ByteBuffer logBuffer = Buffers.newDirectByteBuffer(length);
-			gl.glGetProgramInfoLog(programId, length, lenBuffer, logBuffer);
-			final byte[] logData = new byte[length];
-			logBuffer.get(logData);
-			System.out.println("Error in " + name + ":");
-			System.out.println(new String(logData));
-		}
-		else
-		{
-			System.out.println(name + " link successful");
-		}
-	}
-	
-	public final void init(final GL2 gl)
+	public final boolean init(final GL2 gl)
 	{
 		if (_initialized)
-			return;
+			return true;
 		
 		_initialized = true;
 		if (_vertexShader == null || _fragmentShader == null)
-			return;
+			return false;
 		
 		_vertexShaderId = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
 		_fragmentShaderId = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
 		
 		gl.glShaderSource(_vertexShaderId, 1, new String[]{_vertexShader}, new int[]{_vertexShader.length()}, 0);
 		gl.glCompileShader(_vertexShaderId);
-		logShader(gl, _vertexShaderId, "VertexShader");
+		if (!checkCompilationOk(gl, _vertexShaderId, true, "Vertex"))
+			return false;
 		
 		gl.glShaderSource(_fragmentShaderId, 1, new String[]{_fragmentShader}, new int[]{_fragmentShader.length()}, 0);
 		gl.glCompileShader(_fragmentShaderId);
-		logShader(gl, _fragmentShaderId, "FragmentShader");
+		if (!checkCompilationOk(gl, _fragmentShaderId, true, "Fragment"))
+			return false;
 		
 		_programId = gl.glCreateProgram();
 		gl.glAttachShader(_programId, _vertexShaderId);
 		gl.glAttachShader(_programId, _fragmentShaderId);
 		gl.glLinkProgram(_programId);
 		gl.glValidateProgram(_programId);
-		logProgram(gl, _programId, "Program");
-		System.out.println("Done");
+		if (!checkCompilationOk(gl, _programId, false, "GSLS"))
+			return false;
+		
+		return true;
 	}
 	
 	public final void setTexture(final GL2 gl, final Texture texture, final String unifromName)

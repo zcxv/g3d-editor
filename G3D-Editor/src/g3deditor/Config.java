@@ -17,6 +17,7 @@ package g3deditor;
 import g3deditor.jogl.GLCellRenderSelector;
 import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.renderer.DLLoDRenderer;
+import g3deditor.jogl.renderer.IRenderer;
 
 import java.awt.Color;
 import java.io.File;
@@ -55,7 +56,7 @@ public final class Config
 	public static boolean TERRAIN_DEFAULT_ON			= false;
 	public static int VIS_GRID_RANGE					= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
 	public static String LOOK_AND_FEEL					= "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-	public static String CELL_RENDERER					= GLCellRenderer.validateRenderer(null);
+	public static String CELL_RENDERER					= GLCellRenderer.validateRenderer(null, null);
 	public static int DLLoD_RANGE						= DLLoDRenderer.MAX_DISTANCE_SQ;
 	public static boolean V_SYNC						= true;
 	public static boolean USE_TRANSPARENCY				= true;
@@ -75,7 +76,7 @@ public final class Config
 	public static int COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL		= DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL;
 	public static int COLOR_MULTILAYER_SELECTED_SPECIAL			= DEFAULT_COLOR_MULTILAYER_SELECTED_SPECIAL;
 	
-	public static int NSWE_TEXTURE_ID					= 1;
+	public static int NSWE_TEXTURE_ID					= 5;
 	
 	public static final LookAndFeelInfo[] getInstalledLookAndFeels()
 	{
@@ -126,7 +127,7 @@ public final class Config
 				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TERRAIN_DEFAULT_ON", String.valueOf(TERRAIN_DEFAULT_ON)));
 				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VIS_GRID_RANGE", String.valueOf(VIS_GRID_RANGE)));
 				LOOK_AND_FEEL			= PROPERTIES.getProperty("LOOK_AND_FEEL", LOOK_AND_FEEL);
-				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", GLCellRenderer.validateRenderer(CELL_RENDERER));
+				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", IRenderer.NAME);
 				DLLoD_RANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoD_RANGE", String.valueOf(DLLoD_RANGE)));
 				V_SYNC					= Boolean.parseBoolean(PROPERTIES.getProperty("V_SYNC", String.valueOf(V_SYNC)));
 				USE_TRANSPARENCY		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_TRANSPARENCY", String.valueOf(USE_TRANSPARENCY)));
@@ -186,8 +187,6 @@ public final class Config
 		{
 			VIS_GRID_RANGE = GLCellRenderSelector.MAX_VIS_GRID_RANGE;
 		}
-		
-		CELL_RENDERER = GLCellRenderer.validateRenderer(CELL_RENDERER);
 		
 		if (DLLoD_RANGE < DLLoDRenderer.MIN_DISTANCE_SQ)
 		{

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="G3DEditor Windows x64" default="dist-deflate" basedir=".">
-	<property name="main" location="g3deditor.Main" />
+	<property name="main" location="g3deditor.G3DEditor" />
 	<property name="src" location="src" />
 	<property name="dist" location="dist" />
 	<property name="lib" location="lib_win_x64" />

@@ -30,13 +30,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -46,6 +49,20 @@ import javax.swing.SwingUtilities;
 @SuppressWarnings("serial")
 public final class FrameMain extends JFrame implements ActionListener
 {
+	private static final FileFilter GEO_FILTER = new FileFilter()
+	{
+		public final boolean accept(final File file)
+		{
+			return file.isDirectory() || GeoEngine.GEO_FILE_FILTER.accept(file);
+		}
+		
+		@Override
+		public final String getDescription()
+		{
+			return "GeoData *.l2j/*.dat";
+		}
+	};
+	
 	private static FrameMain _instance;
 	
 	public static final void init()
@@ -70,18 +87,21 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	private final JMenuBar _menuBar;
 	private final DefaultButton _buttonConfig;
+	private final DefaultButton _buttonOpen;
 	private final DefaultButton _buttonJumpTo;
 	private final DefaultButton _buttonSave;
 	private final DefaultButton _buttonHelp;
 	private final DefaultLabel _labelLogoL2j;
 	private final DefaultButton _buttonDonate;
 	
+	private final JFileChooser _fileChooser;
+	
 	private GeoCell _selectedCell;
 	private boolean _waitForUpdate;
 	
 	private FrameMain()
 	{
-		super("G3D-Editor [Beta 1.3] by Forsaiken");
+		super("G3D-Editor [Beta 1.4] by Forsaiken");
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -130,6 +150,8 @@ public final class FrameMain extends JFrame implements ActionListener
 		_menuBar = new JMenuBar();
 		_buttonConfig = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/config.png")));
 		_buttonConfig.addActionListener(this);
+		_buttonOpen = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/open.png")));
+		_buttonOpen.addActionListener(this);
 		_buttonJumpTo = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/search.png")));
 		_buttonJumpTo.addActionListener(this);
 		_buttonSave = new DefaultButton(new ImageIcon(Util.loadImage("./data/icon/save.png")));
@@ -141,6 +163,12 @@ public final class FrameMain extends JFrame implements ActionListener
 		img = Util.loadImage("./data/icon/donate.png");
 		_buttonDonate = new DefaultButton(new ImageIcon(Util.scaleImage(img, (int) (img.getWidth() * (32D / img.getHeight())), 32, 2)));
 		_buttonDonate.addActionListener(this);
+		
+		_fileChooser = new JFileChooser();
+		_fileChooser.setFileFilter(GEO_FILTER);
+		_fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+		_fileChooser.setDialogTitle("Open an GeoData file...");
+		_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		
 		setJMenuBar(_menuBar);
 		initLayout();
@@ -179,10 +207,18 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.gridheight = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
+		_menuBar.add(_buttonOpen, gbc);
+		
+		gbc.gridx = 3;
+		gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
 		gbc.ipadx = 50;
 		_menuBar.add(new DefaultLabel(), gbc);
 		
-		gbc.gridx = 3;
+		gbc.gridx = 4;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
@@ -191,7 +227,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.ipadx = 0;
 		_menuBar.add(_labelLogoL2j, gbc);
 		
-		gbc.gridx = 4;
+		gbc.gridx = 5;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
@@ -200,7 +236,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.ipadx = 50;
 		_menuBar.add(new DefaultLabel(), gbc);
 		
-		gbc.gridx = 5;
+		gbc.gridx = 6;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
@@ -209,7 +245,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.ipadx = 0;
 		_menuBar.add(_buttonSave, gbc);
 		
-		gbc.gridx = 6;
+		gbc.gridx = 7;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
@@ -217,7 +253,7 @@ public final class FrameMain extends JFrame implements ActionListener
 		gbc.weighty = 0;
 		_menuBar.add(_buttonHelp, gbc);
 		
-		gbc.gridx = 7;
+		gbc.gridx = 8;
 		gbc.gridy = 0;
 		gbc.gridwidth = 1;
 		gbc.gridheight = 1;
@@ -288,6 +324,11 @@ public final class FrameMain extends JFrame implements ActionListener
 		add(_panelRight, gbc);
 	}
 	
+	public final void checkAvailableRenderers()
+	{
+		_dialogConfig.checkAvailableRenderers();
+	}
+	
 	public final void onNsweTexIdUpdated()
 	{
 		_panelDirectNswe.updateNsweTexId();
@@ -348,6 +389,89 @@ public final class FrameMain extends JFrame implements ActionListener
 			else
 			{
 				JOptionPane.showMessageDialog(this, "I am sure you want to load a region first ;)", "Save Region UNKOWN?!?", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+		else if (e.getSource() == _buttonOpen)
+		{
+			if (_fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			{
+				final File file = _fileChooser.getSelectedFile();
+				if (file != null && GeoEngine.GEO_FILE_FILTER.accept(file))
+				{
+					final int[] header = GeoEngine.getHeaderOfL2jOrL2Off(file);
+					final int regionX = header[0];
+					final int regionY = header[1];
+					final int geoX = GeoEngine.getGeoXY(regionX, 128);
+					final int geoY = GeoEngine.getGeoXY(regionY, 128);
+					
+					final boolean l2j = !file.getName().toLowerCase().equals(".dat");
+					final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
+					if (region != null)
+					{
+						if (region.getRegionX() != regionX || region.getRegionY() != regionY)
+						{
+							if (!region.allDataEqual())
+							{
+								switch (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Region " + region.getName() + " was modified.\nWould u like to save it?", "Save...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE))
+								{
+									case JOptionPane.YES_OPTION:
+									{
+										new DialogSave(FrameMain.getInstance(), region, new Runnable()
+										{
+											@Override
+											public final void run()
+											{
+												try
+												{
+													GeoEngine.getInstance().unload();
+													GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j, file);
+													
+													if (GeoEngine.getInstance().getActiveRegion() != null)
+														GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+												}
+												catch (final Exception e1)
+												{
+													e1.printStackTrace();
+												}
+											}
+										}).setVisible(true);
+										setVisible(false);
+										return;
+									}
+									
+									case JOptionPane.NO_OPTION:
+										break;
+										
+									default:
+										return;
+								}
+							}
+							GeoEngine.getInstance().unload();
+							try
+							{
+								GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j, file);
+							}
+							catch (final Exception e1)
+							{
+								e1.printStackTrace();
+							}
+						}
+					}
+					else
+					{
+						try
+						{
+							GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j, file);
+						}
+						catch (final Exception e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+					
+					if (GeoEngine.getInstance().getActiveRegion() != null)
+						GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+				}
 			}
 		}
 		else if (e.getSource() == _buttonConfig)

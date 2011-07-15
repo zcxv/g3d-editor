@@ -29,6 +29,11 @@ import javax.media.opengl.GL2;
  */
 public final class DLRenderer extends GLCellRenderer
 {
+	public static final boolean isAvailable(final GL2 gl)
+	{
+		return true;
+	}
+	
 	public static final String NAME = "DisplayList";
 	public static final String NAME_SHORT = "DL";
 	

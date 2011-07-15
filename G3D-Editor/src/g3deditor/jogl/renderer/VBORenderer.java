@@ -34,6 +34,15 @@ import com.jogamp.common.nio.Buffers;
  */
 public final class VBORenderer extends GLCellRenderer
 {
+	public static final boolean isAvailable(final GL2 gl)
+	{
+		return gl.isExtensionAvailable("GL_ARB_vertex_buffer_object") &&
+		gl.isFunctionAvailable("glGenBuffersARB") &&
+		gl.isFunctionAvailable("glBindBufferARB") &&
+		gl.isFunctionAvailable("glBufferDataARB") &&
+		gl.isFunctionAvailable("glDeleteBuffersARB");
+	}
+	
 	public static final String NAME = "VertexBufferObject";
 	public static final String NAME_SHORT = "VBO";
 	
@@ -54,6 +63,7 @@ public final class VBORenderer extends GLCellRenderer
 		if (!super.init(gl))
 			return false;
 		
+		isAvailable(gl);
 		_indexBuffer = Buffers.newDirectByteBuffer(GEOMETRY_INDICES_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_INDICES_DATA_LENGTH);
 		_vertexBuffer = Buffers.newDirectFloatBuffer(GEOMETRY_VERTEX_DATA_SMALL_LENGTH * NSWE_COMBINATIONS + GEOMETRY_VERTEX_DATA_SMALL_LENGTH);
 		_textureBuffer = Buffers.newDirectFloatBuffer(GEOMETRY_TEXTURE_DATA_LENGTH * NSWE_COMBINATIONS + GEOMETRY_TEXTURE_DATA_LENGTH);

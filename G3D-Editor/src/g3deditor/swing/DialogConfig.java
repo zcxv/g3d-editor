@@ -21,6 +21,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -125,8 +127,8 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		_checkDrawOutline = new JCheckBox("Draw Outline");
 		
 		_labelCellRenderer = new DefaultLabel("CellRenderer:");
-		_comboCellRenderer = new JComboBox(GLCellRenderer.RENDERER_NAMES);
-		_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
+		_comboCellRenderer = new JComboBox();
+		//_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
 		
 		_labelDLLoDRange = new DefaultLabel("DisplayList LoD - max detail range:");
 		_sliderDLLoDRange = new JSlider();
@@ -401,6 +403,15 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 		setResizable(false);
 	}
 	
+	public final void checkAvailableRenderers()
+	{
+		for (final String name : GLCellRenderer.getAvailableRenderers((GL2) GLContext.getCurrentGL()))
+		{
+			_comboCellRenderer.addItem(name);
+		}
+		_comboCellRenderer.setSelectedItem(Config.CELL_RENDERER);
+	}
+	
 	public final DialogColorChooser getColorChooser()
 	{
 		return _dialogColor;
@@ -499,7 +510,7 @@ public final class DialogConfig extends JDialog implements MouseListener, Action
 			Config.DRAW_OUTLINE = _checkDrawOutline.isSelected();
 			Config.VIS_GRID_RANGE = _sliderGridRange.getValue();
 			Config.LOOK_AND_FEEL = ((LookAndFeelInfo) _comboLookAndFeel.getSelectedItem()).getClassName();
-			Config.CELL_RENDERER = GLCellRenderer.validateRenderer((String) _comboCellRenderer.getSelectedItem());
+			Config.CELL_RENDERER = GLCellRenderer.validateRenderer((String) _comboCellRenderer.getSelectedItem(), null);
 			Config.DLLoD_RANGE = _sliderDLLoDRange.getValue();
 			Config.NSWE_TEXTURE_ID = (Integer) _comboNSWETexture.getSelectedItem();
 			FrameMain.getInstance().onNsweTexIdUpdated();

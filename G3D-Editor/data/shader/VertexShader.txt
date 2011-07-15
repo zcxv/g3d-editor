@@ -1,4 +1,4 @@
-#extension GL_EXT_gpu_shader4 : enable
+#extension GL_EXT_gpu_shader4 : require
 
 uniform vec4 cell_colors[12];
 uniform int block_data[64];
@@ -14,7 +14,7 @@ void mapTexCoord(int nswe)
    if (gl_MultiTexCoord0.s != 0.0)
    {
       float u1 = float(nswe / 4) * 0.25;
-      float v1 = float(nswe - ((nswe / 4) * 4)) * 0.25;
+      float v1 = float(nswe % 4) * 0.25;
       
       if (gl_MultiTexCoord0.s == 0.1)
       {
@@ -43,11 +43,7 @@ void mapTexCoord(int nswe)
 
 void maybeMakeDarker()
 {
-   int bx = int(block_position.x) >> 3;
-   int by = int(block_position.y) >> 3;
-   bx = bx - ((bx / 256) * 256);
-   by = by - ((by / 256) * 256);
-   if ((bx - ((bx / 2) * 2)) != (by - ((by / 2) * 2)))
+   if ((int(block_position.x) >> 3) % 2 != (int(block_position.y) >> 3) % 2)
    {
       gl_FrontColor.r *= 0.85;
       gl_FrontColor.g *= 0.85;

@@ -32,7 +32,7 @@ import com.jogamp.opengl.util.Animator;
  * 
  * @author Forsaiken aka Patrick, e-mail: patrickbiesenbach@yahoo.de
  */
-public final class Main
+public final class G3DEditor
 {
 	public static final void main(final String[] args)
 	{

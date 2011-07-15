@@ -22,7 +22,9 @@ import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLGUIRenderer.GLText;
+import g3deditor.jogl.renderer.IRenderer;
 import g3deditor.jogl.renderer.VBOGSLSRenderer;
+import g3deditor.swing.FrameMain;
 import g3deditor.util.FastArrayList;
 
 import java.awt.event.MouseEvent;
@@ -178,6 +180,11 @@ public final class GLDisplay implements GLEventListener
 	public final void init(final GLAutoDrawable glautodrawable)
 	{
 		final GL2 gl = glautodrawable.getGL().getGL2();
+		
+		// check again here
+		Config.CELL_RENDERER = GLCellRenderer.validateRenderer(Config.CELL_RENDERER, gl);
+		FrameMain.getInstance().checkAvailableRenderers();
+		
 		_glu = GLU.createGLU(gl);
 		
 		GLState.init(gl);
@@ -284,7 +291,15 @@ public final class GLDisplay implements GLEventListener
 		
 		if (_input.getKeyGToggle())
 		{
-			_renderer.init(gl);
+			if (!_renderer.isInitialized())
+			{
+				if (!_renderer.init(gl))
+				{
+					System.err.println("Renderer could not be initialized: " + _renderer.getName());
+					_renderer = new IRenderer();
+					Config.CELL_RENDERER = _renderer.getName();
+				}
+			}
 			_renderer.enableRender(gl);
 			
 			GLSubRenderSelector selector;
