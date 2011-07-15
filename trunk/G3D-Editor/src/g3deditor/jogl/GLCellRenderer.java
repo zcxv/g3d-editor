@@ -24,7 +24,9 @@ import g3deditor.jogl.renderer.VBORenderer;
 import g3deditor.jogl.shader.GLShader;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 
@@ -47,6 +49,21 @@ public abstract class GLCellRenderer
 		VBOGSLSRenderer.NAME,
 	};
 	
+	public static final String[] getAvailableRenderers(final GL2 gl)
+	{
+		final ArrayList<String> list = new ArrayList<String>(5);
+		list.add(IRenderer.NAME);
+		if (DLRenderer.isAvailable(gl))
+			list.add(DLRenderer.NAME);
+		if (DLLoDRenderer.isAvailable(gl))
+			list.add(DLLoDRenderer.NAME);
+		if (VBORenderer.isAvailable(gl))
+			list.add(VBORenderer.NAME);
+		if (VBOGSLSRenderer.isAvailable(gl))
+			list.add(VBOGSLSRenderer.NAME);
+		return list.toArray(new String[list.size()]);
+	}
+	
 	public static final GLCellRenderer getRenderer(final String name)
 	{
 		if (IRenderer.NAME.equals(name))
@@ -61,17 +78,42 @@ public abstract class GLCellRenderer
 		if (VBOGSLSRenderer.NAME.equals(name))
 			return new VBOGSLSRenderer();
 		
-		return new DLLoDRenderer();
+		return new IRenderer();
 	}
 	
-	public static final String validateRenderer(final String name)
+	public static final String validateRenderer(String name, final GL2 gl)
 	{
 		for (final String temp : GLCellRenderer.RENDERER_NAMES)
 		{
 			if (temp.equals(name))
-				return temp;
+			{
+				name = temp;
+				break;
+			}
 		}
-		return DLLoDRenderer.NAME;
+		
+		Class<?> clazz = null;
+		if (DLRenderer.NAME.equals(name))
+			clazz = DLRenderer.class;
+		if (DLLoDRenderer.NAME.equals(name))
+			clazz = DLLoDRenderer.class;
+		if (VBORenderer.NAME.equals(name))
+			clazz = VBORenderer.class;
+		if (VBOGSLSRenderer.NAME.equals(name))
+			clazz = VBOGSLSRenderer.class;
+		
+		if (clazz != null)
+		{
+			try
+			{
+				return gl == null ? (String) clazz.getField("NAME").get(null) : ((Boolean) clazz.getMethod("isAvailable", GL2.class).invoke(null, gl)).booleanValue() ? (String) clazz.getField("NAME").get(null) : IRenderer.NAME;
+			}
+			catch (final Exception e)
+			{
+				
+			}
+		}
+		return IRenderer.NAME;
 	}
 	
 	protected static final int NSWE_COMBINATIONS = 16;
@@ -155,6 +197,16 @@ public abstract class GLCellRenderer
 		TEX_COORD_V1 // top
 	};
 	
+	protected static final void fillVertexAndTextureCoordsSmall(final float x, final float y, final float z, final ByteBuffer buffer)
+	{
+		for (int i = 0; i < GEOMETRY_VERTEX_DATA_SMALL_LENGTH; i += 3)
+		{
+			buffer.putFloat(GEOMETRY_VERTEX_DATA_SMALL[i] + x);
+			buffer.putFloat(GEOMETRY_VERTEX_DATA_SMALL[i + 1] + y);
+			buffer.putFloat(GEOMETRY_VERTEX_DATA_SMALL[i + 2] + z);
+		}
+	}
+	
 	protected static final void fillTextureUV(final int nswe, final FloatBuffer textureBuffer)
 	{
 		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
@@ -171,6 +223,24 @@ public abstract class GLCellRenderer
 		textureBuffer.put(v1);
 		textureBuffer.put(u1);
 		textureBuffer.put(v1);
+	}
+	
+	protected static final void fillTextureUV(final int nswe, final ByteBuffer textureBuffer)
+	{
+		final float u1 = (nswe / NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float u2 = u1 + NSWE_TEX_BLOCK;
+		final float v1 = (nswe % NSWE_TEX_ROWS_COLS) * NSWE_TEX_BLOCK;
+		final float v2 = v1 + NSWE_TEX_BLOCK;
+		
+		textureBuffer.position(textureBuffer.position() + GEOMETRY_TEXTURE_DATA_LENGTH - 8);
+		textureBuffer.putFloat(u1);
+		textureBuffer.putFloat(v2);
+		textureBuffer.putFloat(u2);
+		textureBuffer.putFloat(v2);
+		textureBuffer.putFloat(u2);
+		textureBuffer.putFloat(v1);
+		textureBuffer.putFloat(u1);
+		textureBuffer.putFloat(v1);
 	}
 	
 	protected static final int GEOMETRY_TEXTURE_DATA_LENGTH = GEOMETRY_TEXTURE_DATA.length;
@@ -242,10 +312,19 @@ public abstract class GLCellRenderer
 		return _shader;
 	}
 	
-	protected final void initShader(final GL2 gl, final String vertexShaderPath, final String fragmentShaderPath)
+	protected final boolean initShader(final GL2 gl, final String vertexShaderPath, final String fragmentShaderPath)
 	{
 		_shader = new GLShader(vertexShaderPath, fragmentShaderPath);
-		_shader.init(gl);
+		if (!_shader.init(gl))
+		{
+			_shader.dispose(gl);
+			_shader = null;
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 	
 	private final void updateTexture(final GL2 gl)
@@ -273,6 +352,11 @@ public abstract class GLCellRenderer
 		
 		if (_shader != null && _nsweTexture != null)
 			_shader.setTexture(gl, _nsweTexture, "nswe_texture");
+	}
+	
+	public final boolean isInitialized()
+	{
+		return _initialized;
 	}
 	
 	public boolean init(final GL2 gl)

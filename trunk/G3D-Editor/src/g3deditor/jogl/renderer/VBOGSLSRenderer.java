@@ -40,6 +40,11 @@ import com.jogamp.common.nio.Buffers;
  */
 public final class VBOGSLSRenderer extends GLCellRenderer
 {
+	public static final boolean isAvailable(final GL2 gl)
+	{
+		return VBORenderer.isAvailable(gl);
+	}
+	
 	public static final String NAME = "VertexBufferObject GSLS";
 	public static final String NAME_SHORT = "VBO GSLS";
 	
@@ -110,7 +115,9 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 		gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, _vboTexture);
 		gl.glBufferData(GL2.GL_ARRAY_BUFFER, textureBuffer.remaining() * Buffers.SIZEOF_FLOAT, textureBuffer, GL2.GL_STATIC_DRAW);
 		
-		initShader(gl, "./data/shader/VertexShader.txt", "./data/shader/FragmentShader.txt");
+		if (!initShader(gl, "./data/shader/VertexShader.txt", "./data/shader/FragmentShader.txt"))
+			return false;
+		
 		_cellColors = getShader().getUniformVec4fv(gl, "cell_colors", 12);
 		_blockPosition = getShader().getUniformVec2f(gl, "block_position");
 		_blockData = getShader().getUniformVec1iv(gl, "block_data", 64);
@@ -170,7 +177,6 @@ public final class VBOGSLSRenderer extends GLCellRenderer
 		_blockPosition.update(gl);
 		
 		GeoCell cell;
-		
 		switch (block.getType())
 		{
 			case GeoEngine.GEO_BLOCK_TYPE_FLAT:

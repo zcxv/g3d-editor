@@ -26,6 +26,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.util.regex.Pattern;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -36,10 +37,42 @@ public final class GeoEngine
 {
 	public static final FileFilter OFF_GEO_FILE_FILTER = new FileFilter()
 	{
+		/**
+		 * @see java.io.FileFilter#accept(java.io.File)
+		 */
 		@Override
 		public final boolean accept(final File file)
 		{
-			return file.isFile() && file.getName().toLowerCase().endsWith(".dat");
+			return file.isFile() && file.getName().toLowerCase().endsWith(".dat") && hasValidHeader(file);
+		}
+	};
+	
+	public static final FileFilter GEO_FILE_FILTER = new FileFilter()
+	{
+		private final Pattern L2j_Pattern = Pattern.compile("\\d\\d_\\d\\d.l2j");
+		
+		/**
+		 * @see java.io.FileFilter#accept(java.io.File)
+		 */
+		@Override
+		public final boolean accept(final File file)
+		{
+			if (!file.isFile())
+				return false;
+			
+			final String name = file.getName().toLowerCase();
+			if (name.endsWith(".dat"))
+			{
+				return hasValidHeader(file);
+			}
+			else if (name.endsWith(".l2j"))
+			{
+				return L2j_Pattern.matcher(name).matches();
+			}
+			else
+			{
+				return false;
+			}
 		}
 	};
 	
@@ -282,37 +315,57 @@ public final class GeoEngine
 		
 		for (final File file : geoFile.listFiles(OFF_GEO_FILE_FILTER))
 		{
-			FileInputStream fis = null;
-			
-			try
-			{
-				fis = new FileInputStream(file);
-				if (fis.read() != regionX)
-					throw new Exception();
-				
-				if (fis.read() != regionY)
-					throw new Exception();
-				
+			final int[] header = getL2OffHeader(file);
+			if (header != null && header[0] == regionX && header[1] == regionY)
 				return file;
-			}
-			catch (final Exception e)
-			{
-				continue;
-			}
-			finally
-			{
-				try
-				{
-					if (fis != null)
-						fis.close();
-				}
-				catch (final Exception e1)
-				{
-					
-				}
-			}
 		}
 		return null;
+	}
+	
+	public static final boolean hasValidHeader(final File file)
+	{
+		final int[] header = getL2OffHeader(file);
+		return header != null && header[0] >= 10 && header[0] <= 26 && header[1] >= 10 && header[1] <= 25;
+	}
+	
+	public static final int[] getL2OffHeader(final File file)
+	{
+		FileInputStream fis = null;
+		
+		try
+		{
+			fis = new FileInputStream(file);
+			final int regionX = fis.read();
+			final int regionY = fis.read();
+			return new int[]{regionX, regionY};
+		}
+		catch (final Exception e)
+		{
+			return null;
+		}
+		finally
+		{
+			try
+			{
+				if (fis != null)
+					fis.close();
+			}
+			catch (final Exception e1)
+			{
+				
+			}
+		}
+	}
+	
+	public static final int[] getHeaderOfL2jOrL2Off(final File file)
+	{
+		String name = file.getName().toLowerCase();
+		if (name.equals(".dat"))
+			return getL2OffHeader(file);
+		
+		name = name.substring(0, name.lastIndexOf(".l2j"));
+		final String[] header = name.split("_");
+		return new int[]{Integer.parseInt(header[0]), Integer.parseInt(header[1])};
 	}
 	
 	private static GeoEngine _instance;
@@ -346,9 +399,8 @@ public final class GeoEngine
 		_activeRegion = null;
 	}
 	
-	public final void reloadGeo(final int regionX, final int regionY, final boolean l2j) throws Exception
+	public final void reloadGeo(final int regionX, final int regionY, final boolean l2j, final File file) throws Exception
 	{
-		final File file = l2j ? new File(Config.PATH_TO_GEO_FILES, (regionX + 10) + "_" + (regionY + 10) + ".l2j") : searchL2OffGeoFile((regionX + 10), (regionY + 10));
 		if (file == null || !file.isFile())
 			throw new GeoFileNotFoundException(file, l2j);
 		
@@ -372,6 +424,7 @@ public final class GeoEngine
 		}
 		catch (final Exception e)
 		{
+			e.printStackTrace();
 			throw new GeoFileLoadException(file, l2j, e);
 		}
 		finally
@@ -386,6 +439,12 @@ public final class GeoEngine
 				
 			}
 		}
+	}
+	
+	public final void reloadGeo(final int regionX, final int regionY, final boolean l2j) throws Exception
+	{
+		final File file = l2j ? new File(Config.PATH_TO_GEO_FILES, (regionX + 10) + "_" + (regionY + 10) + ".l2j") : searchL2OffGeoFile((regionX + 10), (regionY + 10));
+		reloadGeo(regionX, regionY, l2j, file);
 	}
 	
 	public final GeoRegion getActiveRegion()

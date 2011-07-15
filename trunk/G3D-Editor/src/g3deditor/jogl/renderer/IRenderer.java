@@ -28,6 +28,11 @@ import javax.media.opengl.GL2;
  */
 public final class IRenderer extends GLCellRenderer
 {
+	public static final boolean isAvailable(final GL2 gl)
+	{
+		return true;
+	}
+	
 	public static final String NAME = "Immediate";
 	public static final String NAME_SHORT = NAME;
 	

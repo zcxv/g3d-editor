@@ -2,29 +2,17 @@ package g3deditor.swing;
 
 import g3deditor.util.Util;
 
-import java.awt.AWTException;
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 
-/*
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
 import javax.swing.JWindow;
+
+import com.sun.awt.AWTUtilities;
 
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
@@ -69,11 +57,19 @@ public final class Splash extends JWindow implements Runnable
 			
 			try
 			{
-				_background = new Robot().createScreenCapture(new Rectangle(getX(), getY(), _image.getWidth(), _image.getHeight()));
-				_buffer = new BufferedImage(_image.getWidth(), _image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+				try
+				{
+					AWTUtilities.setWindowOpaque(this, false);
+				}
+				catch (final Exception e)
+				{
+					_background = new Robot().createScreenCapture(new Rectangle(getX(), getY(), _image.getWidth(), _image.getHeight()));
+					_buffer = new BufferedImage(_image.getWidth(), _image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+				}
+				
 				_composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0F);
 			}
-			catch (final AWTException e)
+			catch (final Exception e)
 			{
 				
 			}
@@ -102,20 +98,22 @@ public final class Splash extends JWindow implements Runnable
 	
 	private final void drawImage(final float alpha)
 	{
+		Graphics2D g;
+		
 		if (_background != null)
 		{
-			final Graphics2D g = (Graphics2D) _buffer.getGraphics();
+			g = (Graphics2D) _buffer.getGraphics();
 			g.setComposite(_composite);
 			g.drawImage(_background, 0, 0, null);
 			g.setComposite(_composite.derive(alpha));
 			g.drawImage(_image, 0, 0, null);
-	        
-			getGraphics().drawImage(_buffer, 0, 0, null);
 		}
-		else
-		{
-			getGraphics().drawImage(_image, 0, 0, null);
-		}
+		
+		g = (Graphics2D) getGraphics();
+		g.setBackground(new Color(0, 0, 0, 0));
+		g.clearRect(0, 0, getWidth(), getHeight());
+		g.setComposite(_composite.derive(alpha));
+		g.drawImage(_image, 0, 0, null);
 	}
 	
 	@Override
