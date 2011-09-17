@@ -196,7 +196,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 								if (!_checkAddIfHeightAlreadyExist.isSelected())
 								{
 									temp = block.nGetCell(cellX, cellY, GeoEngine.getHeight(heightAndNSWE));
-									if (temp.getHeightAndNSWE() == heightAndNSWE)
+									if (temp.getHeight() == GeoEngine.getHeight(heightAndNSWE))
 										continue;
 								}
 									
@@ -229,7 +229,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 								if (!_checkAddIfHeightAlreadyExist.isSelected())
 								{
 									temp = block.nGetCell(temp.getCellX(), temp.getCellY(), GeoEngine.getHeight(heightAndNSWE));
-									if (temp.getHeightAndNSWE() == heightAndNSWE)
+									if (temp.getHeight() == GeoEngine.getHeight(heightAndNSWE))
 										continue;
 								}
 								
