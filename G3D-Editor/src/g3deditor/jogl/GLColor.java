@@ -101,6 +101,15 @@ public final class GLColor
 		return _a;
 	}
 	
+	@Override
+	public final boolean equals(final Object obj)
+	{
+		if (!(obj instanceof GLColor))
+			return false;
+		
+		return equals((GLColor) obj);
+	}
+	
 	public final boolean equals(final GLColor color)
 	{
 		if (color == this)

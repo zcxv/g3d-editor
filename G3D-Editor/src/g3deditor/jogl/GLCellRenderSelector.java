@@ -20,7 +20,7 @@ import g3deditor.geo.GeoBlockSelector;
 import g3deditor.geo.GeoCell;
 import g3deditor.geo.GeoEngine;
 import g3deditor.geo.GeoRegion;
-import g3deditor.jogl.renderer.VBOGSLSRenderer;
+import g3deditor.jogl.renderer.VBOGLSLRenderer;
 import g3deditor.util.TaskExecutor;
 import g3deditor.util.Util;
 import g3deditor.util.Util.FastComparator;
@@ -338,7 +338,7 @@ public final class GLCellRenderSelector
 				{
 					if (GLCellRenderSelector.this.isVisible(_block))
 					{
-						if (!(GLDisplay.getInstance().getRenderer() instanceof VBOGSLSRenderer))
+						if (!(GLDisplay.getInstance().getRenderer() instanceof VBOGLSLRenderer))
 						{
 							final GeoCell[] cells = _block.getCells();
 							ensureCapacity(cells.length);

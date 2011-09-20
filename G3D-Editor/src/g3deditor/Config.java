@@ -15,9 +15,8 @@
 package g3deditor;
 
 import g3deditor.jogl.GLCellRenderSelector;
-import g3deditor.jogl.GLCellRenderer;
 import g3deditor.jogl.renderer.DLLoDRenderer;
-import g3deditor.jogl.renderer.IRenderer;
+import g3deditor.jogl.renderer.VBOGLSLRenderer;
 
 import java.awt.Color;
 import java.io.File;
@@ -36,9 +35,24 @@ import javax.swing.UIManager.LookAndFeelInfo;
 public final class Config
 {
 	private static final LookAndFeelInfo[] LOOK_AND_FEEL_INFOS;
+	
+	private static final int mix(final Color c1, final Color c2, final float ratio)
+	{
+		return new Color(
+				mix(c1.getRed(), c2.getRed(), ratio),
+				mix(c1.getGreen(), c2.getGreen(), ratio),
+				mix(c1.getBlue(), c2.getBlue(), ratio),
+				mix(c1.getAlpha(), c2.getAlpha(), ratio)).getRGB();
+	}
+	
+	private static final int mix(final int v1, final int v2, final float ratio)
+	{
+		return Math.min(((int) (v1 * ratio) + v2) / 2, 255);
+	}
 
 	private static final File CONFIG_FILE				= new File("./G3DEditor.ini");
 	private static final ConfigProperties PROPERTIES	= new ConfigProperties();
+	public static int DEFAULT_COLOR_GUI_SELECTED				= Color.YELLOW.getRGB();
 	public static int DEFAULT_COLOR_FLAT_NORMAL					= Color.BLUE.getRGB();
 	public static int DEFAULT_COLOR_FLAT_HIGHLIGHTED			= Color.CYAN.getRGB();
 	public static int DEFAULT_COLOR_FLAT_SELECTED				= Color.MAGENTA.getRGB();
@@ -48,21 +62,22 @@ public final class Config
 	public static int DEFAULT_COLOR_MULTILAYER_NORMAL			= Color.RED.getRGB();
 	public static int DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED		= Color.CYAN.getRGB();
 	public static int DEFAULT_COLOR_MULTILAYER_SELECTED			= Color.MAGENTA.getRGB();
-	public static int DEFAULT_COLOR_MULTILAYER_NORMAL_SPECIAL			= Color.WHITE.getRGB();
-	public static int DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL		= Color.WHITE.getRGB();
-	public static int DEFAULT_COLOR_MULTILAYER_SELECTED_SPECIAL			= Color.WHITE.getRGB();
+	public static int DEFAULT_COLOR_MULTILAYER_NORMAL_SPECIAL			= mix(Color.WHITE, Color.RED, 1.125f);
+	public static int DEFAULT_COLOR_MULTILAYER_HIGHLIGHTED_SPECIAL		= mix(Color.WHITE, Color.CYAN, 1.125f);
+	public static int DEFAULT_COLOR_MULTILAYER_SELECTED_SPECIAL			= mix(Color.WHITE, Color.MAGENTA, 1.125f);
 	
 	public static String PATH_TO_GEO_FILES				= "./data/geodata/";
 	public static boolean TERRAIN_DEFAULT_ON			= false;
 	public static int VIS_GRID_RANGE					= GLCellRenderSelector.MIN_VIS_GRID_RANGE;
 	public static String LOOK_AND_FEEL					= "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-	public static String CELL_RENDERER					= GLCellRenderer.validateRenderer(null, null);
+	public static String CELL_RENDERER					= VBOGLSLRenderer.NAME;
 	public static int DLLoD_RANGE						= DLLoDRenderer.MAX_DISTANCE_SQ;
 	public static boolean V_SYNC						= true;
 	public static boolean USE_TRANSPARENCY				= true;
 	public static boolean USE_MULTITHREADING			= Runtime.getRuntime().availableProcessors() > 1;
 	public static boolean DRAW_OUTLINE					= false;
 	
+	public static int COLOR_GUI_SELECTED				= DEFAULT_COLOR_GUI_SELECTED;
 	public static int COLOR_FLAT_NORMAL					= DEFAULT_COLOR_FLAT_NORMAL;
 	public static int COLOR_FLAT_HIGHLIGHTED			= DEFAULT_COLOR_FLAT_HIGHLIGHTED;
 	public static int COLOR_FLAT_SELECTED				= DEFAULT_COLOR_FLAT_SELECTED;
@@ -127,7 +142,7 @@ public final class Config
 				TERRAIN_DEFAULT_ON		= Boolean.parseBoolean(PROPERTIES.getProperty("TERRAIN_DEFAULT_ON", String.valueOf(TERRAIN_DEFAULT_ON)));
 				VIS_GRID_RANGE			= Integer.parseInt(PROPERTIES.getProperty("VIS_GRID_RANGE", String.valueOf(VIS_GRID_RANGE)));
 				LOOK_AND_FEEL			= PROPERTIES.getProperty("LOOK_AND_FEEL", LOOK_AND_FEEL);
-				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", IRenderer.NAME);
+				CELL_RENDERER			= PROPERTIES.getProperty("CELL_RENDERER", VBOGLSLRenderer.NAME);
 				DLLoD_RANGE				= Integer.parseInt(PROPERTIES.getProperty("DLLoD_RANGE", String.valueOf(DLLoD_RANGE)));
 				V_SYNC					= Boolean.parseBoolean(PROPERTIES.getProperty("V_SYNC", String.valueOf(V_SYNC)));
 				USE_TRANSPARENCY		= Boolean.parseBoolean(PROPERTIES.getProperty("USE_TRANSPARENCY", String.valueOf(USE_TRANSPARENCY)));

@@ -24,6 +24,8 @@ import g3deditor.swing.Splash.CheckedRunnable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
+import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 
 import com.jogamp.opengl.util.Animator;
 
@@ -36,8 +38,9 @@ public final class G3DEditor
 {
 	public static final void main(final String[] args)
 	{
-		//ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-		//JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		
 		Config.load();
 		
 		new Splash(3000,

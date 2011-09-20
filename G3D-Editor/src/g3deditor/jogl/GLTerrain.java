@@ -40,6 +40,25 @@ import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
  */
 public final class GLTerrain
 {
+	static final int genTex(final GL2 gl, final int width, final int height, final ShortBuffer buf, int id)
+	{
+		if (id == 0)
+		{
+			final int[] temp = new int[1];
+			gl.glGenTextures(1, temp, 0);
+			id = temp[0];
+		}
+		
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, id);
+		gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, 1, width, height, 0, GL2.GL_RED, GL2.GL_SHORT, buf);
+		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+		gl.glTexParameterf(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
+		gl.glTexParameterf(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+		gl.glTexParameterf(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+		gl.glTexParameterf(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+		return id;
+	}
+
 	private TerrainBuilder _builder;
 	private int _vboIndex;
 	private int _vboVertex;
@@ -185,6 +204,8 @@ public final class GLTerrain
 		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 		
 		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2.GL_FILL);
+		
+		gl.glUseProgram(0);
 	}
 	
 	public final void dispose(final GL2 gl)
@@ -315,7 +336,7 @@ public final class GLTerrain
 		public final void update(final GL2 gl, final int vboVertex, final GeoBlock[][] blocks, final boolean flipped)
 		{
 			_vertexBuffer.clear();
-			updateImpl(_vertexBuffer, blocks, flipped);
+			updateImpl(_vertexBuffer, blocks, flipped);			
 			_vertexBuffer.flip();
 			
 			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboVertex);
