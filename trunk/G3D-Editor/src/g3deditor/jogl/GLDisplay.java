@@ -23,7 +23,7 @@ import g3deditor.geo.GeoEngine;
 import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.GLGUIRenderer.GLText;
 import g3deditor.jogl.renderer.IRenderer;
-import g3deditor.jogl.renderer.VBOGSLSRenderer;
+import g3deditor.jogl.renderer.VBOGLSLRenderer;
 import g3deditor.swing.FrameMain;
 import g3deditor.util.FastArrayList;
 
@@ -297,6 +297,7 @@ public final class GLDisplay implements GLEventListener
 				{
 					System.err.println("Renderer could not be initialized: " + _renderer.getName());
 					_renderer = new IRenderer();
+					_renderInfoText.setText("Renderer: " + _renderer);
 					Config.CELL_RENDERER = _renderer.getName();
 				}
 			}
@@ -310,7 +311,7 @@ public final class GLDisplay implements GLEventListener
 				_renderer.render(gl, selector);
 			}
 			
-			if (Config.DRAW_OUTLINE && !(_renderer instanceof VBOGSLSRenderer))
+			if (Config.DRAW_OUTLINE && !(_renderer instanceof VBOGLSLRenderer))
 			{
 				gl.glPolygonMode(GL2.GL_BACK, GL2.GL_LINE);
 				gl.glCullFace(GL2.GL_FRONT);

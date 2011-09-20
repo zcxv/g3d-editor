@@ -23,6 +23,7 @@ import g3deditor.jogl.shader.uniform.GLUniformVec3fv;
 import g3deditor.jogl.shader.uniform.GLUniformVec4fv;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,8 +43,6 @@ import com.jogamp.opengl.util.texture.Texture;
  */
 public final class GLShader
 {
-	public static final GLShader DEFAULT_SHADER = new GLShader();
-	
 	private static final String readShader(final String file, final String type)
 	{
 		FileInputStream fis = null;
@@ -84,7 +83,9 @@ public final class GLShader
 	}
 	
 	private final String _vertexShader;
+	private final String _vertexShaderName;
 	private final String _fragmentShader;
+	private final String _fragmentShaderName;
 	private final HashMap<String, GLUniform> _uniforms;
 	
 	private boolean _initialized;
@@ -92,17 +93,12 @@ public final class GLShader
 	private int _vertexShaderId;
 	private int _fragmentShaderId;
 	
-	private GLShader()
-	{
-		_vertexShader = null;
-		_fragmentShader = null;
-		_uniforms = null;
-	}
-	
 	public GLShader(final String vertexShaderPath, final String fragmentShaderPath)
 	{
 		_vertexShader = readShader(vertexShaderPath, "VertexShader");
+		_vertexShaderName = new File(vertexShaderPath).getName();
 		_fragmentShader = readShader(fragmentShaderPath, "FragmentShader");
+		_fragmentShaderName = new File(fragmentShaderPath).getName();
 		_uniforms = new HashMap<String, GLUniform>();
 	}
 	
@@ -166,12 +162,12 @@ public final class GLShader
 		
 		gl.glShaderSource(_vertexShaderId, 1, new String[]{_vertexShader}, new int[]{_vertexShader.length()}, 0);
 		gl.glCompileShader(_vertexShaderId);
-		if (!checkCompilationOk(gl, _vertexShaderId, true, "Vertex"))
+		if (!checkCompilationOk(gl, _vertexShaderId, true, "[" + _vertexShaderName + "] Vertex"))
 			return false;
 		
 		gl.glShaderSource(_fragmentShaderId, 1, new String[]{_fragmentShader}, new int[]{_fragmentShader.length()}, 0);
 		gl.glCompileShader(_fragmentShaderId);
-		if (!checkCompilationOk(gl, _fragmentShaderId, true, "Fragment"))
+		if (!checkCompilationOk(gl, _fragmentShaderId, true, "[" + _fragmentShaderName + "] Fragment"))
 			return false;
 		
 		_programId = gl.glCreateProgram();
@@ -179,7 +175,7 @@ public final class GLShader
 		gl.glAttachShader(_programId, _fragmentShaderId);
 		gl.glLinkProgram(_programId);
 		gl.glValidateProgram(_programId);
-		if (!checkCompilationOk(gl, _programId, false, "GSLS"))
+		if (!checkCompilationOk(gl, _programId, false, "[" + _vertexShaderName + "/" + _fragmentShaderName + "] GLSL"))
 			return false;
 		
 		return true;

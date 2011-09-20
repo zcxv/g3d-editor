@@ -49,7 +49,7 @@ public enum SelectionState
 	
 	private SelectionState(final int colorFlat, final int colorComplex, final int colorMutliLayer, final int colorMultiLayerSpecial)
 	{
-		_colorGuiSelected = new GLColor(Color.YELLOW, ALPHA);
+		_colorGuiSelected = new GLColor(new Color(Config.COLOR_GUI_SELECTED), ALPHA);
 		_colorFlat = new GLColor(new Color(colorFlat), ALPHA);
 		_colorComplex1 = new GLColor(new Color(colorComplex), ALPHA);
 		_colorComplex2 = new GLColor(_colorComplex1, 0.85f, 0.85f, 0.85f);

@@ -101,7 +101,7 @@ public final class FrameMain extends JFrame implements ActionListener
 	
 	private FrameMain()
 	{
-		super("G3D-Editor [Beta 1.4] by Forsaiken");
+		super("G3D-Editor [Beta 1.5] by Forsaiken");
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter()
 		{
@@ -481,7 +481,8 @@ public final class FrameMain extends JFrame implements ActionListener
 		else if (e.getSource() == _buttonHelp)
 		{
 			JOptionPane.showMessageDialog(this,
-					"<html><b>G3D-Editor</b> - By Forsaiken<br>If you like this programm please donate!<br>PayPal: <i>patrickbiesenbach@yahoo.de</i><br><br>" +
+					"<html><b>G3D-Editor</b> - By Forsaiken aka Patrick Biesenbach<br>" +
+					"If you like this programm please donate!<br>PayPal/E-Mail: <i>patrickbiesenbach@yahoo.de</i><br><br>" +
 					"Controll:<br><table>" +
 					"<tr><td>Look around:</td><td>Hold RIGHT-MOUSE and move</td></tr>" +
 					"<tr><td>Move around:</td><td>Use WASD and QE</td></tr>" +
@@ -503,7 +504,8 @@ public final class FrameMain extends JFrame implements ActionListener
 					"</table><br>" +
 					"Note: The editor window need focus to accept inputs!<br><br>" +
 					"This programm is FREE and licensed under GNU GPLv3 <i>http://www.gnu.org/licenses/</i><br>" +
-					"Use it on your OWN RISC! I will not take an ANY WARRANTY!" +
+					"Use it on your OWN RISC! I will not take an ANY WARRANTY!<br><br>" +
+					"<i>http://code.google.com/p/g3d-editor/</i>" +
 					"</html>", "About", JOptionPane.INFORMATION_MESSAGE);
 		}
 		else if (e.getSource() == _buttonDonate)

@@ -19,7 +19,7 @@ import g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector;
 import g3deditor.jogl.renderer.DLLoDRenderer;
 import g3deditor.jogl.renderer.DLRenderer;
 import g3deditor.jogl.renderer.IRenderer;
-import g3deditor.jogl.renderer.VBOGSLSRenderer;
+import g3deditor.jogl.renderer.VBOGLSLRenderer;
 import g3deditor.jogl.renderer.VBORenderer;
 import g3deditor.jogl.shader.GLShader;
 
@@ -46,7 +46,7 @@ public abstract class GLCellRenderer
 		DLRenderer.NAME,
 		VBORenderer.NAME,
 		DLLoDRenderer.NAME,
-		VBOGSLSRenderer.NAME,
+		VBOGLSLRenderer.NAME,
 	};
 	
 	public static final String[] getAvailableRenderers(final GL2 gl)
@@ -59,8 +59,8 @@ public abstract class GLCellRenderer
 			list.add(DLLoDRenderer.NAME);
 		if (VBORenderer.isAvailable(gl))
 			list.add(VBORenderer.NAME);
-		if (VBOGSLSRenderer.isAvailable(gl))
-			list.add(VBOGSLSRenderer.NAME);
+		if (VBOGLSLRenderer.isAvailable(gl))
+			list.add(VBOGLSLRenderer.NAME);
 		return list.toArray(new String[list.size()]);
 	}
 	
@@ -75,8 +75,8 @@ public abstract class GLCellRenderer
 		if (VBORenderer.NAME.equals(name))
 			return new VBORenderer();
 		
-		if (VBOGSLSRenderer.NAME.equals(name))
-			return new VBOGSLSRenderer();
+		if (VBOGLSLRenderer.NAME.equals(name))
+			return new VBOGLSLRenderer();
 		
 		return new IRenderer();
 	}
@@ -99,8 +99,8 @@ public abstract class GLCellRenderer
 			clazz = DLLoDRenderer.class;
 		if (VBORenderer.NAME.equals(name))
 			clazz = VBORenderer.class;
-		if (VBOGSLSRenderer.NAME.equals(name))
-			clazz = VBOGSLSRenderer.class;
+		if (VBOGLSLRenderer.NAME.equals(name))
+			clazz = VBOGLSLRenderer.class;
 		
 		if (clazz != null)
 		{
