@@ -92,6 +92,6 @@ void main(void)
 	
 	#ifdef MAYBE_MAKE_DARKER
 		if ((int(block_position.x) >> 3) % 2 != (int(block_position.y) >> 3) % 2)
-			gl_FrontColor *= MAYBE_MAKE_DARKER_FACTOR;
+			gl_FrontColor.rgb *= MAYBE_MAKE_DARKER_FACTOR;
 	#endif
 }
