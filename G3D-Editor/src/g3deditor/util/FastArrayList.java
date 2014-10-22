@@ -591,7 +591,8 @@ public final class FastArrayList<E> implements List<E>
 			swapUnsafe(i, random.nextInt(_size));
 		}
 	}
-	
+	// TODO fix this error:
+	// Name clash: The method sort(Comparator<E>) of type FastArrayList<E> has the same erasure as sort(Comparator<? super E>) of type List<E> but does not override it
 	public final void sort(final Comparator<E> c)
 	{
 		Arrays.sort(_values, 0, _size, c);
