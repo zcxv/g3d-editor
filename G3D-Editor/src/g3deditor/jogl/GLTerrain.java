@@ -382,10 +382,8 @@ public final class GLTerrain
 					{
 						return Math.min(Math.min(Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX - 1][blockY].getMaxHeight()), blocks[blockX][blockY - 1].getMaxHeight()), blocks[blockX - 1][blockY - 1].getMaxHeight());
 					}
-					else
-					{
-						return Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX - 1][blockY].getMaxHeight());
-					}
+					
+					return Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX - 1][blockY].getMaxHeight());
 				}
 				else
 				{
@@ -393,10 +391,8 @@ public final class GLTerrain
 					{
 						return Math.min(blocks[blockX][blockY].getMaxHeight(), blocks[blockX][blockY - 1].getMaxHeight());
 					}
-					else
-					{
-						return blocks[blockX][blockY].getMaxHeight();
-					}
+					
+					return blocks[blockX][blockY].getMaxHeight();
 				}
 			}
 			else
@@ -407,10 +403,8 @@ public final class GLTerrain
 					{
 						return Math.min(Math.min(Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight()), blocks[blockX][blockY - 1].getMinHeight()), blocks[blockX - 1][blockY - 1].getMinHeight());
 					}
-					else
-					{
-						return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight());
-					}
+					
+					return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX - 1][blockY].getMinHeight());
 				}
 				else
 				{
@@ -418,10 +412,8 @@ public final class GLTerrain
 					{
 						return Math.min(blocks[blockX][blockY].getMinHeight(), blocks[blockX][blockY - 1].getMinHeight());
 					}
-					else
-					{
-						return blocks[blockX][blockY].getMinHeight();
-					}
+					
+					return blocks[blockX][blockY].getMinHeight();
 				}
 			}
 		}

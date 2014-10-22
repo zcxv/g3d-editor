@@ -36,11 +36,11 @@ public final class VBORenderer extends GLCellRenderer
 {
 	public static final boolean isAvailable(final GL2 gl)
 	{
-		return gl.isExtensionAvailable("GL_ARB_vertex_buffer_object") &&
-		gl.isFunctionAvailable("glGenBuffersARB") &&
-		gl.isFunctionAvailable("glBindBufferARB") &&
-		gl.isFunctionAvailable("glBufferDataARB") &&
-		gl.isFunctionAvailable("glDeleteBuffersARB");
+		return gl.isExtensionAvailable("GL_ARB_vertex_buffer_object")
+			&& gl.isFunctionAvailable("glGenBuffersARB")
+			&& gl.isFunctionAvailable("glBindBufferARB")
+			&& gl.isFunctionAvailable("glBufferDataARB")
+			&& gl.isFunctionAvailable("glDeleteBuffersARB");
 	}
 	
 	public static final String NAME = "VertexBufferObject";
@@ -54,9 +54,6 @@ public final class VBORenderer extends GLCellRenderer
 	private int _vboVertex;
 	private int _vboTexture;
 	
-	/**
-	 * @see g3deditor.jogl.GLCellRenderer#init(javax.media.opengl.GL2)
-	 */
 	@Override
 	public final boolean init(final GL2 gl)
 	{
@@ -104,9 +101,6 @@ public final class VBORenderer extends GLCellRenderer
 		return true;
 	}
 	
-	/**
-	 * @see g3deditor.jogl.GLCellRenderer#enableRender(javax.media.opengl.GL2)
-	 */
 	@Override
 	public final void enableRender(final GL2 gl)
 	{
@@ -123,9 +117,7 @@ public final class VBORenderer extends GLCellRenderer
 		gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, _vboIndex);
 	}
 	
-	/**
-	 * @see g3deditor.jogl.GLCellRenderer#render(javax.media.opengl.GL2, g3deditor.jogl.GLCellRenderSelector.GLSubRenderSelector)
-	 */
+	@Override
 	public final void render(final GL2 gl, final GLSubRenderSelector selector)
 	{
 		GeoCell cell;
@@ -134,21 +126,17 @@ public final class VBORenderer extends GLCellRenderer
 			cell = selector.getElementToRender(i);
 			GLState.glColor4f(gl, cell.getSelectionState().getColor(cell));
 			GLState.translatef(gl, cell.getRenderX(), cell.getRenderY(), cell.getRenderZ());
-			
-			if (cell.isBig())
-			{
-				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, 0);
-			}
-			else
-			{
-				gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH, GL2.GL_UNSIGNED_BYTE, cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH + GEOMETRY_INDICES_DATA_LENGTH);
-			}
+			gl.glDrawElements(
+				GL2.GL_TRIANGLES,
+				GEOMETRY_INDICES_DATA_LENGTH,
+				GL2.GL_UNSIGNED_BYTE,
+				(cell.isBig()
+					? 0
+					: (cell.getNSWE() * GEOMETRY_INDICES_DATA_LENGTH) + GEOMETRY_INDICES_DATA_LENGTH)
+			);
 		}
 	}
 	
-	/**
-	 * @see g3deditor.jogl.GLCellRenderer#disableRender(javax.media.opengl.GL2)
-	 */
 	@Override
 	public final void disableRender(final GL2 gl)
 	{
@@ -160,9 +148,6 @@ public final class VBORenderer extends GLCellRenderer
 		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 	}
 	
-	/**
-	 * @see g3deditor.jogl.GLCellRenderer#dispose(javax.media.opengl.GL2)
-	 */
 	@Override
 	public final void dispose(final GL2 gl)
 	{
@@ -170,9 +155,6 @@ public final class VBORenderer extends GLCellRenderer
 		gl.glDeleteBuffers(3, new int[]{_vboIndex, _vboVertex, _vboTexture}, 0);
 	}
 	
-	/**
-	 * @see g3deditor.jogl.GLCellRenderer#getName()
-	 */
 	@Override
 	public final String getName()
 	{

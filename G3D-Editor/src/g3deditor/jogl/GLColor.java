@@ -112,11 +112,11 @@ public final class GLColor
 	
 	public final boolean equals(final GLColor color)
 	{
-		if (color == this)
-			return true;
-		
 		if (color == null)
 			return false;
+		
+		if (color == this)
+			return true;
 		
 		return color.getR() == getR() && color.getG() == getG() && color.getB() == getB() && color.getA() == getA();
 	}

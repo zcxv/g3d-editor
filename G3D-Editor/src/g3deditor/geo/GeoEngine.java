@@ -43,7 +43,7 @@ public final class GeoEngine
 		@Override
 		public final boolean accept(final File file)
 		{
-			return file.isFile() && file.getName().toLowerCase().endsWith(".dat") && hasValidHeader(file);
+			return file.isFile() && file.getName().toLowerCase().endsWith(".dat") && hasValidL2OffHeader(file);
 		}
 	};
 	
@@ -61,18 +61,18 @@ public final class GeoEngine
 				return false;
 			
 			final String name = file.getName().toLowerCase();
+			
 			if (name.endsWith(".dat"))
 			{
-				return hasValidHeader(file);
+				return hasValidL2OffHeader(file);
 			}
-			else if (name.endsWith(".l2j"))
+			
+			if (name.endsWith(".l2j"))
 			{
 				return L2j_Pattern.matcher(name).matches();
 			}
-			else
-			{
-				return false;
-			}
+			
+			return false;
 		}
 	};
 	
@@ -240,27 +240,24 @@ public final class GeoEngine
 		{
 			return "NSWE";
 		}
-		else
-		{
-			String nswe = "";
-			
-			if ((NSWE & NORTH) == NORTH)
-				nswe += "N";
-			
-			if ((NSWE & SOUTH) == SOUTH)
-				nswe += "S";
-			
-			if ((NSWE & WEST) == WEST)
-				nswe += "W";
-			
-			if ((NSWE & EAST) == EAST)
-				nswe += "E";
-			
-			if (nswe.isEmpty())
-				nswe = "NONE";
-			
-			return nswe;
-		}
+		String nswe = "";
+		
+		if ((NSWE & NORTH) == NORTH)
+			nswe += "N";
+		
+		if ((NSWE & SOUTH) == SOUTH)
+			nswe += "S";
+		
+		if ((NSWE & WEST) == WEST)
+			nswe += "W";
+		
+		if ((NSWE & EAST) == EAST)
+			nswe += "E";
+		
+		if (nswe.isEmpty())
+			nswe = "NONE";
+		
+		return nswe;
 	}
 	
 	public static final boolean checkNSWE(final short NSWE, final int x1, final int y1, final int x2, final int y2)
@@ -301,10 +298,7 @@ public final class GeoEngine
 		{
 			return new File(Config.PATH_TO_GEO_FILES, regionX + "_" + regionY + ".l2j").isFile();
 		}
-		else
-		{
-			return searchL2OffGeoFile(regionX, regionY) != null;
-		}
+		return searchL2OffGeoFile(regionX, regionY) != null;
 	}
 	
 	public static final File searchL2OffGeoFile(final int regionX, final int regionY)
@@ -322,7 +316,7 @@ public final class GeoEngine
 		return null;
 	}
 	
-	public static final boolean hasValidHeader(final File file)
+	public static final boolean hasValidL2OffHeader(final File file)
 	{
 		final int[] header = getL2OffHeader(file);
 		return header != null && header[0] >= 10 && header[0] <= 26 && header[1] >= 10 && header[1] <= 25;
@@ -330,42 +324,32 @@ public final class GeoEngine
 	
 	public static final int[] getL2OffHeader(final File file)
 	{
-		FileInputStream fis = null;
+		int[] retval;
 		
-		try
+		try (FileInputStream fis = new FileInputStream(file))
 		{
-			fis = new FileInputStream(file);
-			final int regionX = fis.read();
-			final int regionY = fis.read();
-			return new int[]{regionX, regionY};
+			retval = new int[] { fis.read(), fis.read() };
 		}
 		catch (final Exception e)
 		{
-			return null;
+			retval = null;
 		}
-		finally
-		{
-			try
-			{
-				if (fis != null)
-					fis.close();
-			}
-			catch (final Exception e1)
-			{
-				
-			}
-		}
+		return retval;
 	}
 	
 	public static final int[] getHeaderOfL2jOrL2Off(final File file)
 	{
 		String name = file.getName().toLowerCase();
-		if (name.equals(".dat"))
+		if (name.endsWith(".dat"))
 			return getL2OffHeader(file);
 		
 		name = name.substring(0, name.lastIndexOf(".l2j"));
 		final String[] header = name.split("_");
-		return new int[]{Integer.parseInt(header[0]), Integer.parseInt(header[1])};
+		return new int[]
+		{
+			Integer.parseInt(header[0]),
+			Integer.parseInt(header[1])
+		};
 	}
 	
 	private static GeoEngine _instance;
@@ -384,7 +368,6 @@ public final class GeoEngine
 	
 	public GeoEngine()
 	{
-		
 	}
 	
 	public final void unload()
@@ -407,11 +390,11 @@ public final class GeoEngine
 		if (_activeRegion != null)
 			throw new RuntimeException("Geo must be unloaded first");
 		
-		FileInputStream fis = null;
-		try
+		try (FileInputStream fis = new FileInputStream(file);
+			BufferedInputStream bis = new BufferedInputStream(fis))
 		{
-			fis = new FileInputStream(file);
-			final GeoReader reader = GeoStreamReader.wrap(new BufferedInputStream(fis));
+			final GeoReader reader = GeoStreamReader.wrap(bis);
+			
 			if (!l2j)
 			{
 				for (int i = 18; i-- > 0;)
@@ -427,23 +410,13 @@ public final class GeoEngine
 			e.printStackTrace();
 			throw new GeoFileLoadException(file, l2j, e);
 		}
-		finally
-		{
-			try
-			{
-				if (fis != null)
-					fis.close();
-			}
-			catch (final Exception e)
-			{
-				
-			}
-		}
 	}
 	
 	public final void reloadGeo(final int regionX, final int regionY, final boolean l2j) throws Exception
 	{
-		final File file = l2j ? new File(Config.PATH_TO_GEO_FILES, (regionX + 10) + "_" + (regionY + 10) + ".l2j") : searchL2OffGeoFile((regionX + 10), (regionY + 10));
+		final File file = l2j
+			? new File(Config.PATH_TO_GEO_FILES, (regionX + 10) + "_" + (regionY + 10) + ".l2j")
+			: searchL2OffGeoFile((regionX + 10), (regionY + 10));
 		reloadGeo(regionX, regionY, l2j, file);
 	}
 	
@@ -478,10 +451,7 @@ public final class GeoEngine
 		{
 			return region.nGetType(geoX, geoY);
 		}
-		else
-		{
-			return GeoEngine.GEO_BLOCK_TYPE_FLAT;
-		}
+		return GeoEngine.GEO_BLOCK_TYPE_FLAT;
 	}
 	
 	public final GeoCell nGetCell(final int geoX, final int geoY, final int z)
@@ -491,10 +461,7 @@ public final class GeoEngine
 		{
 			return region.nGetCell(geoX, geoY, z);
 		}
-		else
-		{
-			throw new GeoDataNotFoundException(geoX, geoY);
-		}
+		throw new GeoDataNotFoundException(geoX, geoY);
 	}
 	
 	public final GeoBlock getBlock(final int geoX, final int geoY)
@@ -504,10 +471,7 @@ public final class GeoEngine
 		{
 			return region.getBlock(geoX, geoY);
 		}
-		else
-		{
-			throw new GeoDataNotFoundException(geoX, geoY);
-		}
+		throw new GeoDataNotFoundException(geoX, geoY);
 	}
 	
 	public final int nGetLayerCount(final int geoX, final int geoY)
@@ -517,9 +481,6 @@ public final class GeoEngine
 		{
 			return region.nGetLayerCount(geoX, geoY);
 		}
-		else
-		{
-			return 1;
-		}
+		return 1;
 	}
 }

@@ -254,7 +254,7 @@ public final class GLDisplay implements GLEventListener
 		GLState.setVSyncEnabled(gl, Config.V_SYNC);
 		GLState.setDepthTestEnabled(gl, true);
 		
-		_input.update(gl, tpf);
+		_input.update(tpf);
 		_camera.checkPositionOrRotationChanged();
 		
 		gl.glRotatef(360f - _camera.getRotX(), 1.0f, 0.0f, 0.0f);

@@ -462,59 +462,64 @@ public final class DialogJumpTo extends JDialog implements ActionListener, KeyLi
 			{
 				final int regionX = GeoEngine.getRegionXY(geoX);
 				final int regionY = GeoEngine.getRegionXY(geoY);
-				final boolean l2j = _comboGeoFileType.getSelectedItem() == "L2j Geo File";
+				final boolean l2j = (_comboGeoFileType.getSelectedItem() == "L2j Geo File");
 				final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
-				if (region != null)
+				if (region == null)
 				{
-					if (region.getRegionX() != regionX || region.getRegionY() != regionY)
-					{
-						if (!region.allDataEqual())
-						{
-							switch (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Region " + region.getName() + " was modified.\nWould u like to save it?", "Save...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE))
-							{
-								case JOptionPane.YES_OPTION:
-								{
-									new DialogSave(FrameMain.getInstance(), region, new Runnable()
-									{
-										@Override
-										public final void run()
-										{
-											try
-											{
-												GeoEngine.getInstance().unload();
-												GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
-												
-												if (GeoEngine.getInstance().getActiveRegion() != null)
-													GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
-											}
-											catch (final Exception e1)
-											{
-												e1.printStackTrace();
-											}
-										}
-									}).setVisible(true);
-									setVisible(false);
-									return;
-								}
-								
-								case JOptionPane.NO_OPTION:
-									break;
-									
-								default:
-									return;
-							}
-						}
-						GeoEngine.getInstance().unload();
-						GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
-					}
+					GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
 				}
-				else
+				else if (region.getRegionX() != regionX || region.getRegionY() != regionY)
 				{
+					if (!region.allDataEqual())
+					{
+						final int choice = JOptionPane.showConfirmDialog(
+							FrameMain.getInstance(),
+							"Region " + region.getName() + " was modified.\nWould u like to save it?", "Save...",
+							JOptionPane.YES_NO_CANCEL_OPTION,
+							JOptionPane.QUESTION_MESSAGE
+						);
+						
+						if (choice == JOptionPane.YES_OPTION)
+						{
+							new DialogSave(FrameMain.getInstance(), region, new Runnable()
+							{
+								@Override
+								public final void run()
+								{
+									try
+									{
+										GeoEngine.getInstance().unload();
+										GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
+										
+										if (GeoEngine.getInstance().getActiveRegion() != null)
+											GLDisplay.getInstance().getCamera().setXYZ(geoX, GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+									}
+									catch (final Exception e1)
+									{
+										e1.printStackTrace();
+									}
+								}
+							}).setVisible(true);
+							setVisible(false);
+							return;
+						}
+					}
+					GeoEngine.getInstance().unload();
 					GeoEngine.getInstance().reloadGeo(regionX, regionY, l2j);
 				}
 				
 				if (GeoEngine.getInstance().getActiveRegion() != null)
-					GLDisplay.getInstance().getCamera().setXYZ(geoX, worldZ != Integer.MIN_VALUE ? worldZ / 16f : GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f, geoY);
+				{
+					GLDisplay.getInstance().getCamera().setXYZ(
+						geoX,
+						// TODO it seems the variable order is incorrect here (x/z/y, not x/y/z)
+						// can someone confirm this works incorrectly?
+						((worldZ == Integer.MIN_VALUE)
+							? GeoEngine.getInstance().nGetCell(geoX, geoY, 0).getHeight() / 16f
+							: worldZ / 16f),
+						geoY
+					);
+				}
 			}
 			catch (final Exception e1)
 			{

@@ -32,7 +32,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.awt.GLCanvas;
 
 /**
@@ -75,7 +74,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 	public AWTInput()
 	{
 		_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR), new Point(0, 0), "CCursor");
-		_mouseEvents = new FastArrayList<MouseEvent>();
+		_mouseEvents = new FastArrayList<>();
 		
 		try
 		{
@@ -183,7 +182,7 @@ public final class AWTInput implements MouseListener, MouseMotionListener, Mouse
 		}
 	}
 	
-	public final void update(final GL2 gl, final double tpf)
+	public final void update(final double tpf)
 	{
 		final GLCamera camera = GLDisplay.getInstance().getCamera();
 		
