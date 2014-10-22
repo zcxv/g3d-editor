@@ -12,8 +12,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JWindow;
 
-import com.sun.awt.AWTUtilities;
-
 /**
  * <a href="http://l2j-server.com/">L2jServer</a>
  * 
@@ -59,7 +57,7 @@ public final class Splash extends JWindow implements Runnable
 			{
 				try
 				{
-					AWTUtilities.setWindowOpaque(this, false);
+					setBackground(new Color(0, 0, 0, 0));
 				}
 				catch (final Exception e)
 				{
