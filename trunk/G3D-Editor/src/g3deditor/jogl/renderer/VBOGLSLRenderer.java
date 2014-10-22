@@ -217,11 +217,19 @@ public final class VBOGLSLRenderer extends GLCellRenderer
 					{
 						_blockData.update(gl);
 						_cellPositions.update(gl);
-						gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH * 64, GL2.GL_UNSIGNED_SHORT, GEOMETRY_INDICES_DATA_LENGTH * Buffers.SIZEOF_SHORT);
+						gl.glDrawElements(
+							GL2.GL_TRIANGLES,
+							GEOMETRY_INDICES_DATA_LENGTH * 64,
+							GL2.GL_UNSIGNED_SHORT,
+							GEOMETRY_INDICES_DATA_LENGTH * Buffers.SIZEOF_SHORT
+						);
 					}
 					
 					cell = selector.getElementToRender(i);
-					_blockData.put((FrameMain.getInstance().isSelectedGeoCell(cell) ? 12 : (GLDisplay.getInstance().getSelectionBox().isInside(cell) ? 9 : 6) + cell.getSelectionState().ordinal()) | cell.getHeightAndNSWE() << 4);
+					_blockData.put((FrameMain.getInstance().isSelectedGeoCell(cell)
+							? 12
+							: (GLDisplay.getInstance().getSelectionBox().isInside(cell) ? 9 : 6) + cell.getSelectionState().ordinal())
+						| cell.getHeightAndNSWE() << 4);
 					_cellPositions.put(cell.getCellX() | cell.getCellY() << 16);
 				}
 				
@@ -229,7 +237,12 @@ public final class VBOGLSLRenderer extends GLCellRenderer
 				{
 					_blockData.update(gl);
 					_cellPositions.update(gl);
-					gl.glDrawElements(GL2.GL_TRIANGLES, GEOMETRY_INDICES_DATA_LENGTH * _blockData.getRemaining(), GL2.GL_UNSIGNED_SHORT, GEOMETRY_INDICES_DATA_LENGTH * Buffers.SIZEOF_SHORT);
+					gl.glDrawElements(
+						GL2.GL_TRIANGLES,
+						GEOMETRY_INDICES_DATA_LENGTH * _blockData.getRemaining(),
+						GL2.GL_UNSIGNED_SHORT,
+						GEOMETRY_INDICES_DATA_LENGTH * Buffers.SIZEOF_SHORT
+					);
 				}
 				break;
 			}

@@ -274,29 +274,20 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 					@Override
 					public final void run()
 					{
-						FileOutputStream fos = null;
-						try
+						try (FileOutputStream fos = new FileOutputStream(file);
+								final BufferedOutputStream bos = new BufferedOutputStream(fos))
 						{
-							fos = new FileOutputStream(file);
-							final BufferedOutputStream bos = new BufferedOutputStream(fos);
 							_region.saveTo(bos, _checkL2j.isSelected(), DialogSave.this);
 							bos.flush();
 						}
 						catch (final IOException e1)
 						{
-							JOptionPane.showMessageDialog(FrameMain.getInstance(), "Failed storing " + file + "\n" + e1.getMessage(), "Error", JOptionPane.INFORMATION_MESSAGE);
-						}
-						finally
-						{
-							try
-							{
-								if (fos != null)
-									fos.close();
-							}
-							catch (final Exception e1)
-							{
-								
-							}
+							JOptionPane.showMessageDialog(
+								FrameMain.getInstance(),
+								"Failed storing " + file + "\n" + e1.getMessage(),
+								"Error",
+								JOptionPane.INFORMATION_MESSAGE
+							);
 						}
 						onSaveComplete();
 					}
@@ -372,24 +363,19 @@ public final class DialogSave extends JDialog implements ActionListener, MouseLi
 	@Override
 	public final void mouseClicked(final MouseEvent e)
 	{
-		if (e.getSource() == _fieldFile)
+		if ((e.getSource() == _fieldFile)
+			&& (_fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION))
 		{
-			if (_fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
+			final File file = _fileChooser.getSelectedFile();
+			final boolean enabled = ((file != null) && FILE_FILTER.accept(file));
+			
+			_checkL2j.setEnabled(enabled);
+			_checkL2Off.setEnabled(enabled);
+			_buttonOk.setEnabled(enabled);
+			
+			if (enabled)
 			{
-				final File file = _fileChooser.getSelectedFile();
-				if (file != null && FILE_FILTER.accept(file))
-				{
-					_fieldFile.setText(file.toString());
-					_checkL2j.setEnabled(true);
-					_checkL2Off.setEnabled(true);
-					_buttonOk.setEnabled(true);
-				}
-				else
-				{
-					_checkL2j.setEnabled(false);
-					_checkL2Off.setEnabled(false);
-					_buttonOk.setEnabled(false);
-				}
+				_fieldFile.setText(file.toString());
 			}
 		}
 	}

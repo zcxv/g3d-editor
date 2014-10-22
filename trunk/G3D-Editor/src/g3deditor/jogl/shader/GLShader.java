@@ -45,12 +45,9 @@ public final class GLShader
 {
 	private static final String readShader(final String file, final String type)
 	{
-		FileInputStream fis = null;
-		
-		try
+		try (FileInputStream fis = new FileInputStream(file);
+			final BufferedReader br = new BufferedReader(new InputStreamReader(fis)))
 		{
-			fis = new FileInputStream(file);
-			final BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 			final StringBuilder sb = new StringBuilder();
 			
 			String line;
@@ -65,20 +62,6 @@ public final class GLShader
 		catch (final IOException e)
 		{
 			throw new RuntimeException("Failed reading " + type + ": " + file);
-		}
-		finally
-		{
-			if (fis != null)
-			{
-				try
-				{
-					fis.close();
-				}
-				catch (final IOException e)
-				{
-					
-				}
-			}
 		}
 	}
 	

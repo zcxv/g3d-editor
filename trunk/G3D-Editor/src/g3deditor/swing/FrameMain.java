@@ -111,26 +111,25 @@ public final class FrameMain extends JFrame implements ActionListener
 				final GeoRegion region = GeoEngine.getInstance().getActiveRegion();
 				if (region != null && !region.allDataEqual())
 				{
-					switch (JOptionPane.showConfirmDialog(FrameMain.getInstance(), "Region " + region.getName() + " was modified.\nWould u like to save it before closing?", "Save and exit", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE))
+					final int choice = JOptionPane.showConfirmDialog(
+						FrameMain.getInstance(),
+						"Region " + region.getName() + " was modified.\nWould u like to save it before closing?",
+						"Save and exit",
+						JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE
+					);
+					
+					if (choice == JOptionPane.YES_OPTION)
 					{
-						case JOptionPane.YES_OPTION:
+						new DialogSave(FrameMain.getInstance(), region, new Runnable()
 						{
-							new DialogSave(FrameMain.getInstance(), region, new Runnable()
+							@Override
+							public final void run()
 							{
-								@Override
-								public final void run()
-								{
-									System.exit(0);
-								}
-							}).setVisible(true);
-							return;
-						}
-						
-						case JOptionPane.NO_OPTION:
-							break;
-							
-						default:
-							return;
+								System.exit(0);
+							}
+						}).setVisible(true);
+						return;
 					}
 				}
 				System.exit(0);

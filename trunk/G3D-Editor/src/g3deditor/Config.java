@@ -251,55 +251,26 @@ public final class Config
 	{
 		ConfigProperties()
 		{
-			
 		}
 		
 		final void load(final File file) throws Exception
 		{
-			FileInputStream fis = null;
-			
-			try
+			try (FileInputStream fis = new FileInputStream(file))
 			{
-				fis = new FileInputStream(file);
 				super.clear();
 				super.load(fis);
-			}
-			finally
-			{
-				try
-				{
-					fis.close();
-				}
-				catch (Exception e)
-				{
-					
-				}
 			}
 		}
 		
 		final void save(final File file)
 		{
-			FileWriter fw = null;
-			
-			try
+			try (FileWriter fw = new FileWriter(file))
 			{
-				fw = new FileWriter(file);
 				super.store(fw, "G3DEditor Config");
 			}
 			catch (final Exception e)
 			{
 				e.printStackTrace();
-			}
-			finally
-			{
-				try
-				{
-					fw.close();
-				}
-				catch (final Exception e)
-				{
-					
-				}
 			}
 		}
 		
@@ -307,14 +278,7 @@ public final class Config
 		public final String getProperty(final String key, final String defaultValue)
 		{
 			final String property = super.getProperty(key);
-			if (property == null)
-			{
-				return defaultValue;
-			}
-			else
-			{
-				return property;
-			}
+			return ((property == null) ? defaultValue : property);
 		}
 	}
 }

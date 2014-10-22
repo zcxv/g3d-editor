@@ -84,9 +84,6 @@ public final class GeoBlockFlat extends GeoBlock
 		return new GeoCell[]{_cells[0]};
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#writeTo(g3deditor.util.GeoWriter, boolean)
-	 */
 	@Override
 	public final void writeTo(final GeoWriter writer, final boolean l2j)
 	{
@@ -96,9 +93,6 @@ public final class GeoBlockFlat extends GeoBlock
 			writer.putShort(_cells[0].getHeight());
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#getRequiredCapacity(boolean)
-	 */
 	@Override
 	public final int getRequiredCapacity(final boolean l2j)
 	{
@@ -117,45 +111,30 @@ public final class GeoBlockFlat extends GeoBlock
 		return null;
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#removeCells(g3deditor.geo.GeoCell[])
-	 */
 	@Override
 	public final int removeCells(final GeoCell... cells)
 	{
 		return 0;
 	}
 	
-	/**
-	 * @see g3deditor.content.geo.GeoBlock#getAllCells()
-	 */
 	@Override
 	public final GeoCell[] getCells()
 	{
 		return _cells;
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#getMinHeight()
-	 */
 	@Override
 	public final short getMinHeight()
 	{
 		return _cells[0].getHeight();
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#getMaxHeight()
-	 */
 	@Override
 	public final short getMaxHeight()
 	{
 		return getMinHeight();
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#updateMinMaxHeight(short)
-	 */
 	@Override
 	public final void updateMinMaxHeight(final short newHeight, final short oldHeight)
 	{
@@ -163,9 +142,6 @@ public final class GeoBlockFlat extends GeoBlock
 			GLDisplay.getInstance().getTerrain().checkNeedUpdateVBO(true, true);
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#unload()
-	 */
 	@Override
 	public final void unload()
 	{
@@ -177,9 +153,6 @@ public final class GeoBlockFlat extends GeoBlock
 		_cells = null;
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#dataEquals(g3deditor.util.GeoReader)
-	 */
 	@Override
 	public final boolean dataEquals(final GeoReader reader)
 	{
@@ -192,9 +165,6 @@ public final class GeoBlockFlat extends GeoBlock
 		return true;
 	}
 	
-	/**
-	 * @see g3deditor.geo.GeoBlock#updateLayerFor(g3deditor.geo.GeoCell)
-	 */
 	@Override
 	public final void updateLayerFor(final GeoCell cell)
 	{

@@ -185,6 +185,7 @@ public final class PanelLayers extends JPanel implements ActionListener
 		public final void mouseClicked(final MouseEvent e)
 		{
 			final int row = rowAtPoint(new Point(e.getX(), e.getY()));
+			// TODO what is this supposed to be?
 			if (row > -1)
 			{
 				

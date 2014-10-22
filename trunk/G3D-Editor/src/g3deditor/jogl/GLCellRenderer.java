@@ -106,13 +106,17 @@ public abstract class GLCellRenderer
 		{
 			try
 			{
-				return gl == null ? (String) clazz.getField("NAME").get(null) : ((Boolean) clazz.getMethod("isAvailable", GL2.class).invoke(null, gl)).booleanValue() ? (String) clazz.getField("NAME").get(null) : IRenderer.NAME;
+				if ((gl == null)
+					|| ((Boolean) clazz.getMethod("isAvailable", GL2.class).invoke(null, gl)).booleanValue())
+				{
+					return (String) clazz.getField("NAME").get(null);
+				}
 			}
 			catch (final Exception e)
 			{
-				
 			}
 		}
+		
 		return IRenderer.NAME;
 	}
 	
@@ -315,16 +319,13 @@ public abstract class GLCellRenderer
 	protected final boolean initShader(final GL2 gl, final String vertexShaderPath, final String fragmentShaderPath)
 	{
 		_shader = new GLShader(vertexShaderPath, fragmentShaderPath);
-		if (!_shader.init(gl))
-		{
-			_shader.dispose(gl);
-			_shader = null;
-			return false;
-		}
-		else
+		if (_shader.init(gl))
 		{
 			return true;
 		}
+		_shader.dispose(gl);
+		_shader = null;
+		return false;
 	}
 	
 	private final void updateTexture(final GL2 gl)
