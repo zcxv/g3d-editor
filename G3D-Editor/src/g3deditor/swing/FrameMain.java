@@ -51,6 +51,7 @@ public final class FrameMain extends JFrame implements ActionListener
 {
 	private static final FileFilter GEO_FILTER = new FileFilter()
 	{
+		@Override
 		public final boolean accept(final File file)
 		{
 			return file.isDirectory() || GeoEngine.GEO_FILE_FILTER.accept(file);

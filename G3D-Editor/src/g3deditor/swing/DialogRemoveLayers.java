@@ -213,7 +213,7 @@ public final class DialogRemoveLayers extends JDialog implements ActionListener,
 		}
 		else
 		{
-			final FastArrayList<Integer> layersHeights = new FastArrayList<Integer>();
+			final FastArrayList<Integer> layersHeights = new FastArrayList<>();
 			final GeoBlockSelector selector = GeoBlockSelector.getInstance();
 			
 			GeoBlock block;
@@ -324,7 +324,7 @@ public final class DialogRemoveLayers extends JDialog implements ActionListener,
 		else if (e.getSource() == _buttonOk)
 		{
 			final GeoBlockSelector selector = GeoBlockSelector.getInstance();
-			final FastArrayList<GeoCell> toRemove = new FastArrayList<GeoCell>();
+			final FastArrayList<GeoCell> toRemove = new FastArrayList<>();
 			
 			FastArrayList<GeoCell> selected;
 			GeoBlock block;

@@ -73,7 +73,7 @@ public final class GeoBlockSelector
 		getHead().setNext(getTail());
 		getTail().setPrev(getHead());
 		getTail().setNext(getTail());
-		_temp = new FastArrayList<GeoCell>();
+		_temp = new FastArrayList<>();
 	}
 	
 	private final GeoBlockEntry getEntry(final GeoBlock block)
@@ -240,14 +240,11 @@ public final class GeoBlockSelector
 			selected = null;
 		}
 		
-		if (selected == null)
-		{
-			cell.setSelectionState(SelectionState.SELECTED);
-			selected = new FastArrayList<GeoCell>(block.getCells(), true);
-			entry.setKey(block);
-			entry.setValue(selected);
-			entry.addBefore(getTail());
-		}
+		cell.setSelectionState(SelectionState.SELECTED);
+		selected = new FastArrayList<>(block.getCells());
+		entry.setKey(block);
+		entry.setValue(selected);
+		entry.addBefore(getTail());
 	}
 	
 	private final void selectGeoCellComplex(final GeoCell cell, final boolean fullBlock, final boolean append)
@@ -308,11 +305,11 @@ public final class GeoBlockSelector
 			{
 				if (fullBlock)
 				{
-					selected = new FastArrayList<GeoCell>(cells, true);
+					selected = new FastArrayList<>(cells);
 				}
 				else
 				{
-					selected = new FastArrayList<GeoCell>(8);
+					selected = new FastArrayList<>(8);
 					selected.addLastUnsafe(cell);
 					setStateOf(cells, SelectionState.HIGHLIGHTED);
 				}
@@ -329,11 +326,11 @@ public final class GeoBlockSelector
 			
 			if (fullBlock)
 			{
-				selected = new FastArrayList<GeoCell>(cells, true);
+				selected = new FastArrayList<>(cells);
 			}
 			else
 			{
-				selected = new FastArrayList<GeoCell>(8);
+				selected = new FastArrayList<>(8);
 				selected.addLastUnsafe(cell);
 				setStateOf(cells, SelectionState.HIGHLIGHTED);
 			}
@@ -425,11 +422,11 @@ public final class GeoBlockSelector
 				{
 					if (selectionBox.isInfHeight())
 					{
-						selected = new FastArrayList<GeoCell>(cells, true);
+						selected = new FastArrayList<>(cells);
 					}
 					else
 					{
-						selected = new FastArrayList<GeoCell>();
+						selected = new FastArrayList<>();
 						selectionBox.getAllCellsInside(cell, cells, selected);
 						if (!selected.isEmpty())
 							setStateOf(cells, SelectionState.HIGHLIGHTED);
@@ -437,7 +434,7 @@ public final class GeoBlockSelector
 				}
 				else
 				{
-					selected = new FastArrayList<GeoCell>(8);
+					selected = new FastArrayList<>(8);
 					selected.addLastUnsafe(cell);
 					setStateOf(cells, SelectionState.HIGHLIGHTED);
 				}
@@ -459,17 +456,17 @@ public final class GeoBlockSelector
 			{
 				if (selectionBox.isInfHeight())
 				{
-					selected = new FastArrayList<GeoCell>(cells, true);
+					selected = new FastArrayList<>(cells);
 				}
 				else
 				{
-					selected = new FastArrayList<GeoCell>();
+					selected = new FastArrayList<>();
 					selectionBox.getAllCellsInside(cell, cells, selected);
 				}
 			}
 			else
 			{
-				selected = new FastArrayList<GeoCell>(8);
+				selected = new FastArrayList<>(8);
 				selected.addLastUnsafe(cell);
 				setStateOf(cells, SelectionState.HIGHLIGHTED);
 			}

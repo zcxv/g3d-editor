@@ -177,7 +177,7 @@ public final class DialogAddLayers extends JDialog implements ActionListener, Do
 			if (!selector.hasSelected())
 				return;
 			
-			final FastArrayList<GeoCell> added = new FastArrayList<GeoCell>();
+			final FastArrayList<GeoCell> added = new FastArrayList<>();
 			
 			GeoBlock block;
 			GeoCell temp;
