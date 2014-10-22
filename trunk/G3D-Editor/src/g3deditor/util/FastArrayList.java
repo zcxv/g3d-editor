@@ -70,16 +70,10 @@ public final class FastArrayList<E> implements List<E>
 	}
 	
 	@SuppressWarnings("unchecked")
-	public FastArrayList(final E[] values, final boolean copy)
+	public FastArrayList(final E[] values)
 	{
-		if (copy)
-		{
-			_values = (E[]) new Object[values.length];
-			System.arraycopy(values, 0, _values, 0, values.length);
-		}
-		else
-			_values = values;
-		
+		_values = (E[]) new Object[values.length];
+		System.arraycopy(values, 0, _values, 0, values.length);
 		_size = values.length;
 	}
 	
@@ -591,9 +585,8 @@ public final class FastArrayList<E> implements List<E>
 			swapUnsafe(i, random.nextInt(_size));
 		}
 	}
-	// TODO fix this error:
-	// Name clash: The method sort(Comparator<E>) of type FastArrayList<E> has the same erasure as sort(Comparator<? super E>) of type List<E> but does not override it
-	public final void sort(final Comparator<E> c)
+	
+	public final void sort(final Comparator<? super E> c)
 	{
 		Arrays.sort(_values, 0, _size, c);
 	}

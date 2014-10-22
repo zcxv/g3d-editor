@@ -46,7 +46,7 @@ public final class GLGUIRenderer
 	
 	public GLGUIRenderer()
 	{
-		_texts = new FastArrayList<GLText>();
+		_texts = new FastArrayList<>();
 	}
 	
 	public final GLText newText(final int x, final int y)

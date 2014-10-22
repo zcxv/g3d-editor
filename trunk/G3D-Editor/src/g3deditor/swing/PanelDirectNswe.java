@@ -72,7 +72,7 @@ public final class PanelDirectNswe extends JPanel implements MouseListener
 			_v3 = v3;
 		}
 		
-		private final boolean isSameOrient(final Vec2 p, final Vec2 v1, final Vec2 v2, final Vec2 v3)
+		private static final boolean isSameOrient(final Vec2 p, final Vec2 v1, final Vec2 v2, final Vec2 v3)
 		{
 			return v3.substract(v2).cross2(p.substract(v2)) * v3.substract(v2).cross2(v1.substract(v2)) >= 0;
 		}
