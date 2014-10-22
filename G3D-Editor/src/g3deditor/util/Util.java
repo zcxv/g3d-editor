@@ -14,6 +14,7 @@
  */
 package g3deditor.util;
 
+import java.awt.Desktop;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -131,8 +133,8 @@ public final class Util
 			v = values[j];
 			while (true)
 			{
-				while (comparator.compare(v, values[++i]));
-				while (comparator.compare(values[--j], v));
+				while (comparator.compare(v, values[++i])) {}
+				while (comparator.compare(values[--j], v)) {}
 				if (j < i)
 					break;
 				swap(values, i, j);
@@ -273,6 +275,7 @@ public final class Util
 	
 	public static final BufferedImage loadImage(final File file)
 	{
+		// TODO cache images in memory
 		try
 		{
 			return ImageIO.read(file);
@@ -370,32 +373,18 @@ public final class Util
 	
 	public static final void openBrowser(final String url)
 	{
-		final String osName = System.getProperty("os.name");
-		try
+		Desktop desktop = (Desktop.isDesktopSupported() ? Desktop.getDesktop() : null);
+		
+		if ((desktop != null) && desktop.isSupported(Desktop.Action.BROWSE))
 		{
-			if (osName.startsWith("Windows"))
+			try
 			{
-				Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
+				desktop.browse(new URL(url).toURI());
 			}
-			else
+			catch (Exception e)
 			{
-				final String[] browsers = {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
-				
-				String browser;
-				for (int i = browsers.length; i-- > 0;)
-				{
-					browser = browsers[i];
-					if (Runtime.getRuntime().exec(new String[]{"which", browser}).waitFor() == 0)
-					{
-						Runtime.getRuntime().exec(new String[]{browser, url});
-						break;
-					}
-				}
+				e.printStackTrace();
 			}
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
 		}
 	}
 	
